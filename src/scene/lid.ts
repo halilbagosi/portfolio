@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
+import { settings } from '../config/projects';
 import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, TOP_Y } from './box';
 import { brushedRoughness, engravingMaps, heightToNormal } from './textures';
 
@@ -51,7 +52,7 @@ export class Lid {
     // the engraving crisp without the full desktop map's cost.
     const res = PORTRAIT ? 1600 : 2048;
     // Narrow lid: set the name larger so it reads at phone size.
-    const { height, mask } = engravingMaps(res, Math.round(res * aspect), PORTRAIT ? 1.3 : 1);
+    const { height, mask } = engravingMaps(res, Math.round(res * aspect), settings.identity.name, settings.identity.role, PORTRAIT ? 1.3 : 1);
     const normal = heightToNormal(height, 3.6);
     const rough = brushedRoughness(1024, Math.round(1024 * aspect), mask);
     const color = new THREE.CanvasTexture(height);
@@ -142,7 +143,7 @@ export class Lid {
       this.rz.velocity += (Math.random() - 0.5) * 0.5;
     }
 
-    if (!this.reduced && this.state === 'closed' && time > this.nextKnock) {
+    if (!this.reduced && settings.motion.lidKnock && this.state === 'closed' && time > this.nextKnock) {
       this.nextKnock = time + 3 + Math.random() * 3.5;
       this.queued = [0, 0.15, 0.32].slice(0, Math.random() < 0.5 ? 2 : 3).map((t) => time + t);
     }

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Spring } from './anim/springs';
-import { projects } from './config/projects';
+import { projects, settings } from './config/projects';
 import { Motion } from './input/motion';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
@@ -44,9 +44,10 @@ const { scene, camera } = stage;
 const pointer = new Pointer(host, camera);
 const motion = new Motion();
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
-let openHint = touch ? (motion.needsPermission ? 'Tap to begin' : 'Tap to open') : 'Click to open';
-const closeHint = touch ? 'Swipe down to close' : 'Scroll up to close';
-const sectionHint = touch ? 'Tap a section to open it' : 'Click a section to open it';
+const copy = settings.hints;
+let openHint = touch ? (motion.needsPermission ? copy.begin.touch : copy.open.touch) : copy.open.desktop;
+const closeHint = touch ? copy.close.touch : copy.close.desktop;
+const sectionHint = touch ? copy.section.touch : copy.section.desktop;
 hint.textContent = openHint;
 
 const box = createBox();
@@ -179,7 +180,7 @@ function setFocus(i: number) {
   });
   a11yButtons.forEach((b, k) => b.setAttribute('aria-expanded', String(k === i)));
   // Open: glide over the section and look straight down at it. Closed: back to the usual tilt.
-  stage.setView(i < 0 ? null : rects[i], reduced);
+  stage.setView(i < 0 || !settings.motion.topDownOnOpen ? null : rects[i], reduced);
 }
 
 function cellAt(x: number, z: number) {
@@ -193,7 +194,7 @@ function cellAt(x: number, z: number) {
 
 // ---- Accessibility layer: real buttons and links mirror the 3D scene ----------------
 const openBtn = document.createElement('button');
-openBtn.textContent = 'Open the box: Halil Bagosi, software engineer';
+openBtn.textContent = `Open the box: ${settings.identity.name}, ${settings.identity.role}`;
 openBtn.addEventListener('click', openLid);
 a11y.appendChild(openBtn);
 const a11yButtons = projects.slice(0, n).map((p, i) => {
@@ -274,7 +275,7 @@ host.addEventListener('touchend', (e) => {
   const dx = e.changedTouches[0].clientX - swipeX;
   // A deliberate, mostly vertical flick.
   if (Math.abs(dy) < 60 || Math.abs(dy) < Math.abs(dx) * 1.5 || performance.now() - swipeT > 700) return;
-  if (motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = 'Tap to open'));
+  if (motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
   lidGesture(dy < 0 ? 1 : -1);
 });
 
@@ -282,7 +283,7 @@ host.addEventListener('click', () => {
   // iOS grants motion only from a tap. The first tap on the closed lid asks for it and leaves the
   // lid on, so the steel can follow the tilt before it opens; the next tap opens it.
   if (touch && motion.needsPermission && lid.state === 'closed') {
-    void motion.enable().finally(() => (openHint = hint.textContent = 'Tap to open'));
+    void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
     return;
   }
   if (touch) void motion.enable();
@@ -389,7 +390,7 @@ function frame() {
     px = Math.sin(time * 0.35) * 0.5;
     py = Math.cos(time * 0.27) * 0.3;
   }
-  const par = reduced ? 0 : 1;
+  const par = reduced ? 0 : settings.motion.parallax;
   stage.setParallax(px * par, py * par);
   stage.update(dt);
 

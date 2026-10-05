@@ -1,3 +1,5 @@
+import { settings } from '../config/projects';
+
 /**
  * Device tilt as a pointer substitute on touch devices: x/y in -1..1, like the pointer's NDC.
  * Neutral is however the phone is being held: a slowly adapting baseline follows the posture,
@@ -67,8 +69,9 @@ export class Motion {
     const b = 1 - Math.exp(-dt / 2.5);
     this.baseX += (this.rawX - this.baseX) * b;
     this.baseY += (this.rawY - this.baseY) * b;
-    const tx = Math.max(-1, Math.min(1, (this.rawX - this.baseX) / 18));
-    const ty = Math.max(-1, Math.min(1, (this.rawY - this.baseY) / 18));
+    const range = settings.motion.gyroDegrees; // degrees of tilt for the full effect
+    const tx = Math.max(-1, Math.min(1, (this.rawX - this.baseX) / range));
+    const ty = Math.max(-1, Math.min(1, (this.rawY - this.baseY) / range));
     const k = 1 - Math.exp(-dt * 7);
     this.x += (tx - this.x) * k;
     this.y += (ty - this.y) * k;

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
+import { settings } from '../config/projects';
 import { CARD_RADIUS } from '../lightbox';
 import { sdRoundGLSL } from './shaders';
 
@@ -61,8 +62,8 @@ void main() {
 /** Rest pose per slot behind the top card: a gentle fan, as in a Messages photo stack. */
 const SLOT_ROT = [0, 0.045, -0.04, 0.07];
 
-/** How long each photo stays on top before the next flip, once it has arrived (s). */
-const DWELL = 2;
+/** How long each photo stays on top before the next flip, once it has arrived (s); set in the dashboard. */
+const DWELL = settings.motion.photoDwell;
 /** A flip: the top card slides aside for SWIPE s, dissolving over its last part, then fades in again at the back. */
 const SWIPE = 0.36;
 const DISSOLVE_FROM = 0.2;

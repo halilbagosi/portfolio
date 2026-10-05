@@ -87,7 +87,7 @@ export function heightToNormal(src: HTMLCanvasElement, strength: number): THREE.
  * Engraving height map (white = surface, black = groove) + roughness mask.
  * Just the name and role, centred.
  */
-export function engravingMaps(w: number, h: number, scale = 1) {
+export function engravingMaps(w: number, h: number, name: string, role: string, scale = 1) {
   const height = canvas(w, h);
   const hc = height.getContext('2d')!;
   hc.fillStyle = '#fff';
@@ -99,9 +99,9 @@ export function engravingMaps(w: number, h: number, scale = 1) {
   // Baseline sits just above centre so name + role together read as centred.
   const y = h / 2 - u * 0.1;
   hc.font = `500 ${u * 4.4}px ${FONT}`;
-  drawTracked(hc, 'HALIL BAGOSI', w / 2, y, u * 0.85);
+  drawTracked(hc, name.toUpperCase(), w / 2, y, u * 0.85);
   hc.font = `500 ${u * 1.35}px ${FONT}`;
-  drawTracked(hc, 'SOFTWARE ENGINEER', w / 2, y + u * 3.3, u * 0.7);
+  drawTracked(hc, role.toUpperCase(), w / 2, y + u * 3.3, u * 0.7);
 
   const mask = canvas(w, h);
   const mc = mask.getContext('2d')!;
