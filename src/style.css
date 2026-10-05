@@ -1,0 +1,57 @@
+:root {
+  color-scheme: dark;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helvetica Neue", sans-serif; color: #d9dce1; -webkit-font-smoothing: antialiased; }
+#stage { position: fixed; inset: 0; touch-action: none; }
+#stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+#vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%); }
+#hint { position: fixed; left: 0; right: 0; bottom: max(28px, env(safe-area-inset-bottom)); margin: 0; text-align: center; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: rgba(217,220,225,.55); opacity: 0; transition: opacity 0.35s var(--ease-out); pointer-events: none; }
+#hint.show { opacity: 1; transition-duration: 1.2s; }
+#fallback { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; gap: 8px; padding: 24px; }
+#fallback[hidden] { display: none; }
+.fallback { position: fixed; inset: 0; display: grid; place-content: center; margin: 0; }
+@media (prefers-reduced-motion: reduce) { #hint { transition: none; } }
+.sr-only { position: fixed; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.sr-only:focus-within { /* keep offscreen; the 3D scene shows focus */ }
+
+/* Screenshot viewer. Opens on the iOS sheet curve; closes the same way, a touch faster. */
+#lightbox { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; }
+#lightbox[hidden] { display: none; }
+.lb-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.78); -webkit-backdrop-filter: blur(28px) saturate(130%); backdrop-filter: blur(28px) saturate(130%); opacity: 0; transition: opacity 0.45s var(--ease-drawer); }
+#lightbox.open .lb-backdrop { opacity: 1; }
+#lightbox.closing .lb-backdrop { transition-duration: 0.36s; }
+.lb-figure { position: relative; margin: 0; width: 100%; height: 100%; display: grid; place-items: center; padding: max(56px, 6vh) max(16px, 7vw); box-sizing: border-box; pointer-events: auto; }
+.lb-img { max-width: none; max-height: none; object-fit: contain; border-radius: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 30px 90px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(255, 255, 255, 0.14); transform-origin: center; transition: transform 0.5s var(--ease-drawer), opacity 0.22s var(--ease-out), translate 0.3s var(--ease-out); will-change: transform; }
+#lightbox.closing .lb-img { transition: transform 0.42s var(--ease-drawer); }
+/* Swap: leaves quickly the way it's going, arrives from the other side. */
+.lb-img.out-left, .lb-img.out-right { opacity: 0; transition: transform 0.5s var(--ease-drawer), opacity 0.14s var(--ease-out), translate 0.14s var(--ease-out); }
+.lb-img.out-left { translate: -24px 0; }
+.lb-img.out-right { translate: 24px 0; }
+.lb-img.in-right { opacity: 0; translate: 32px 0; transition: none; }
+.lb-img.in-left { opacity: 0; translate: -32px 0; transition: none; }
+.lb-btn { position: absolute; width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.1); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #f5f5f7; font: 400 24px/1 ui-sans-serif, -apple-system, sans-serif; cursor: pointer; opacity: 0; scale: 0.96; transition: opacity 0.15s var(--ease-out), scale 0.15s var(--ease-out), background-color 0.15s ease, transform 0.16s var(--ease-out); }
+/* Controls follow the image in, and get out of its way first on close. */
+#lightbox.open .lb-btn { opacity: 1; scale: 1; transition-duration: 0.3s, 0.3s, 0.15s, 0.16s; transition-delay: 0.12s, 0.12s, 0s, 0s; }
+@media (hover: hover) and (pointer: fine) { .lb-btn:hover { background-color: rgba(255, 255, 255, 0.18); } }
+.lb-btn:active { transform: scale(0.95); }
+.lb-btn:focus-visible { outline: 2px solid #f5f5f7; outline-offset: 2px; }
+.lb-prev { left: max(12px, 2vw); top: 50%; margin-top: -22px; }
+.lb-next { right: max(12px, 2vw); top: 50%; margin-top: -22px; }
+.lb-close { right: max(12px, 2vw); top: max(12px, 2vh); font-size: 16px; }
+.lb-label { position: absolute; bottom: max(14px, 2.5vh); left: 0; right: 0; margin: 0; text-align: center; color: rgba(245, 245, 247, 0.7); font: 500 12px/1 ui-sans-serif, -apple-system, sans-serif; letter-spacing: 0.08em; opacity: 0; transition: opacity 0.15s var(--ease-out); }
+#lightbox.open .lb-label { opacity: 1; transition-duration: 0.3s; transition-delay: 0.16s; }
+/* Phones: the image takes the width, so the arrows move down beside the counter (swipe works too). */
+@media (max-width: 640px) {
+  .lb-figure { padding: max(64px, env(safe-area-inset-top)) 16px max(88px, calc(env(safe-area-inset-bottom) + 72px)); }
+  .lb-prev, .lb-next { top: auto; margin-top: 0; bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px)); }
+  .lb-prev { left: 16px; }
+  .lb-next { right: 16px; }
+  .lb-label { bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); }
+  .lb-close { top: max(12px, env(safe-area-inset-top)); right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .lb-img, .lb-backdrop, .lb-btn, .lb-label, #lightbox.open .lb-btn, #lightbox.open .lb-label { transition: opacity 0.2s ease; transition-delay: 0s; scale: none; } }
+@media (prefers-reduced-transparency: reduce) { .lb-backdrop { background: rgba(0, 0, 0, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; } }
