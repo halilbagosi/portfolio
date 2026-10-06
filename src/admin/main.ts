@@ -3,7 +3,9 @@ import { api, ApiError } from './api';
 import { h } from './dom';
 import { showIssues } from './fields';
 import { Store } from './state';
+import { cleanUnusedPhotos } from './views/housekeeping';
 import { renderList } from './views/list';
+import { photoStrip } from './views/photo-strip';
 import { Preview } from './views/preview';
 import { renderProjectForm } from './views/project-form';
 import { renderSettings } from './views/settings';
@@ -27,17 +29,11 @@ let store: Store;
 /** Problems the server reported on the last save (e.g. a missing photo file). */
 let serverErrors: string[] = [];
 
-/** Placeholder until Task 6 adds the photo strip. */
-let photosView = (_index: number): HTMLElement => h('p', { class: 'field-hint' }, 'Photos are managed in the next step.');
-export function setPhotosView(fn: (index: number) => HTMLElement) {
-  photosView = fn;
-}
-
 function render() {
   renderList(side, store, render);
   const t = store.tab;
   if (t.kind === 'project' && store.content.projects[t.index])
-    renderProjectForm(form, store, t.index, { rerender: render, refreshList: () => renderList(side, store, render) }, (i) => photosView(i));
+    renderProjectForm(form, store, t.index, { rerender: render, refreshList: () => renderList(side, store, render) }, (i) => photoStrip(store, i));
   else renderSettings(form, store);
   refresh();
   preview.show(previewHash());
@@ -92,7 +88,7 @@ async function discard() {
 }
 
 let toastTimer = 0;
-export function toast(message: string) {
+function toast(message: string) {
   toastEl.textContent = message;
   toastEl.classList.add('show');
   clearTimeout(toastTimer);
@@ -107,7 +103,8 @@ async function boot() {
     return;
   }
   store.onChange(refresh);
-  const top = h('header', { class: 'top' }, h('h1', {}, 'Portfolio dashboard'), status, h('span', { class: 'spacer' }), discardBtn, saveBtn);
+  const unused = h('button', { class: 'btn', type: 'button', onclick: () => void cleanUnusedPhotos(store, toast) }, 'Unused photos…');
+  const top = h('header', { class: 'top' }, h('h1', {}, 'Portfolio dashboard'), status, h('span', { class: 'spacer' }), unused, discardBtn, saveBtn);
   app.replaceChildren(h('div', { class: 'app' }, top, side, editor, preview.el), toastEl);
   render();
 }
