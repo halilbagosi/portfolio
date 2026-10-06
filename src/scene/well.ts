@@ -4,7 +4,7 @@ import type { Project } from '../config/projects';
 import { CARD_DEPTH, TOP_Y, WELL_RADIUS } from './box';
 import type { Rect } from './layout';
 import { sdRoundGLSL } from './shaders';
-import { CardStack } from './stack';
+import { CardStack, shownHeight } from './stack';
 import { FONT, labelTexture, sharpenText } from './textures';
 import { kindTint } from './tints';
 
@@ -155,6 +155,12 @@ export class Well {
   private dim = new Spring(0, 120, 1);
   private glow = new Spring(1, 90, 1);
   private focus = new Spring(0, 200, 1);
+  // Label layout, eased so it never jumps: roomy (room for the kind and caption lines) follows the
+  // section's height, which can cross its whole range in two frames mid-switch; side (0 = photos
+  // below the labels, 1 = beside them) is a choice that flips.
+  private roomy = new Spring(0, 140, 1);
+  private side = new Spring(0, 200, 1);
+  private placed = false;
 
   constructor(readonly project: Project, index: number, reduced: boolean) {
     this.mat = shaftMat();
@@ -254,8 +260,8 @@ export class Well {
     (l.mesh.material as THREE.MeshBasicMaterial).opacity = opacity;
   }
 
-  /** elevation: the camera's current elevation (radians), which changes as it moves over a section. */
-  update(dt: number, time: number, reveal: number, elevation: number) {
+  /** eye: the camera at rest (no parallax); the photos sit deeper than the opening and are placed as seen from it. */
+  update(dt: number, time: number, reveal: number, eye: THREE.Vector3) {
     const x = this.sx.step(dt);
     const z = this.sz.step(dt);
     const w = Math.max(0.08, this.sw.step(dt));
@@ -274,46 +280,85 @@ export class Well {
     u.uSize.value.set(w, d);
     u.uCenter.value.set(x, z);
 
-    // Stack area: wide sections put it on the right, tall ones below the title; focused, it takes
-    // the right side (or, focused in a tall portrait box, the lower part below the facts).
-    const wide = w / d > 1.6;
-    const band = this.kind.h + this.title.h + this.caption.h + 0.42;
-    const m = Math.min(0.2, w * 0.08, d * 0.1);
-    const restA = wide
-      ? { x0: w * 0.02, x1: w / 2 - m * 0.6, z0: -d / 2 + m * 0.6, z1: d / 2 - m * 0.6 }
-      : { x0: -w / 2 + m * 0.6, x1: w / 2 - m * 0.6, z0: -d / 2 + Math.min(band, d * 0.36), z1: d / 2 - m * 0.6 };
+    const lerp = THREE.MathUtils.lerp;
+    const smooth = THREE.MathUtils.smoothstep;
+
+    // Resting labels: kind, title, caption top-left, sized to the width they may use.
+    // Returns their sizes and where the block ends (bottom edge, right edge).
+    const pad = Math.min(0.24, w * 0.1);
+    this.roomy.target = smooth(d, 0.75, 1.0);
+    if (!this.placed) this.roomy.snap(this.roomy.target);
+    const roomy = this.roomy.step(dt);
+    const top = -d / 2 + pad;
+    const left = -w / 2 + pad;
+    const kh = this.kind.h;
+    const labels = (textW: number) => {
+      const kk = Math.min(1, textW / this.kind.w);
+      const k = Math.min(1 - 0.4 * (1 - roomy), textW / this.title.w, (d - 0.14) / this.title.h);
+      const th = this.title.h * k;
+      const titleZ = lerp(0, top + kh + 0.03 + th / 2, roomy);
+      const ck = Math.min(1, textW / this.caption.w);
+      const right = left + Math.max(this.title.w * k, Math.max(this.kind.w * kk, this.caption.w * ck) * roomy);
+      return { textW, kk, k, th, titleZ, ck, bottom: titleZ + th / 2 + (0.03 + this.caption.h * ck) * roomy, right };
+    };
+
+    // Photos at rest: below the labels, or beside them, whichever shows the first photo bigger.
+    // Beside, the photo column is only as wide as the photo needs (at most half), the labels get
+    // the rest. Decided per section and eased, so a change animates rather than jumps.
+    const m = Math.min(0.2, w * 0.08, d * 0.1) * 0.6;
+    const GAP_TEXT = 0.12;
+    // Small sections at rest show portrait screenshots by their top half (fading out below), so
+    // they read at a useful size; opening the section, or a big section, shows them whole.
+    const crop = (1 - smooth(Math.min(w, d), 1.8, 2.4)) * (1 - f);
+    const aspect = this.stack.leadAspect / shownHeight(this.stack.leadAspect, crop);
+    const photoW = Math.min((d - m * 2) * aspect, w * 0.5 - m);
+    const below = labels(w - pad * 2);
+    const beside = labels(Math.max(w * 0.5 - pad, w - pad - m - photoW - GAP_TEXT));
+    const belowA = { x0: -w / 2 + m, x1: w / 2 - m, z0: below.bottom + GAP_TEXT, z1: d / 2 - m };
+    const besideA = { x0: beside.right + GAP_TEXT, x1: w / 2 - m, z0: -d / 2 + m, z1: d / 2 - m };
+    const shown = (a: typeof belowA) => {
+      const cw = Math.min(Math.max(0, a.x1 - a.x0), Math.max(0, a.z1 - a.z0) * aspect);
+      return (cw * cw) / aspect;
+    };
+    // A little stickiness, so a section near the tipping point doesn't flip back and forth mid-motion.
+    const stay = this.side.target > 0.5 ? 1.15 : 1 / 1.15;
+    this.side.target = shown(besideA) * stay > shown(belowA) ? 1 : 0;
+    if (!this.placed) this.side.snap(this.side.target);
+    this.placed = true;
+    const side = this.side.step(dt);
+    const text = labels(lerp(below.textW, beside.textW, side));
+    const restA = {
+      x0: lerp(belowA.x0, besideA.x0, side),
+      x1: belowA.x1,
+      z0: lerp(belowA.z0, besideA.z0, side),
+      z1: belowA.z1,
+    };
     const focA =
       this.focusTall
         ? { x0: -w / 2 + 0.12, x1: w / 2 - 0.12, z0: -d / 2 + d * TALL_SPLIT, z1: d / 2 - 0.12 }
         : { x0: -w / 2 + w * 0.5, x1: w / 2 - 0.12, z0: -d / 2 + 0.12, z1: d / 2 - 0.12 };
-    const lerp = THREE.MathUtils.lerp;
     const x0 = lerp(restA.x0, focA.x0, f);
     const x1 = lerp(restA.x1, focA.x1, f);
     const z0 = lerp(restA.z0, focA.z0, f);
     const z1 = lerp(restA.z1, focA.z1, f);
-    const aw = Math.max(0.01, x1 - x0);
-    const ad = Math.max(0.01, z1 - z0);
-    // Deep content looks shifted toward the viewer; pull it back so it reads centred in the opening.
-    const shift = Math.min(CARD_DEPTH / Math.tan(elevation), Math.max(0, ad * 0.25));
-    this.stack.group.position.set((x0 + x1) / 2, TOP_Y - CARD_DEPTH, (z0 + z1) / 2 - shift);
-    const presence = THREE.MathUtils.smoothstep(Math.min(w, d), 0.6, 1.0);
+    // The photos lie CARD_DEPTH below the opening. Place them on the line of sight through the
+    // area's centre, scaled up to match, so from the camera they sit exactly in the area.
+    const depth = TOP_Y - CARD_DEPTH;
+    const reach = (eye.y - depth) / Math.max(eye.y - TOP_Y, 0.01);
+    const cx = x + (x0 + x1) / 2;
+    const cz = z + (z0 + z1) / 2;
+    const aw = Math.max(0.01, x1 - x0) * reach;
+    const ad = Math.max(0.01, z1 - z0) * reach;
+    this.stack.group.position.set(eye.x + (cx - eye.x) * reach - x, depth, eye.z + (cz - eye.z) * reach - z);
+    const presence = smooth(Math.min(w, d), 0.6, 1.0);
     this.stack.setClip(x, z, w / 2 - 0.01, d / 2 - 0.01, Math.min(WELL_RADIUS, w / 2, d / 2));
-    this.stack.update(dt, aw, ad, dim * 0.8 + (1 - reveal), presence);
+    this.stack.update(dt, aw, ad, dim * 0.8 + (1 - reveal), presence, crop);
 
-    // Resting labels: kind, title, caption top-left. A thin strip shows only the title.
-    const pad = Math.min(0.24, w * 0.1);
-    const textOn = (1 - THREE.MathUtils.smoothstep(f, 0, 0.35)) * reveal * THREE.MathUtils.smoothstep(w, 0.8, 1.3) * THREE.MathUtils.smoothstep(d, 0.36, 0.48);
-    const roomy = THREE.MathUtils.smoothstep(d, 0.75, 1.0);
-    const textW = wide ? w * 0.5 - pad : w - pad * 2;
-    const k = Math.min(1 - 0.4 * (1 - roomy), textW / this.title.w, (d - 0.14) / this.title.h);
-    const th = this.title.h * k;
-    const kh = this.kind.h;
-    const top = -d / 2 + pad;
-    const titleZ = lerp(0, top + kh + 0.03 + th / 2, roomy);
-    const left = -w / 2 + pad;
-    this.place(this.kind, Math.min(1, textW / this.kind.w), left, top + kh / 2, textOn * roomy * (1 - dim));
+    // Place the labels (a thin strip shows only the title, below).
+    const textOn = (1 - smooth(f, 0, 0.35)) * reveal * smooth(w, 0.8, 1.3) * smooth(d, 0.36, 0.48);
+    const { kk, k, th, titleZ, ck } = text;
+    this.place(this.kind, kk, left, top + kh / 2, textOn * roomy * (1 - dim));
     this.place(this.title, k, left, titleZ, textOn * (1 - 0.55 * dim));
-    const ck = Math.min(1, textW / this.caption.w);
     this.place(this.caption, ck, left, titleZ + th / 2 + 0.03 + (this.caption.h * ck) / 2, textOn * roomy * (1 - dim));
 
     // Slim vertical strip: the title turns and runs down from the top, sized to fit the strip.

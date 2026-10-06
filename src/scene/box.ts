@@ -4,9 +4,14 @@ import { basicVert, sdRoundGLSL } from './shaders';
 /**
  * Portrait screens (phones) get a tall, narrow box with the projects stacked as rows, seen from
  * a little higher so text lying on the plate reads larger. Decided once per load; main.ts reloads
- * if the viewport flips orientation.
+ * if the viewport flips orientation. Touch screens (tablets) switch as soon as they are taller than
+ * wide: a big iPad in portrait, minus Safari's toolbars, is only ~0.8 and would otherwise get the
+ * wide box squeezed into a tall screen.
  */
-export const isPortraitViewport = () => innerWidth / innerHeight < 0.8;
+export const isPortraitViewport = () => {
+  const r = innerWidth / innerHeight;
+  return r < 0.8 || (r < 1 && matchMedia('(any-pointer: coarse)').matches);
+};
 export const PORTRAIT = isPortraitViewport();
 export const INTERIOR_W = PORTRAIT ? 3.9 : 6;
 export const INTERIOR_D = PORTRAIT ? 7 : 3.9;

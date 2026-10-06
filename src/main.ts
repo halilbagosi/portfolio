@@ -336,7 +336,7 @@ if (import.meta.env.DEV && location.hash.startsWith('#open')) {
     for (let i = 0; i < 3; i++) {
       stepLayout(3);
       stage.update(3);
-      tiles.forEach((t) => t.update(3, 0, 1, stage.elevation));
+      tiles.forEach((t) => t.update(3, 0, 1, stage.restEye));
       chipSets[k].setShown(true);
       chipSets[k].update(3, null, stage.pxPerUnit);
     }
@@ -408,7 +408,7 @@ function frame() {
   const hovered = !touch && pointer.inside && lid.state === 'gone' && !lightbox.isOpen ? sectionUnderPointer() : -1;
   tiles.forEach((t, k) => t.setHover(k === hovered && k !== focused));
   stepLayout(dt);
-  tiles.forEach((t) => t.update(dt, time, rv, stage.elevation));
+  tiles.forEach((t) => t.update(dt, time, rv, stage.restEye));
   const tu = box.top.uniforms;
   tu.uCount.value = n;
   tiles.forEach((t, k) => {

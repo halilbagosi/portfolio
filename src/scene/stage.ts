@@ -141,10 +141,11 @@ export class Stage {
     return [this.vEl, this.vX, this.vY, this.vZ, this.vW, this.vH];
   }
 
-  /** Current camera elevation (radians), for content that compensates for the viewing angle. */
-  get elevation() {
-    return this.vEl.value;
-  }
+  /**
+   * Where the camera is without parallax, for content that compensates for the viewing angle.
+   * Parallax is left out on purpose: deep content shifting with it is what reads as depth.
+   */
+  readonly restEye = new THREE.Vector3();
 
   update(dt: number) {
     const [baseEl, x, y, z, fw, fh] = this.views.map((sp) => sp.step(dt));
@@ -153,6 +154,7 @@ export class Stage {
     const vfov = THREE.MathUtils.degToRad(this.camera.fov);
     const t = Math.tan(vfov / 2);
     this.dist = Math.max(fh / 2 / t, fw / 2 / (t * this.aspect));
+    this.restEye.set(x, y + Math.sin(baseEl) * this.dist, z + Math.cos(baseEl) * this.dist);
 
     // Parallax: orbiting a little in azimuth reads as depth at the tilt, but seen from straight
     // above it would spin the picture, so from above it becomes a slight sideways lean instead.

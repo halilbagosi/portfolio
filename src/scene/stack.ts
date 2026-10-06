@@ -26,6 +26,8 @@ uniform float uR;
 uniform float uDim;
 uniform float uShade;
 uniform float uOpacity;
+uniform float uCrop;    // share of the image's height shown, from the top (1 = all of it)
+uniform float uFade;    // 0..1: how much the card's lower part fades out into the section
 uniform vec4 uClip;     // section opening in world xz: centre, half size
 uniform float uClipR;
 varying vec2 vUv;
@@ -43,7 +45,9 @@ void main() {
   float sh = 0.32 * exp(-max(d1, 0.0) * 38.0) + 0.3 * exp(-max(d2, 0.0) * 9.0);
   sh *= smoothstep(uPad, uPad * 0.55, max(abs(p.x) - uSize.x * 0.5, abs(p.y) - uSize.y * 0.5)); // reach zero before the plane edge
 
-  vec3 img = texture2D(uMap, clamp(p / uSize + 0.5, 0.0, 1.0)).rgb;
+  vec2 q = p / uSize + 0.5;
+  q.y = 1.0 - uCrop * (1.0 - q.y);
+  vec3 img = texture2D(uMap, clamp(q, 0.0, 1.0)).rgb;
   vec3 col = img * (1.0 - uShade) * mix(1.0, 0.3, uDim);
   // Hairline edge, like a photo's paper edge catching light: barely there.
   col = mix(col, vec3(1.0), (1.0 - smoothstep(0.0, 0.006, -d)) * 0.12 * mask);
@@ -52,12 +56,20 @@ void main() {
   float dc = sdRound(vWorld - uClip.xy, uClip.zw, uClipR);
   float clip = 1.0 - smoothstep(-fwidth(dc), 0.0, dc);
 
-  float a = (mask + sh * (1.0 - mask)) * uOpacity * clip;
+  // A cropped card has no bottom edge: its lower half dissolves into the dark, shadow and all.
+  float fade = mix(1.0, smoothstep(-uSize.y * 0.5, uSize.y * 0.05, p.y), uFade);
+  float a = (mask + sh * (1.0 - mask)) * uOpacity * clip * fade;
   if (a <= 0.002) discard;
-  gl_FragColor = vec4(col * (mask * uOpacity * clip / max(a, 1e-4)), a);
+  gl_FragColor = vec4(col * (mask * uOpacity * clip * fade / max(a, 1e-4)), a);
   #include <colorspace_fragment>
 }
 `;
+
+/** Below this width/height a screenshot is a phone's (portrait): it gets device corners and may be cropped. */
+const TALL = 0.75;
+
+/** The share of a screenshot's height shown at a given crop (0 = whole, 1 = cropped): only portrait ones crop, to their top half. */
+export const shownHeight = (aspect: number, crop: number) => (aspect < TALL ? 1 - 0.5 * crop : 1);
 
 /** Rest pose per slot behind the top card: a gentle fan, as in a Messages photo stack. */
 const SLOT_ROT = [0, 0.045, -0.04, 0.07];
@@ -107,6 +119,8 @@ class Card {
         uDim: { value: 0 },
         uShade: { value: 0 },
         uOpacity: { value: 1 },
+        uCrop: { value: 1 },
+        uFade: { value: 0 },
         uClip: { value: new THREE.Vector4(0, 0, 100, 100) },
         uClipR: { value: 0.2 },
       },
@@ -145,6 +159,11 @@ export class CardStack {
 
   get textures() {
     return this.cards.map((c) => c.tex);
+  }
+
+  /** Width / height of the first photo, the one on top at rest (1 until it has loaded). */
+  get leadAspect() {
+    return this.cards[0].aspect;
   }
 
   get topIndex() {
@@ -200,7 +219,8 @@ export class CardStack {
     }
   }
 
-  update(dt: number, aw: number, ad: number, dim: number, presence = 1) {
+  /** crop: 0..1, how far portrait screenshots are cut to their top half (small sections at rest). */
+  update(dt: number, aw: number, ad: number, dim: number, presence = 1, crop = 0) {
     this.clock += dt;
     if (this.hovered && this.clock > this.nextAt) {
       this.next();
@@ -217,8 +237,10 @@ export class CardStack {
         : THREE.MathUtils.smoothstep(t, SWIPE, SWIPE + RETURN_FADE);
       const fw = aw * 0.9;
       const fd = ad * 0.9;
-      const cw = Math.min(fw, fd * c.aspect);
-      const cd = cw / c.aspect;
+      const shown = shownHeight(c.aspect, crop);
+      const va = c.aspect / shown; // aspect of the part on show
+      const cw = Math.min(fw, fd * va);
+      const cd = cw / va;
 
       // Swipe: slide out to the right (lifted, turning a little) while still on top, then tuck in at the back.
       c.x.target = out ? cw * 0.6 : 0;
@@ -237,7 +259,9 @@ export class CardStack {
       const u = c.mat.uniforms;
       u.uSize.value.set(w, h);
       // Phone screenshots get device-like corners; desktop ones a small, crisp radius.
-      u.uR.value = c.aspect < 0.75 ? w * CARD_RADIUS.phone : Math.min(w, h) * CARD_RADIUS.other;
+      u.uR.value = c.aspect < TALL ? w * CARD_RADIUS.phone : Math.min(w, h) * CARD_RADIUS.other;
+      u.uCrop.value = shown;
+      u.uFade.value = (1 - shown) * 2;
       u.uDim.value = dim;
       u.uShade.value = c.shade.step(dt);
       // Only the top few cards show; deeper ones fade rather than pop.
