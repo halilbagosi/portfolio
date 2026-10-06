@@ -42,9 +42,19 @@ export function photoStrip(store: Store, index: number): HTMLElement {
     }
   }
 
+  // One file input, kept in the page: Safari opens the picker for a detached input but never
+  // fires its change event, so the chosen files would be silently dropped.
+  let pickReplaceAt = -1;
+  const input = h('input', { type: 'file', accept: 'image/*', hidden: true });
+  input.addEventListener('change', () => {
+    const files = Array.from(input.files ?? []);
+    input.value = ''; // so choosing the same file again still counts as a change
+    void upload(files, pickReplaceAt);
+  });
+
   function pick(multiple: boolean, replaceAt = -1) {
-    const input = h('input', { type: 'file', accept: 'image/*', multiple });
-    input.addEventListener('change', () => void upload(Array.from(input.files ?? []), replaceAt));
+    input.multiple = multiple;
+    pickReplaceAt = replaceAt;
     input.click();
   }
 
@@ -120,5 +130,5 @@ export function photoStrip(store: Store, index: number): HTMLElement {
 
   draw();
   // The field wrapper lets validation ("needs at least one photo") mark the strip.
-  return h('div', { class: 'field', 'data-path': `projects.${index}.images` }, strip, h('small', { class: 'field-error' }), messages);
+  return h('div', { class: 'field', 'data-path': `projects.${index}.images` }, strip, h('small', { class: 'field-error' }), messages, input);
 }

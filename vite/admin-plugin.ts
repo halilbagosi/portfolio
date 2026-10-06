@@ -150,7 +150,9 @@ class HttpError extends Error {
  */
 function isLocal(req: IncomingMessage) {
   if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress ?? '')) return false;
-  const host = (req.headers.host ?? '').replace(/:\d+$/, '').replace(/^\[(.*)\]$/, '$1');
+  // HTTPS (`npm run dev:phone`) is served over HTTP/2, which names the host in :authority, not Host.
+  const authority = req.headers[':authority'];
+  const host = ((typeof authority === 'string' ? authority : undefined) ?? req.headers.host ?? '').replace(/:\d+$/, '').replace(/^\[(.*)\]$/, '$1');
   return ['localhost', '127.0.0.1', '::1'].includes(host);
 }
 
