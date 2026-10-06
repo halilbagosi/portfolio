@@ -14,6 +14,7 @@ export class Preview {
   private stage = h('div', { class: 'preview-stage' }, this.frame);
   private mode: Mode = 'desktop';
   private hash = '#open';
+  private loaded = false;
   private n = 0;
 
   constructor() {
@@ -46,18 +47,18 @@ export class Preview {
       this.stage,
     );
     new ResizeObserver(() => this.fit()).observe(this.stage);
-    this.reload();
   }
 
-  /** Point the preview at `hash`; the site reads it on load, so a change means a reload. */
+  /** Point the preview at `hash`; the site reads it on load, so a change means a reload. The first call always loads. */
   show(hash: string, force = false) {
-    if (hash === this.hash && !force) return;
+    if (this.loaded && hash === this.hash && !force) return;
     this.hash = hash;
     this.reload();
   }
 
   reload() {
     // A changing query makes it a real navigation (a hash-only change wouldn't reload).
+    this.loaded = true;
     this.frame.src = `/?preview=${++this.n}${this.hash}`;
   }
 
