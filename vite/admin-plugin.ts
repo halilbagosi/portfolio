@@ -43,6 +43,8 @@ export function adminPlugin(): Plugin {
       const files = new Set(await readdir(shotsDir()));
       for (const p of (body as SiteContent).projects)
         for (const img of p.images) if (!files.has(shotFile(img) ?? '')) errors.push(`${p.title}: photo ${img} is not in public/shots.`);
+      const portrait = (body as SiteContent).settings.about.photo;
+      if (portrait && !files.has(shotFile(portrait) ?? '')) errors.push(`About: portrait ${portrait} is not in public/shots.`);
     }
     if (errors.length) return send(res, 422, { errors });
     // Write next to the target and rename: a crash mid-write can't leave a half-written file.

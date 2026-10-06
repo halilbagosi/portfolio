@@ -10,8 +10,27 @@ export function validContent(): SiteContent {
         begin: { touch: 'Tap to begin' },
         section: { desktop: 'Click a section', touch: 'Tap a section' },
         close: { desktop: 'Scroll up to close', touch: 'Swipe down to close' },
+        flip: { desktop: 'Scroll down to turn it over', touch: 'Swipe up to turn it over' },
+        back: { desktop: 'Scroll up to turn it back', touch: 'Swipe down to turn it back' },
       },
       motion: { photoDwell: 2, gyroDegrees: 18, parallax: 1, lidKnock: true, topDownOnOpen: true },
+      socials: [
+        { label: 'GitHub', text: 'github.com/ada', href: 'https://github.com/ada' },
+        { label: 'Email', text: 'ada@example.com', href: 'mailto:ada@example.com' },
+      ],
+      about: {
+        photo: '',
+        bio: 'Builds analytical engines.',
+        years: 5,
+        location: 'London, UK',
+        workPreference: 'Remote',
+        available: true,
+        availability: 'Open to new roles',
+        skills: ['Swift', 'TypeScript'],
+        email: 'ada@example.com',
+        resume: '',
+        timeline: [{ role: 'Engineer', org: 'Engines Ltd', period: '2020–now' }],
+      },
     },
     projects: [
       {

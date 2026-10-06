@@ -44,4 +44,10 @@ describe('unusedPhotos', () => {
     c.projects[1].visible = false;
     expect(unusedPhotos(c, ['beta-1.jpg'])).toEqual([]);
   });
+
+  it('counts the About portrait as used', () => {
+    const c = validContent();
+    c.settings.about.photo = '/shots/about-1.jpg';
+    expect(unusedPhotos(c, ['alpha-1.jpg', 'beta-1.jpg', 'beta-2.jpg', 'about-1.jpg'])).toEqual([]);
+  });
 });

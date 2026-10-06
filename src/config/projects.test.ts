@@ -31,6 +31,13 @@ describe('loadContent', () => {
     expect(c.projects[0].images[0]).toBe(path); // the input itself is left alone
   });
 
+  it('serves the About portrait under the base path, and leaves no portrait empty', () => {
+    const c = validContent();
+    expect(loadContent(c, '/portfolio/').settings.about.photo).toBe('');
+    c.settings.about.photo = '/shots/about-1.jpg';
+    expect(loadContent(c, '/portfolio/').settings.about.photo).toBe('/portfolio/shots/about-1.jpg');
+  });
+
   it('loads the real content', () => {
     expect(projects.length).toBeGreaterThan(0);
     expect(settings.identity.name.length).toBeGreaterThan(0);

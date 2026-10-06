@@ -15,8 +15,10 @@ export function loadContent(input: unknown, base = import.meta.env.BASE_URL): { 
   const issues = validate(input);
   if (issues.length) throw new Error(`src/content/site.json is invalid:\n- ${issues.map(formatIssue).join('\n- ')}`);
   const content = input as SiteContent;
-  const projects = siteOrder(content.projects).map((p) => ({ ...p, images: p.images.map((src) => base + src.slice(1)) }));
-  return { projects, settings: content.settings };
+  const at = (src: string) => base + src.slice(1);
+  const projects = siteOrder(content.projects).map((p) => ({ ...p, images: p.images.map(at) }));
+  const about = { ...content.settings.about, photo: content.settings.about.photo && at(content.settings.about.photo) };
+  return { projects, settings: { ...content.settings, about } };
 }
 
 export const { projects, settings } = loadContent(raw);

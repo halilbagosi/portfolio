@@ -21,6 +21,14 @@
       "close": {
         "desktop": "Scroll up to close",
         "touch": "Swipe down to close"
+      },
+      "flip": {
+        "desktop": "Scroll down to turn it over",
+        "touch": "Swipe up to turn it over"
+      },
+      "back": {
+        "desktop": "Scroll up to turn it back",
+        "touch": "Swipe down to turn it back"
       }
     },
     "motion": {
@@ -29,6 +37,27 @@
       "parallax": 1.5,
       "lidKnock": true,
       "topDownOnOpen": true
+    },
+    "socials": [
+      { "label": "GitHub", "text": "github.com/your-handle", "href": "https://github.com/your-handle" },
+      { "label": "LinkedIn", "text": "linkedin.com/in/your-handle", "href": "https://www.linkedin.com/in/your-handle" },
+      { "label": "Email", "text": "you@example.com", "href": "mailto:you@example.com" }
+    ],
+    "about": {
+      "photo": "",
+      "bio": "Placeholder bio — edit in the dashboard. Two or three sentences on what you build, how you work and what you are looking for next.",
+      "years": 5,
+      "location": "City, Country",
+      "workPreference": "Remote · open to relocation",
+      "available": true,
+      "availability": "Open to new roles",
+      "skills": ["Swift", "SwiftUI", "TypeScript", "three.js", "WebGL"],
+      "email": "you@example.com",
+      "resume": "",
+      "timeline": [
+        { "role": "Role title", "org": "Company", "period": "20XX–now" },
+        { "role": "Role title", "org": "Company", "period": "20XX–20XX" }
+      ]
     }
   },
   "projects": [
