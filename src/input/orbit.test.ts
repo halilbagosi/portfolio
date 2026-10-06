@@ -74,6 +74,20 @@ describe('Orbit', () => {
     expect(angleTo(o, 'top')).toBeLessThan(1e-3);
   });
 
+  it('keeps the hard stop when a fast flick toward the rim is released with the lid off', () => {
+    const o = make();
+    o.setLimits(false, false);
+    o.begin(0, 800, 0);
+    for (let i = 1; i <= 8; i++) o.move(0, 800 - i * 40, i * 16); // 40px every 16ms
+    o.end(8 * 16 + 8);
+    let low = topElevation(o.quaternion, view);
+    o.update(1 / 60);
+    low = Math.min(low, topElevation(o.quaternion, view));
+    settle(o, (s) => (low = Math.min(low, topElevation(s.quaternion, view))));
+    expect(low).toBeGreaterThanOrEqual(Math.sin(THREE.MathUtils.degToRad(10)) - 1e-6);
+    expect(o.face).toBe('top');
+  });
+
   it('ignores input while locked', () => {
     const o = make();
     o.setLimits(true, true);
