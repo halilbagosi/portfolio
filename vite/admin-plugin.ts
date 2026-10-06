@@ -145,8 +145,8 @@ class HttpError extends Error {
 
 /**
  * The connection must come from this machine AND be addressed to it by name. The address alone
- * isn't enough: this middleware runs before Vite's own host check, so a web page whose domain
- * rebinds to 127.0.0.1 would otherwise reach the dashboard API from the user's browser.
+ * isn't enough: a web page whose domain rebinds to 127.0.0.1 would reach the API from the user's
+ * browser. Vite's own host check blocks that too; this keeps it blocked if that is ever relaxed.
  */
 function isLocal(req: IncomingMessage) {
   if (!['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress ?? '')) return false;
