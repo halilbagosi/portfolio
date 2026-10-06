@@ -57,7 +57,8 @@ src/input/gestures.ts     NEW   wheel / swipe / drag / click arbitration, emits 
 src/scene/stage.ts              applies the orbit to camera, lights and environment; Underside framing
 src/scene/box.ts                shell shaded in view space; real bottom plate; table hidden with lid on
 src/scene/lid.ts                Space Gray anodised material; reveal/heat shader patch; social link regions
-src/scene/laser.ts        NEW   etch schedule (pure) + laser effect (spot, light, sparks)
+src/scene/etch.ts         NEW   etch schedule: raster hatch path + reveal times (pure, no GPU)
+src/scene/laser.ts        NEW   laser effect: spot, light, sparks; drives the lid's etch time
 src/scene/textures.ts           engraving maps gain the socials line; bead-blast maps replace brushed
 src/scene/underside.ts    NEW   bottom plate mesh with the About card + link hit regions
 src/scene/about-card.ts   NEW   canvas layout of the About card (pure drawing, no three.js scene code)
@@ -167,10 +168,10 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
   (e.g. `github.com/handle`) in tracked caps separated by ` · `. In portrait the socials stack
   one per line.
 - `engravingMaps()` also returns each line's ink bounding box and each social's UV rectangle.
-- **Socials are links:** hovering one shows the `pointer` cursor and a faint raw-metal glint.
+- **Socials are links:** hovering one shows the `pointer` cursor.
   Clicking opens `href` (`mailto:` allowed). Clicking anywhere else on the lid opens it as before.
 
-#### Etch schedule (`laser.ts`, pure part)
+#### Etch schedule (`etch.ts`)
 
 `etchSchedule(mask, lines)` produces:
 - **The path:** for each text line in order (name → role → socials), a bidirectional raster
@@ -179,11 +180,12 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
   1.6 s for the name, 0.8 s for the role and 1.1 s for the socials, ~3.5 s in total.
 - **A reveal-time map:** a `HalfFloatType` `DataTexture`, at quarter resolution of the engraving
   map with linear filtering. Each texel holds the moment (seconds from the start) the spot
-  passes over it. Texels without ink hold a large sentinel.
+  passes over it. Texels outside every line hold 0: nothing is cut there, and keeping them small
+  means linear filtering never delays the edge of a glyph.
 - `spotAt(t) → { u, v, firing }`: the spot position along the path, and whether there is ink
   under it (from the mask).
 
-#### Etch rendering (`laser.ts`, effect part + lid shader patch)
+#### Etch rendering (`laser.ts` + lid shader patch)
 
 - **Lid shader patch** (`onBeforeCompile`): `revealed = step(tReveal(uv), uTime)`. The engraving's
   colour lift, roughness lift and normal perturbation are multiplied by `revealed`, so unrevealed
@@ -308,8 +310,8 @@ accident:
   - `schema.test.ts`: socials, about, hints and their limits.
   - `orbit.test.ts`: face choice from projected pitch, the lid-off elevation clamp, the settle
     target, locking.
-  - `laser.test.ts`: the hatch visits every ink row, the reveal times are monotone along the
-    path, there are no-ink sentinels, and the total duration is ~3.5 s.
+  - `etch.test.ts`: the hatch visits every ink row, the reveal times are monotone along the
+    path, the spot fires only over ink, and the total matches the line budgets.
   - `about-card.test.ts`: link UV rectangles are inside the card and don't overlap.
 - **Browser preview, desktop and phone (375×812):**
   - The etch plays on load; the hint appears after it.
