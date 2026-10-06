@@ -143,7 +143,7 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
 #### Material (`lid.ts`, `textures.ts`)
 
 - **Base:** `MeshPhysicalMaterial`, metalness 1, Space Gray tint (sRGB `#7d7e80` as a starting point,
-  terms, tuned by eye against a MacBook reference), roughness ~0.42, **no anisotropy**, and a
+  tuned by eye against a MacBook reference), roughness ~0.42, **no anisotropy**, and a
   faint clearcoat (0.15, roughness 0.5) for the anodised oxide layer.
 - **Bead-blast micro-texture:** `beadBlastMaps()` replaces `brushedRoughness`. It provides a
   fine isotropic noise roughness map (±0.04) and a very low-strength normal map, giving a soft,
