@@ -17,6 +17,14 @@ describe('loadContent', () => {
     expect(() => loadContent(c)).toThrow(/site\.json is invalid[\s\S]*between 0 and 2[\s\S]*title is required/);
   });
 
+  it('serves photos under the base path the site is published at', () => {
+    const c = validContent();
+    const path = c.projects[0].images[0];
+    expect(loadContent(c, '/portfolio/').projects[0].images[0]).toBe(`/portfolio${path}`);
+    expect(loadContent(c, '/').projects[0].images[0]).toBe(path);
+    expect(c.projects[0].images[0]).toBe(path); // the input itself is left alone
+  });
+
   it('loads the real content', () => {
     expect(projects.length).toBeGreaterThan(0);
     expect(settings.identity.name.length).toBeGreaterThan(0);
