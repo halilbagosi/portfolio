@@ -1,4 +1,4 @@
-import { formatIssue, validate } from '../content/schema';
+import { formatIssue, siteOrder, validate } from '../content/schema';
 import { api, ApiError } from './api';
 import { h } from './dom';
 import { showIssues } from './fields';
@@ -45,7 +45,7 @@ function previewHash() {
   if (t.kind !== 'project') return '#open';
   const p = store.content.projects[t.index];
   if (!p?.visible) return '#open';
-  return `#open-${store.content.projects.filter((q) => q.visible).indexOf(p)}`;
+  return `#open-${siteOrder(store.content.projects).indexOf(p)}`;
 }
 
 /** Status line, problem list, field marks and button states, after any change. */

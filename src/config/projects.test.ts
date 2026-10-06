@@ -9,6 +9,12 @@ describe('loadContent', () => {
     expect(loadContent(c).projects.map((p) => p.id)).toEqual(['beta']);
   });
 
+  it('puts the featured project first, in the big tile', () => {
+    const c = validContent();
+    c.projects[1].featured = true;
+    expect(loadContent(c).projects.map((p) => p.id)).toEqual(['beta', 'alpha']);
+  });
+
   it('throws with every problem listed', () => {
     const c = validContent();
     c.projects[0].title = '';

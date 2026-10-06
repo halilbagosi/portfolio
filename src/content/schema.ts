@@ -25,6 +25,8 @@ export interface Project {
   id: string;
   /** Hidden projects stay in the dashboard but are not shown on the site. */
   visible: boolean;
+  /** Shown in the big lead tile. One project at most; with none, the first visible one is. */
+  featured?: boolean;
   title: string;
   kind: ProjectKind;
   /** Short line shown on the resting tile. */
@@ -62,6 +64,14 @@ export interface Issue {
   path: string;
   message: string;
   project?: string;
+}
+
+/** The projects the site shows, in its order: visible ones, the featured one first (the big tile). */
+export function siteOrder(projects: Project[]): Project[] {
+  const shown = projects.filter((p) => p.visible);
+  const lead = shown.findIndex((p) => p.featured);
+  if (lead > 0) shown.unshift(...shown.splice(lead, 1));
+  return shown;
 }
 
 export const formatIssue = (i: Issue) => (i.project ? `${i.project}: ${i.message}` : i.message);
@@ -122,6 +132,7 @@ function validateProjects(list: unknown, issues: Issue[]) {
   }
   const ids = new Set<string>();
   let visible = 0;
+  let featured = false;
   list.forEach((p: unknown, i) => {
     const at = (field: string) => `projects.${i}.${field}`;
     if (!isObj(p)) {
@@ -135,6 +146,11 @@ function validateProjects(list: unknown, issues: Issue[]) {
     else if (ids.has(p.id)) add('id', `id "${p.id}" is used twice.`);
     else ids.add(p.id);
     if (typeof p.visible !== 'boolean') add('visible', 'visible must be on or off.');
+    if (p.featured !== undefined && typeof p.featured !== 'boolean') add('featured', 'featured must be on or off.');
+    else if (p.featured === true) {
+      if (featured) add('featured', 'Only one project can be featured.');
+      featured = true;
+    }
     for (const k of ['title', 'caption', 'purpose', 'architecture', 'duration', 'status']) if (!filled(p[k])) add(k, `${k} is required.`);
     if (!(KINDS as readonly unknown[]).includes(p.kind)) add('kind', `kind must be one of ${KINDS.join(', ')}.`);
     if (!Array.isArray(p.stack) || !p.stack.every(filled)) add('stack', 'Stack entries cannot be empty.');

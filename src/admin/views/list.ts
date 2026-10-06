@@ -22,6 +22,7 @@ export function renderList(root: HTMLElement, store: Store, rerender: () => void
       },
       h('span', { class: 'swatch', style: `background: linear-gradient(135deg, ${p.glow[0]}, ${p.glow[1]})` }),
       h('span', { class: 'item-title' }, p.title || 'Untitled'),
+      p.featured ? h('span', { class: 'featured-mark', title: 'Featured: gets the big tile' }, '★') : null,
       h(
         'button',
         {

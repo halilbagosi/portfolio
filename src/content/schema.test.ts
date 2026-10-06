@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatIssue, MAX_PROJECTS, validate, type SiteContent } from './schema';
+import { formatIssue, MAX_PROJECTS, siteOrder, validate, type SiteContent } from './schema';
 import site from './site.json';
 import { validContent } from './test-fixture';
 
@@ -102,6 +102,12 @@ describe('validate', () => {
     expectIssue((c) => c.projects.forEach((p) => (p.visible = false)), 'projects', 'At least one');
   });
 
+  it('allows one featured project at most', () => {
+    expect(issuesAfter((c) => (c.projects[1].featured = true))).toEqual([]);
+    expectIssue((c) => (c.projects[0].featured = 'yes' as unknown as boolean), 'projects.0.featured', 'on or off');
+    expectIssue((c) => c.projects.forEach((p) => (p.featured = true)), 'projects.1.featured', 'Only one project');
+  });
+
   it(`allows at most ${MAX_PROJECTS} visible projects`, () => {
     expectIssue(
       (c) => {
@@ -111,5 +117,30 @@ describe('validate', () => {
       'projects',
       `At most ${MAX_PROJECTS}`,
     );
+  });
+});
+
+describe('siteOrder', () => {
+  const ids = (c: SiteContent) => siteOrder(c.projects).map((p) => p.id);
+
+  it('keeps visible projects in order when none is featured', () => {
+    const c = validContent();
+    expect(ids(c)).toEqual(['alpha', 'beta']);
+    c.projects[0].visible = false;
+    expect(ids(c)).toEqual(['beta']);
+  });
+
+  it('puts the featured project first, the rest in order', () => {
+    const c = validContent();
+    c.projects.push({ ...c.projects[0], id: 'gamma' });
+    c.projects[1].featured = true;
+    expect(ids(c)).toEqual(['beta', 'alpha', 'gamma']);
+  });
+
+  it('ignores a featured project that is hidden', () => {
+    const c = validContent();
+    c.projects[1].featured = true;
+    c.projects[1].visible = false;
+    expect(ids(c)).toEqual(['alpha']);
   });
 });

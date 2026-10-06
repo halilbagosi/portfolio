@@ -42,6 +42,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (hover: hover) and (pointer: fine) { .item:not(.active):hover { background: rgba(255, 255, 255, 0.05); } }
 .swatch { width: 14px; height: 14px; border-radius: 4px; flex: none; }
 .item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.featured-mark { color: var(--accent); font-size: 12px; }
 .icon { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 5px; border-radius: 5px; }
 @media (hover: hover) and (pointer: fine) { .icon:hover { color: var(--text); background: rgba(255, 255, 255, 0.08); } }
 
