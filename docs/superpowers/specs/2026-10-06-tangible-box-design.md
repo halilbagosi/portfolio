@@ -89,9 +89,16 @@ axes), mode `'drag' | 'glide' | 'settle' | 'rest'`, and `face: 'top' | 'bottom'`
   - Lid off: the camera's elevation relative to the top plane is clamped to at least 20°. The
     clamp is soft, rubber-banding at the limit. Only the Top face is allowed.
   - Section focused or lid animating: input is ignored, and the controller settles to Top.
+- **Ambient tracking pauses while held.** From pointer-down until the box is back at rest, the
+  cursor-driven effects are frozen, and so are their gyro equivalents on phones. These are the
+  camera parallax, the lid light and environment sway, the shell sheen, and the touch idle drift.
+  The direct manipulation is then the only thing moving the box: no parallax fights the drag. The
+  smoothed values ease back in over ~0.4 s once the orbit is at rest, so nothing jumps.
+  `main.ts` reads `orbit.engaged` (true from `begin` until `atRest`) and multiplies the ambient
+  input by an eased weight that goes to 0 while engaged.
 - **API:** `begin(x, y)`, `move(x, y)`, `end()`, `flip(face)` (animated, used by the
   wheel/swipe intents and the a11y buttons), `update(dt)`, `quaternion`, `face`, `atRest`,
-  `setLimits({ lidOn, locked })`.
+  `setLimits({ lidOn, locked })`, `engaged`.
 - The pure math is kept in exported functions for tests: face choice from pitch and `ω`, the
   elevation clamp, and the settle target.
 
