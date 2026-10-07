@@ -88,13 +88,12 @@ function hideHint() {
   clearTimeout(swapTimer);
   hint.classList.remove('show');
 }
-/** Cross-fades the hint to new text: out, swap, in. */
 /** Motion permission was asked: the open hint is now the plain one, but a hint already showing something else stays. */
 function permissionAsked() {
   if (hint.textContent === openHint) hint.textContent = copy.open.touch;
   openHint = copy.open.touch;
 }
-
+/** Cross-fades the hint to new text: out, swap, in. */
 function swapHint(text: string) {
   hideHint();
   swapTimer = window.setTimeout(() => showHint(text), 400);
