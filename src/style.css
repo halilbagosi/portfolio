@@ -11,7 +11,11 @@ body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helv
 #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%); }
 #hint { position: fixed; left: 0; right: 0; bottom: max(28px, env(safe-area-inset-bottom)); margin: 0; text-align: center; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: rgba(217,220,225,.55); opacity: 0; transition: opacity 0.35s var(--ease-out); pointer-events: none; }
 #hint.show { opacity: 1; transition-duration: 1.2s; }
-#fallback { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; gap: 8px; padding: 24px; }
+/* Scrolls when the About and the list outgrow the viewport (the page itself is overflow: hidden). The first and
+   last children's auto margins keep it centred when it fits, without clipping the top when it doesn't. */
+#fallback { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 24px; overflow-y: auto; }
+#fallback > :first-child { margin-top: auto; }
+#fallback > :last-child { margin-bottom: auto; }
 #fallback[hidden] { display: none; }
 .fallback { position: fixed; inset: 0; display: grid; place-content: center; margin: 0; }
 @media (prefers-reduced-motion: reduce) { #hint { transition: none; } }

@@ -280,12 +280,30 @@ a11y.appendChild(aboutBtn);
 const aboutSection = document.createElement('section');
 aboutSection.setAttribute('aria-label', `About ${settings.identity.name}`);
 for (const line of aboutLines(settings.about)) aboutSection.appendChild(Object.assign(document.createElement('p'), { textContent: line }));
-for (const l of contactLinks(settings.about, settings.socials)) aboutSection.appendChild(a11yLink(l.label, l.href));
+// The socials are already linked at the top of the nav; only what isn't (email, résumé) is added here.
+const listed = new Set(settings.socials.map((s) => s.href));
+for (const l of contactLinks(settings.about, settings.socials)) if (!listed.has(l.href)) aboutSection.appendChild(a11yLink(l.label, l.href));
 const backBtn = document.createElement('button');
 backBtn.textContent = 'Turn the box back';
 backBtn.addEventListener('click', () => orbit.flip('top'));
 aboutSection.appendChild(backBtn);
 a11y.appendChild(aboutSection);
+
+// A turn is silent otherwise: say which side is showing, and offer only the button that applies.
+const faceStatus = Object.assign(document.createElement('div'), { className: 'sr-only' });
+faceStatus.setAttribute('role', 'status');
+faceStatus.setAttribute('aria-live', 'polite');
+document.body.appendChild(faceStatus);
+let a11yFace: Face = 'top';
+function syncFaceControls(face: Face) {
+  const back = face === 'bottom';
+  aboutBtn.disabled = back;
+  backBtn.disabled = !back;
+  // A disabled button drops focus to the page; hand it to the button that took over.
+  const stranded = back ? aboutBtn : backBtn;
+  if (document.activeElement === stranded) (back ? backBtn : aboutBtn).focus();
+}
+backBtn.disabled = true;
 const a11yButtons = projects.slice(0, n).map((p, i) => {
   const b = document.createElement('button');
   b.textContent = `${p.title}, ${p.kind}: ${p.purpose} Built with ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.status}.`;
@@ -530,6 +548,11 @@ function frame() {
   if (pendingFlip && lid.state === 'closed' && orbit.atRest) {
     pendingFlip = false;
     orbit.flip('bottom');
+  }
+  if (orbit.face !== a11yFace) {
+    a11yFace = orbit.face;
+    syncFaceControls(a11yFace);
+    faceStatus.textContent = a11yFace === 'bottom' ? 'Showing About' : 'Showing the top of the box';
   }
   // Lying on its back, the camera frames the About card straight on; upright, the usual overview.
   if (orbit.face !== shownFace && focused < 0) {
