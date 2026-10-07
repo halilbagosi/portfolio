@@ -540,7 +540,7 @@ function frame() {
 
   let cursor = '';
   if (gestures.dragging) cursor = 'grabbing';
-  else if (lid.state === 'returning' && pointer.cast([lid.hit], false).length) cursor = 'pointer';
+  else if (lid.state === 'returning' && pointer.inside && pointer.cast([lid.hit], false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(chipSets[focused].linkMeshes, false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(tiles[focused].stack.meshes, false).length) cursor = 'zoom-in';
   else if (hovered >= 0 && hovered !== focused) cursor = 'pointer';

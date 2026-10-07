@@ -124,30 +124,41 @@ export function engravingMaps(
   hc.fillStyle = '#000';
   hc.textBaseline = 'alphabetic';
   const u = (w / 100) * (o.scale ?? 1); // layout unit
+  // The socials are the lid's only clickable text, so they are set large enough to read and tap:
+  // twice the base size one per line on the tall lid, a little over a quarter more in rows.
+  // The role keeps at least their size, so the hierarchy runs name > role >= socials.
+  const stack = !!o.stack;
+  const socialSize = u * (stack ? 2.0 : 1.3);
   const type = {
     name: { size: u * 4.4, track: u * 0.85 },
-    role: { size: u * 1.35, track: u * 0.7 },
-    social: { size: u * 1.0, track: u * 0.45 },
+    role: stack ? { size: u * 2.1, track: u * 1.0 } : { size: u * 1.35, track: u * 0.7 },
+    social: { size: socialSize, track: socialSize * 0.45 },
   };
   const font = (t: { size: number }) => `500 ${t.size}px ${FONT}`;
+  /** Widest a line may be: it stays inside the lid's rounded corners. */
+  const maxW = w * 0.86;
 
-  // Socials: as many per line as fit in most of the width (one per line when stacked).
-  const gap = u * 2.4;
+  // Socials: as many per line as fit (one per line when stacked). An item wider than a whole line
+  // has its type shrunk to fit, so nothing runs off the lid.
+  const gap = socialSize * 2.4;
   hc.font = font(type.social);
-  const rows: { text: string; href: string; w: number }[][] = [];
+  type Item = { text: string; href: string; w: number; size: number; track: number };
+  const rows: Item[][] = [];
   for (const s of socials) {
     const text = s.text.toUpperCase();
-    const item = { text, href: s.href, w: trackedWidth(hc, text, type.social.track) };
+    const width = trackedWidth(hc, text, type.social.track);
+    const k = Math.min(1, maxW / width); // type and tracking both scale, so the width does too
+    const item: Item = { text, href: s.href, w: width * k, size: type.social.size * k, track: type.social.track * k };
     const row = rows[rows.length - 1];
     const used = row ? row.reduce((a, b) => a + b.w + gap, 0) : 0;
-    if (row && !o.stack && used + item.w <= w * 0.86) row.push(item);
+    if (row && !stack && used + item.w <= maxW) row.push(item);
     else rows.push([item]);
   }
 
   // Baselines below the name's. The block (the name's cap top to the last baseline) is centred.
-  const roleAt = u * 3.3;
-  const socialAt = roleAt + u * 3.4;
-  const socialLine = u * 2.1;
+  const roleAt = u * (stack ? 4.2 : 3.4);
+  const socialAt = roleAt + u * (stack ? 5.4 : 4.0);
+  const socialLine = u * (stack ? 5.0 : 3.2); // row pitch; it is also the height of a link's hit area
   const lastAt = rows.length ? socialAt + socialLine * (rows.length - 1) : roleAt;
   const yName = h / 2 + (type.name.size * 0.74 - lastAt) / 2;
 
@@ -158,27 +169,40 @@ export function engravingMaps(
     y0: Math.max(0, y - size * 0.8 - pad),
     y1: Math.min(h, y + size * 0.25 + pad),
   });
+  /** A link's hit area: its row's full pitch, and half the gap to its neighbours on each side. */
+  const hitBox = (x: number, width: number, y: number, size: number): PxBox => {
+    const mid = y - size * 0.275; // the ink's vertical centre
+    return {
+      x0: Math.max(0, x - gap / 2),
+      x1: Math.min(w, x + width + gap / 2),
+      y0: Math.max(0, mid - socialLine / 2),
+      y1: Math.min(h, mid + socialLine / 2),
+    };
+  };
   const lines: PxBox[] = [];
   const links: (PxBox & { href: string })[] = [];
   const line = (text: string, y: number, t: { size: number; track: number }) => {
     hc.font = font(t);
-    const tw = trackedWidth(hc, text, t.track);
-    drawTracked(hc, text, w / 2, y, t.track);
-    lines.push(box(w / 2 - tw / 2, tw, y, t.size));
+    const k = Math.min(1, maxW / trackedWidth(hc, text, t.track));
+    const f = { size: t.size * k, track: t.track * k };
+    hc.font = font(f);
+    const tw = trackedWidth(hc, text, f.track);
+    drawTracked(hc, text, w / 2, y, f.track);
+    lines.push(box(w / 2 - tw / 2, tw, y, f.size));
   };
   line(name.toUpperCase(), yName, type.name);
   line(role.toUpperCase(), yName + roleAt, type.role);
-  hc.font = font(type.social);
   rows.forEach((row, r) => {
     const y = yName + socialAt + socialLine * r;
     const total = row.reduce((a, b) => a + b.w, 0) + gap * (row.length - 1);
     let x = w / 2 - total / 2;
     for (const item of row) {
-      drawTracked(hc, item.text, 0, y, type.social.track, x);
-      links.push({ ...box(x, item.w, y, type.social.size), href: item.href });
+      hc.font = font(item);
+      drawTracked(hc, item.text, 0, y, item.track, x);
+      links.push({ ...hitBox(x, item.w, y, item.size), href: item.href });
       x += item.w + gap;
     }
-    lines.push(box(w / 2 - total / 2, total, y, type.social.size));
+    lines.push(box(w / 2 - total / 2, total, y, row[0].size));
   });
 
   const mask = canvas(w, h);
