@@ -81,8 +81,18 @@ describe('Orbit', () => {
     for (let i = 1; i <= 8; i++) o.move(0, 800 - i * 40, i * 16); // 40px every 16ms
     o.end(8 * 16 + 8);
     let low = topElevation(o.quaternion, view);
-    o.update(1 / 60);
-    low = Math.min(low, topElevation(o.quaternion, view));
+    settle(o, (s) => (low = Math.min(low, topElevation(s.quaternion, view))));
+    expect(low).toBeGreaterThanOrEqual(Math.sin(THREE.MathUtils.degToRad(10)) - 1e-6);
+    expect(o.face).toBe('top');
+  });
+
+  it('keeps the hard stop when a sideways flick is released on a tilted box with the lid off', () => {
+    const o = make();
+    o.setLimits(false, false);
+    o.begin(400, 400, 0);
+    for (let i = 1; i <= 8; i++) o.move(400 - i * 80, 400 + i * 80, i * 16); // 80px across and down every 16ms
+    o.end(8 * 16 + 4); // the drag ends tilted near 12 degrees; turning about the vertical there sweeps it under the rim
+    let low = topElevation(o.quaternion, view);
     settle(o, (s) => (low = Math.min(low, topElevation(s.quaternion, view))));
     expect(low).toBeGreaterThanOrEqual(Math.sin(THREE.MathUtils.degToRad(10)) - 1e-6);
     expect(o.face).toBe('top');

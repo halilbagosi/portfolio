@@ -141,7 +141,7 @@ export class Orbit {
         next = this.turned(yaw, pitch);
         if (topElevation(next, this.view) < HARD_OPEN) next = this.turned(yaw, (pitch = 0));
         if (topElevation(next, this.view) < HARD_OPEN) {
-          this.flick.multiplyScalar(0.5); // a rejected step is no flick: don't release a stale velocity
+          this.flick.set(0, 0, 0); // a rejected step is no flick
           return;
         }
       }
@@ -154,9 +154,9 @@ export class Orbit {
   end(now = performance.now()) {
     if (this.mode !== 'drag') return;
     this.omega.copy(now - this.last.t > STILL_MS ? tmpV.set(0, 0, 0) : this.flick).clampLength(0, MAX_W);
-    // Lid off: only the turn about the vertical carries on. Pitch momentum would coast the camera
-    // past the hard stop (the settle spring has no elevation clamp); yaw cannot change elevation.
-    if (!this.lidOn) this.omega.set(0, this.omega.y, 0);
+    // Lid off: no momentum. The settle spring has no elevation clamp, and on a tilted box any turn
+    // (even about the vertical) can sweep it under the rim; it just springs back to the top.
+    if (!this.lidOn) this.omega.set(0, 0, 0);
     this.settleTo(this.lidOn ? faceToward(project(this.quaternion, this.omega, TAU), this.view) : 'top');
   }
 
