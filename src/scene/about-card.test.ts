@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { About, Social } from '../content/schema';
-import { aboutLines, cardPad, contactLinks, initialsOf, layoutAbout, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
+import { aboutLines, cardPad, contactLinks, FIT_MAX, fitAbout, initialsOf, layoutAbout, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
 
 /** Fake text widths: 0.55 em per character, plus tracking between characters. */
 const measure: Measure = (t, font, tracking = 0) => [...t].length * parseFloat(font.split(' ')[1]) * 0.55 + tracking * Math.max(0, [...t].length - 1);
@@ -207,6 +207,81 @@ describe('layoutAbout', () => {
 
   it('draws one portrait', () => {
     expect(layoutAbout(input(), ...SIZES.tall, measure).ops.filter((o) => o.kind === 'photo')).toHaveLength(1);
+  });
+});
+
+describe('layoutAbout bottom', () => {
+  it('reports where the lowest op reaches, at most the padded card', () => {
+    for (const [, make] of CASES)
+      for (const [w, h] of Object.values(SIZES)) {
+        const { ops, bottom } = layoutAbout(make(), w, h, measure);
+        expect(bottom).toBeLessThanOrEqual(h - cardPad(w, h));
+        const lowest = Math.max(
+          ...ops.map((o) =>
+            o.kind === 'text' ? o.y + sizeOf(o.font) * 0.2 : o.kind === 'photo' || o.kind === 'dot' ? o.cy + o.r : o.kind === 'pill' ? o.y + o.h : 0,
+          ),
+        );
+        expect(bottom).toBeGreaterThanOrEqual(lowest);
+      }
+  });
+
+  it('is larger for more content', () => {
+    const [w, h] = SIZES.tall;
+    expect(layoutAbout(maxInput(), w, h, measure).bottom).toBeGreaterThan(layoutAbout(minInput(), w, h, measure).bottom);
+  });
+});
+
+describe('fitAbout', () => {
+  for (const [name, make] of CASES)
+    for (const [shape, [w, h]] of Object.entries(SIZES))
+      describe(`${name} content, ${shape} card`, () => {
+        const fit = fitAbout(make(), w, h, measure);
+        const lay = layoutAbout(make(), fit.lw, fit.lh, measure);
+
+        it('keeps the scale within 1..FIT_MAX and the logical size at the card aspect', () => {
+          expect(fit.scale).toBeGreaterThanOrEqual(1);
+          expect(fit.scale).toBeLessThanOrEqual(FIT_MAX);
+          expect(fit.lw * fit.scale).toBeCloseTo(w, 6);
+          expect(fit.lh * fit.scale).toBeCloseTo(h, 6);
+        });
+
+        it('fits its content inside the padded card at that scale', () => {
+          expect(lay.bottom).toBeLessThanOrEqual(fit.lh - cardPad(fit.lw, fit.lh));
+          expect(fit.ops).toEqual(lay.ops);
+          expect(fit.links).toEqual(lay.links);
+        });
+
+        it('stops at the largest scale that fits', () => {
+          if (fit.scale >= FIT_MAX - 1e-9) return;
+          const next = fit.scale + 0.05;
+          const l = layoutAbout(make(), w / next, h / next, measure);
+          expect(l.bottom).toBeGreaterThan(h / next - cardPad(w / next, h / next));
+        });
+
+        it('draws the same ops as layoutAbout when it picks scale 1', () => {
+          if (fit.scale !== 1) return;
+          expect(fit.ops).toEqual(layoutAbout(make(), w, h, measure).ops);
+        });
+      });
+
+  it('scales a tall card with little content up', () => {
+    const [w, h] = SIZES.tall;
+    const fit = fitAbout(minInput(), w, h, measure);
+    expect(fit.scale).toBeGreaterThan(1);
+    expect(layoutAbout(minInput(), fit.lw, fit.lh, measure).bottom).toBeLessThanOrEqual(fit.lh - cardPad(fit.lw, fit.lh));
+  });
+
+  it('falls back to scale 1 when nothing fits', () => {
+    const [w, h] = SIZES.tall;
+    const fit = fitAbout(maxInput(), w, h / 3, measure);
+    expect(fit.scale).toBe(1);
+    expect(fit.ops).toEqual(layoutAbout(maxInput(), w, h / 3, measure).ops);
+  });
+
+  it('keeps link rects as fractions of the card', () => {
+    const [w, h] = SIZES.tall;
+    const fit = fitAbout(minInput(), w, h, measure);
+    for (const l of fit.links) for (const v of [l.x0, l.y0, l.x1, l.y1]) expect(v).toBeGreaterThan(0), expect(v).toBeLessThan(1);
   });
 });
 

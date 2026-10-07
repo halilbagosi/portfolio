@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OUTER_D, OUTER_R, OUTER_W, roundedRectShape, TOP_Y, WALL_H } from './box';
 import { TEXT_LOD_BIAS } from './textures';
-import { CARD_PX, CARD_SS, drawAbout, initialsOf, layoutAbout, linkAtUv, type CardInput, type CardLink, type Measure } from './about-card';
+import { CARD_PX, CARD_SS, drawAbout, fitAbout, initialsOf, linkAtUv, type CardInput, type CardLink, type Measure } from './about-card';
 
 /** Dark anodised plate until the About card is drawn. */
 function plainPlate() {
@@ -73,14 +73,14 @@ export class Underside {
       ctx.font = font;
       return ctx.measureText(t).width + tracking * Math.max(0, [...t].length - 1);
     };
-    const { ops, links } = layoutAbout(input, w, h, measure);
+    const { ops, links, scale, lw, lh } = fitAbout(input, w, h, measure);
     this.links = links;
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = 8;
     const look = { initials: initialsOf(input.name), corner: OUTER_R * CARD_PX };
     const draw = (photo?: HTMLImageElement) => {
-      drawAbout(ctx, ops, w, h, { ...look, photo });
+      drawAbout(ctx, ops, lw, lh, scale, { ...look, photo });
       tex.needsUpdate = true;
     };
     draw();

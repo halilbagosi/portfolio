@@ -119,9 +119,16 @@ function wrap(text: string, font: string, maxW: number, maxLines: number, measur
 /**
  * The About card: what to draw (layout px, CARD_PX per world unit) and where its links are. Wide
  * cards set the person on the left and the details in a right column; tall ones stack everything.
+ * Also returns `bottom`, how far down the content reaches (text with a descender allowance, pills, the
+ * portrait, the dot, the tall card's rule; not the wide card's divider, which spans the card by design).
  * Pure: `measure` supplies text widths, so it is tested without a canvas.
  */
-export function layoutAbout(input: CardInput, w: number, h: number, measure: Measure): { ops: Op[]; links: CardLink[] } {
+export function layoutAbout(
+  input: CardInput,
+  w: number,
+  h: number,
+  measure: Measure,
+): { ops: Op[]; links: CardLink[]; bottom: number } {
   const ops: Op[] = [];
   const links: CardLink[] = [];
   const a = input.about;
@@ -268,7 +275,44 @@ export function layoutAbout(input: CardInput, w: number, h: number, measure: Mea
     ops.push({ kind: 'rule', x: pad, y, w: colW, h: 1.5 });
     column(pad, y + 1.5 + GAP, colW);
   }
-  return { ops, links };
+  return { ops, links, bottom: contentBottom(ops, wide) };
+}
+
+/** Descender depth below a text baseline, as a fraction of the font size. */
+const DESCENT = 0.2;
+
+/** The largest y any op reaches (layout px). The wide card's full-height divider is left out. */
+function contentBottom(ops: Op[], wide: boolean) {
+  let bottom = 0;
+  for (const op of ops) {
+    let y = 0;
+    if (op.kind === 'text') y = op.y + (parseFloat(op.font.split(' ')[1]) || 0) * DESCENT;
+    else if (op.kind === 'photo' || op.kind === 'dot') y = op.cy + op.r;
+    else if (op.kind === 'pill' || (op.kind === 'rule' && !wide)) y = op.y + op.h;
+    bottom = Math.max(bottom, y);
+  }
+  return bottom;
+}
+
+/** The largest scale the card is drawn up by, and the step it is searched in. */
+export const FIT_MAX = 1.7;
+const FIT_STEP = 0.05;
+
+/**
+ * Lays the card out on a smaller logical canvas (`w / scale` by `h / scale`) that is drawn scaled up, so
+ * the type grows to fill the card. Picks the largest scale in 1..FIT_MAX whose content still fits inside
+ * the card's padding; scale 1 if none does. Link rects are fractions of the card, so they stay valid.
+ */
+export function fitAbout(input: CardInput, w: number, h: number, measure: Measure) {
+  const steps = Math.round((FIT_MAX - 1) / FIT_STEP);
+  for (let i = steps; i >= 0; i--) {
+    const scale = i === 0 ? 1 : Math.round((1 + i * FIT_STEP) * 1e6) / 1e6;
+    const lw = w / scale;
+    const lh = h / scale;
+    const { ops, links, bottom } = layoutAbout(input, lw, lh, measure);
+    if (bottom <= lh - cardPad(lw, lh) || i === 0) return { ops, links, scale, lw, lh };
+  }
+  throw new Error('unreachable');
 }
 
 function portrait(ctx: CanvasRenderingContext2D, op: Extract<Op, { kind: 'photo' }>, initials: string, photo?: HTMLImageElement) {
@@ -303,27 +347,30 @@ function portrait(ctx: CanvasRenderingContext2D, op: Extract<Op, { kind: 'photo'
 }
 
 /**
- * Draws the card on a canvas CARD_SS times its layout size: a dark anodised plate (a touch
- * lighter in the middle) with a machined hairline border following its rounded corners.
+ * Draws the card on a canvas CARD_SS * `scale` times its logical size (`w` by `h`, from `fitAbout`): a
+ * dark anodised plate (a touch lighter in the middle) with a machined hairline border following its
+ * rounded corners. `corner` is the physical corner radius in layout px at scale 1.
  */
 export function drawAbout(
   ctx: CanvasRenderingContext2D,
   ops: Op[],
   w: number,
   h: number,
+  scale: number,
   o: { initials: string; corner: number; photo?: HTMLImageElement },
 ) {
   ctx.save();
-  ctx.setTransform(CARD_SS, 0, 0, CARD_SS, 0, 0);
+  ctx.setTransform(CARD_SS * scale, 0, 0, CARD_SS * scale, 0, 0);
+  const inset = 20 / scale;
   const g = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
   g.addColorStop(0, '#121214');
   g.addColorStop(1, '#09090a');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.5 / scale;
   ctx.beginPath();
-  ctx.roundRect(20, 20, w - 40, h - 40, Math.max(4, o.corner - 20));
+  ctx.roundRect(inset, inset, w - 2 * inset, h - 2 * inset, Math.max(4, o.corner - 20) / scale);
   ctx.stroke();
   for (const op of ops) {
     ctx.textAlign = 'left';
