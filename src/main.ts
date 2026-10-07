@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Spring } from './anim/springs';
 import { projects, settings } from './config/projects';
+import { Gestures } from './input/gestures';
 import { Motion } from './input/motion';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
@@ -235,51 +236,20 @@ function closeLid() {
   openHintAt = clock.elapsedTime + 1.6;
 }
 
-// Lid gestures: scroll down / swipe up lifts it off; scroll up / swipe down puts it back on.
-// Small deltas add up within one gesture; a trigger then rests briefly so trackpad momentum
-// doesn't fire it again.
-let wheelSum = 0;
-let wheelAt = 0;
-let gestureRest = 0;
-function lidGesture(dir: 1 | -1) {
-  const now = performance.now();
-  if (now < gestureRest) return;
-  gestureRest = now + 700;
-  wheelSum = 0;
+// ---- Gestures: taps, drags (turning the box), scrolls and swipes ---------------------
+function openLink(href: string) {
+  if (href.startsWith('mailto:')) location.href = href;
+  else window.open(href, '_blank', 'noopener');
+}
+
+/** One scroll or swipe: down / up lifts the lid off, up / down puts it back on. */
+function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
+  if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
   if (dir > 0) openLid();
   else closeLid();
 }
-host.addEventListener(
-  'wheel',
-  (e) => {
-    if (lightbox.isOpen) return;
-    const now = performance.now();
-    if (now - wheelAt > 250) wheelSum = 0;
-    wheelAt = now;
-    wheelSum += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
-    if (Math.abs(wheelSum) > 70) lidGesture(wheelSum > 0 ? 1 : -1);
-  },
-  { passive: true },
-);
-let swipeY = 0;
-let swipeX = 0;
-let swipeT = 0;
-host.addEventListener('touchstart', (e) => {
-  swipeY = e.touches[0].clientY;
-  swipeX = e.touches[0].clientX;
-  swipeT = performance.now();
-}, { passive: true });
-host.addEventListener('touchend', (e) => {
-  if (lightbox.isOpen || e.changedTouches.length !== 1) return;
-  const dy = e.changedTouches[0].clientY - swipeY;
-  const dx = e.changedTouches[0].clientX - swipeX;
-  // A deliberate, mostly vertical flick.
-  if (Math.abs(dy) < 60 || Math.abs(dy) < Math.abs(dx) * 1.5 || performance.now() - swipeT > 700) return;
-  if (motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
-  lidGesture(dy < 0 ? 1 : -1);
-});
 
-host.addEventListener('click', () => {
+function onTap() {
   // iOS grants motion only from a tap. The first tap on the closed lid asks for it and leaves the
   // lid on, so the steel can follow the tilt before it opens; the next tap opens it.
   if (touch && motion.needsPermission && lid.state === 'closed') {
@@ -297,7 +267,7 @@ host.addEventListener('click', () => {
     const hit = pointer.cast(chipSets[focused].linkMeshes, false)[0];
     const link = hit?.object.userData.link as string | undefined;
     if (link) {
-      window.open(link, '_blank', 'noopener');
+      openLink(link);
       return;
     }
   }
@@ -309,6 +279,15 @@ host.addEventListener('click', () => {
   // outside the box, goes back to the overview.
   const i = sectionUnderPointer();
   setFocus(i === focused ? -1 : i);
+}
+
+new Gestures(host, {
+  tap: onTap,
+  dragStart: () => false, // turning the box comes with the orbit
+  dragMove: () => {},
+  dragEnd: () => {},
+  vertical: onVertical,
+  enabled: () => !lightbox.isOpen,
 });
 
 /** The section under the pointer (in its current or opening layout), or -1. */
