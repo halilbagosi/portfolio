@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { About, Social } from '../content/schema';
-import { aboutLines, cardPad, contactLinks, FIT_MAX, fitAbout, initialsOf, layoutAbout, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
+import { aboutLines, cardPad, contactLinks, cutCount, FIT_MAX, fitAbout, initialsOf, layoutAbout, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
 
 /** Fake text widths: 0.55 em per character, plus tracking between characters. */
 const measure: Measure = (t, font, tracking = 0) => [...t].length * parseFloat(font.split(' ')[1]) * 0.55 + tracking * Math.max(0, [...t].length - 1);
@@ -274,7 +274,8 @@ describe('fitAbout', () => {
           if (fit.scale >= FIT_MAX - 1e-9) return;
           const next = fit.scale + 0.05;
           const l = layoutAbout(make(), w / next, h / next, measure);
-          expect(l.bottom).toBeGreaterThan(h / next - cardPad(w / next, h / next));
+          const fits = l.bottom <= h / next - cardPad(w / next, h / next);
+          expect(fits && cutCount(l.ops) <= cutCount(layoutAbout(make(), w, h, measure).ops)).toBe(false);
         });
 
         it('draws the same ops as layoutAbout when it picks scale 1', () => {
@@ -282,6 +283,25 @@ describe('fitAbout', () => {
           expect(fit.ops).toEqual(layoutAbout(make(), w, h, measure).ops);
         });
       });
+
+  describe('does not cut text that is whole at scale 1', () => {
+    const bio360 = ((s: string) => s.repeat(Math.ceil(360 / s.length)).slice(0, 360))('lorem ipsum dolor sit amet ');
+    const longTimeline = Array.from({ length: 4 }, (_, i) => ({
+      role: `Principal Staff Software Engineer, Platform ${i}`,
+      org: `The Extraordinarily Long Company Name Incorporated ${i}`,
+      period: 'January 2012 – December 2024',
+    }));
+    const cases: [string, Partial<About>][] = [
+      ['a 360-char bio', { bio: bio360 }],
+      ['long timeline roles and orgs', { timeline: longTimeline }],
+    ];
+    for (const [what, over] of cases)
+      for (const [shape, [w, h]] of Object.entries(SIZES))
+        it(`${what}, ${shape} card`, () => {
+          const fit = fitAbout(input(over), w, h, measure);
+          expect(cutCount(fit.ops)).toBeLessThanOrEqual(cutCount(layoutAbout(input(over), w, h, measure).ops));
+        });
+  });
 
   it('scales a tall card with little content up', () => {
     const [w, h] = SIZES.tall;

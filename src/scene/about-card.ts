@@ -307,21 +307,36 @@ function contentBottom(ops: Op[], wide: boolean) {
 export const FIT_MAX = 1.7;
 const FIT_STEP = 0.05;
 
+/** How many text ops were cut short with an ellipsis. */
+export const cutCount = (ops: Op[]) => ops.filter((o) => o.kind === 'text' && o.text.endsWith('…')).length;
+
+/** `fitAbout`'s result: the layout at a logical `lw` by `lh`, to be drawn `scale` times larger. */
+export interface FittedAbout {
+  ops: Op[];
+  links: CardLink[];
+  scale: number;
+  lw: number;
+  lh: number;
+}
+
 /**
  * Lays the card out on a smaller logical canvas (`w / scale` by `h / scale`) that is drawn scaled up, so
  * the type grows to fill the card. Picks the largest scale in 1..FIT_MAX whose content still fits inside
- * the card's padding; scale 1 if none does. Link rects are fractions of the card, so they stay valid.
+ * the card's padding and loses no more text to ellipses than the scale-1 layout does (a narrower logical
+ * column cuts text that was whole, and the cut text is shorter, which would make a bigger scale look like
+ * it fits). Falls back to scale 1. Link rects are fractions of the card, so they stay valid.
  */
-export function fitAbout(input: CardInput, w: number, h: number, measure: Measure) {
-  const steps = Math.round((FIT_MAX - 1) / FIT_STEP);
-  for (let i = steps; i >= 0; i--) {
-    const scale = i === 0 ? 1 : Math.round((1 + i * FIT_STEP) * 1e6) / 1e6;
+export function fitAbout(input: CardInput, w: number, h: number, measure: Measure): FittedAbout {
+  const base = layoutAbout(input, w, h, measure);
+  const baseCuts = cutCount(base.ops);
+  for (let i = Math.round((FIT_MAX - 1) / FIT_STEP); i > 0; i--) {
+    const scale = Math.round((1 + i * FIT_STEP) * 1e6) / 1e6;
     const lw = w / scale;
     const lh = h / scale;
     const { ops, links, bottom } = layoutAbout(input, lw, lh, measure);
-    if (bottom <= lh - cardPad(lw, lh) || i === 0) return { ops, links, scale, lw, lh };
+    if (bottom <= lh - cardPad(lw, lh) && cutCount(ops) <= baseCuts) return { ops, links, scale, lw, lh };
   }
-  throw new Error('unreachable');
+  return { ops: base.ops, links: base.links, scale: 1, lw: w, lh: h };
 }
 
 function portrait(ctx: CanvasRenderingContext2D, op: Extract<Op, { kind: 'photo' }>, initials: string, photo?: HTMLImageElement) {
