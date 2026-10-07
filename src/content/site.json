@@ -39,9 +39,21 @@
       "topDownOnOpen": true
     },
     "socials": [
-      { "label": "GitHub", "text": "github.com/your-handle", "href": "https://github.com/your-handle" },
-      { "label": "LinkedIn", "text": "linkedin.com/in/your-handle", "href": "https://www.linkedin.com/in/your-handle" },
-      { "label": "Email", "text": "you@example.com", "href": "mailto:you@example.com" }
+      {
+        "label": "GitHub",
+        "text": "Halil Bagosi",
+        "href": "https://github.com/halilbagosi"
+      },
+      {
+        "label": "LinkedIn",
+        "text": "Halil Bagosi",
+        "href": "https://www.linkedin.com/in/halil-bagosi"
+      },
+      {
+        "label": "Email",
+        "text": "halilbagosi24@icloud.com",
+        "href": "mailto:halilbagosi24@icloud.com"
+      }
     ],
     "about": {
       "photo": "",
@@ -51,12 +63,26 @@
       "workPreference": "Remote · open to relocation",
       "available": true,
       "availability": "Open to new roles",
-      "skills": ["Swift", "SwiftUI", "TypeScript", "three.js", "WebGL"],
-      "email": "you@example.com",
+      "skills": [
+        "Swift",
+        "SwiftUI",
+        "TypeScript",
+        "three.js",
+        "WebGL"
+      ],
+      "email": "halilbagosi24@icloud.com",
       "resume": "",
       "timeline": [
-        { "role": "Role title", "org": "Company", "period": "20XX–now" },
-        { "role": "Role title", "org": "Company", "period": "20XX–20XX" }
+        {
+          "role": "Role title",
+          "org": "Company",
+          "period": "20XX–now"
+        },
+        {
+          "role": "Role title",
+          "org": "Company",
+          "period": "20XX–20XX"
+        }
       ]
     }
   },
