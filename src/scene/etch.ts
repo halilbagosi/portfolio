@@ -39,8 +39,14 @@ export interface Ink {
 export const JUMP = 0.012;
 /** Seconds to move on to the next line. */
 export const TRAVEL = 0.15;
+/** Shortest time an ink row may take, so a tight budget never squeezes it to nothing. */
+const MIN_INK_ROW = 0.002;
 const INK = 40;
 
+/**
+ * Contract: line boxes are assumed disjoint (`timeAt` takes the first line that contains a point).
+ * A line with no ink takes `rows × JUMP` rather than its `duration`: there is nothing to spend it on.
+ */
 export class EtchSchedule {
   readonly rows: Row[] = [];
   readonly total: number;
@@ -51,6 +57,7 @@ export class EtchSchedule {
     lines: EtchLine[],
     private pitch: number,
   ) {
+    if (!(pitch > 0)) throw new Error(`EtchSchedule: pitch must be a positive number, got ${pitch}`); // also catches NaN
     let t = 0;
     lines.forEach((line, li) => {
       if (li > 0) t += TRAVEL;
@@ -58,7 +65,7 @@ export class EtchSchedule {
       for (let y = line.y0 + pitch / 2; y < line.y1; y += pitch) ys.push(y);
       const inked = ys.map((y) => this.rowHasInk(line, y));
       const n = inked.filter(Boolean).length;
-      const rowT = n ? Math.max(0, line.duration - (ys.length - n) * JUMP) / n : 0;
+      const rowT = n ? Math.max(MIN_INK_ROW, (line.duration - (ys.length - n) * JUMP) / n) : 0;
       this.spans.push({ box: line, first: this.rows.length, count: ys.length });
       ys.forEach((y, i) => {
         const dt = inked[i] ? rowT : JUMP;
@@ -73,9 +80,18 @@ export class EtchSchedule {
   spotAt(t: number): { x: number; y: number; firing: boolean } {
     const last = this.rows[this.rows.length - 1];
     if (!last) return { x: 0, y: 0, firing: false };
-    if (t >= this.total) return { x: last.dir > 0 ? last.x1 : last.x0, y: last.y, firing: false };
-    const r = this.rowAt(t);
-    if (t > r.t1) return { x: r.dir > 0 ? r.x1 : r.x0, y: r.y, firing: false }; // moving to the next line
+    if (t >= this.total) return { ...this.end(last), firing: false };
+    if (t < 0) return { ...this.start(this.rows[0]), firing: false }; // the start delay: rest where the route begins
+    const i = this.rowAt(t);
+    const r = this.rows[i];
+    const next = this.rows[i + 1];
+    if (t > r.t1 && next) {
+      // Travelling to the next line: slide from this row's end to the next row's start, dark.
+      const f = (t - r.t1) / (next.t0 - r.t1 || 1);
+      const a = this.end(r);
+      const b = this.start(next);
+      return { x: a.x + f * (b.x - a.x), y: a.y + f * (b.y - a.y), firing: false };
+    }
     const f = (t - r.t0) / (r.t1 - r.t0 || 1);
     const x = r.dir > 0 ? r.x0 + f * (r.x1 - r.x0) : r.x1 - f * (r.x1 - r.x0);
     return { x, y: r.y, firing: r.ink && this.near(x, r.y) };
@@ -104,7 +120,15 @@ export class EtchSchedule {
     return { data, width, height };
   }
 
-  /** The row being cut at t: the last one started by then. */
+  private start(r: Row) {
+    return { x: r.dir > 0 ? r.x0 : r.x1, y: r.y };
+  }
+
+  private end(r: Row) {
+    return { x: r.dir > 0 ? r.x1 : r.x0, y: r.y };
+  }
+
+  /** Index of the row being cut at t: the last one started by then. */
   private rowAt(t: number) {
     let lo = 0;
     let hi = this.rows.length - 1;
@@ -113,7 +137,7 @@ export class EtchSchedule {
       if (this.rows[mid].t0 <= t) lo = mid;
       else hi = mid - 1;
     }
-    return this.rows[lo];
+    return lo;
   }
 
   private at(x: number, y: number) {
