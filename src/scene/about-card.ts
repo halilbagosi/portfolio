@@ -177,6 +177,15 @@ export function layoutAbout(
   const place: Block = (x, y, colW) => {
     const half = a.workPreference ? (colW - 24) / 2 : colW;
     const value = f(500, 20);
+    // Side by side while neither value would be cut at half width; otherwise (tall card) stacked, full width
+    // each. The wide card keeps them side by side: its right column has no spare height for a second row.
+    if (!wide && a.workPreference && (measure(a.location, value) > half || measure(a.workPreference, value) > half)) {
+      label(x, y + 13, 'Location');
+      text(x, y + 47, fit(a.location, value, colW, measure), value, WHITE);
+      label(x, y + 73, 'Work');
+      text(x, y + 107, fit(a.workPreference, value, colW, measure), value, WHITE);
+      return y + 113;
+    }
     label(x, y + 13, 'Location');
     text(x, y + 47, fit(a.location, value, half, measure), value, WHITE);
     if (a.workPreference) {

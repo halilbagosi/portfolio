@@ -205,6 +205,25 @@ describe('layoutAbout', () => {
     }
   });
 
+  it('stacks Location and Work at full width instead of cutting a long Work value', () => {
+    const [w, h] = SIZES.tall;
+    const work = 'Hybrid or fully remote, open to relocation';
+    const { ops } = layoutAbout(input({ workPreference: work }), w, h, measure);
+    const value = textOps(ops).find((o) => o.text === work);
+    expect(value, 'Work value drawn whole').toBeDefined();
+    expect(value!.text).not.toContain('…');
+    const loc = textOps(ops).find((o) => o.text === 'City, Country')!;
+    expect(value!.y).toBeGreaterThan(loc.y);
+    expect(value!.x).toBe(loc.x);
+  });
+
+  it('keeps Location and Work side by side when both fit at half width', () => {
+    const [w, h] = SIZES.tall;
+    const { ops } = layoutAbout(input({ workPreference: 'Remote' }), w, h, measure);
+    const t = textOps(ops);
+    expect(t.find((o) => o.text === 'Remote')!.y).toBe(t.find((o) => o.text === 'City, Country')!.y);
+  });
+
   it('draws one portrait', () => {
     expect(layoutAbout(input(), ...SIZES.tall, measure).ops.filter((o) => o.kind === 'photo')).toHaveLength(1);
   });
