@@ -9,6 +9,7 @@ import { Lightbox } from './lightbox';
 import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
 import { ChipSet } from './scene/chips';
 import { expandedLayout, focusSizes, packLayout, rectsFrom, restSizes, type Sizes } from './scene/layout';
+import { Laser } from './scene/laser';
 import { Lid } from './scene/lid';
 import { Stage } from './scene/stage';
 import { Underside } from './scene/underside';
@@ -168,6 +169,8 @@ if (reopen) {
   lid.skip();
   reveal.snap(1);
 }
+// First load: a laser engraves the lid. Not on a reopen, under reduced motion, or for dev hashes.
+const laser = reduced || reopen || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid);
 
 const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
 if (idle) idle(prewarm);
@@ -265,6 +268,7 @@ function openLid() {
     return;
   }
   lid.open();
+  laser?.finish(); // lifting it off ends the etch at once
   hideHint();
 }
 
@@ -490,6 +494,7 @@ function frame() {
   underside.sheen = ambX * 0.35;
 
   lid.update(dt, time);
+  laser?.update(dt, stage.res.y / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)));
 
   reveal.target = lid.openness > 0.25 ? 1 : 0;
   const rv = reveal.step(dt);
@@ -584,7 +589,7 @@ function frame() {
   }
 
   // Lid on. Turning the box puts the hints aside; back at rest on its top, the open hint returns.
-  const introDone = time > 1.5;
+  const introDone = laser ? laser.cutDone : time > 1.5;
   const restingTop = lid.state === 'closed' && orbit.face === 'top' && orbit.atRest;
   if (orbit.face === 'bottom') flippedOnce = true;
   // hideHint also cancels a swap still waiting out its fade. Lid off: the section hint stays.

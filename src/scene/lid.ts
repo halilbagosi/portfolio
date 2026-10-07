@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Spring } from '../anim/springs';
 import { settings } from '../config/projects';
 import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, TOP_Y } from './box';
+import { EtchSchedule } from './etch';
 import { beadBlastRoughness, engravingMaps, heightToNormal, type PxBox } from './textures';
 
 const LW = OUTER_W + 0.06;
@@ -18,23 +19,65 @@ const ANODISED = '#7d7e80';
 /** Raw aluminium, where the laser has cut through the anodising: bright and a little frosted. */
 const RAW = new THREE.Color('#d9dbde');
 
+/** Etch time meaning "long finished": everything cut, cooled. */
+const DONE = 1e4;
+/** The normal map's chunk with the groove relief scaled by whether the laser has passed. */
+const OPENED_NORMALS = THREE.ShaderChunk.normal_fragment_maps.replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * opened;');
+
+/** The etch's reveal times as a half-float texture (rows flipped: a DataTexture's first row is v = 0). */
+function revealTexture(etch: EtchSchedule) {
+  const t = etch.revealTimes(4);
+  const data = new Uint16Array(t.width * t.height);
+  for (let j = 0; j < t.height; j++)
+    for (let i = 0; i < t.width; i++) data[(t.height - 1 - j) * t.width + i] = THREE.DataUtils.toHalfFloat(t.data[j * t.width + i]);
+  const tex = new THREE.DataTexture(data, t.width, t.height, THREE.RedFormat, THREE.HalfFloatType);
+  // Nearest, not linear: texels outside the lines hold 0, and blending that into a line's edge texels
+  // would lower their reveal time, so the letters' edges would show long before the laser reached them.
+  tex.minFilter = tex.magFilter = THREE.NearestFilter;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 /**
- * Shades the engraving as cut metal: where the mask says the laser went through the anodising,
- * the surface turns raw aluminium (lighter, a little rougher). The normal map gives the groove.
+ * Shades the engraving as cut metal, as far as the laser has got: where it has passed (reveal
+ * time ≤ etch time) the mask turns the surface raw aluminium (lighter, a little rougher) and the
+ * groove's relief appears. Freshly cut metal glows orange and cools through red to nothing.
  */
-function engrave(m: THREE.MeshPhysicalMaterial, mask: THREE.Texture) {
+function engrave(m: THREE.MeshPhysicalMaterial, mask: THREE.Texture, reveal: THREE.Texture) {
+  const uniforms = { uMask: { value: mask }, uRaw: { value: RAW }, uReveal: { value: reveal }, uEtchTime: { value: DONE } };
   m.onBeforeCompile = (sh) => {
-    sh.uniforms.uMask = { value: mask };
-    sh.uniforms.uRaw = { value: RAW };
+    Object.assign(sh.uniforms, uniforms);
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform sampler2D uMask;\nuniform vec3 uRaw;\nfloat cut;')
+      .replace(
+        '#include <common>',
+        `#include <common>
+uniform sampler2D uMask;
+uniform sampler2D uReveal;
+uniform vec3 uRaw;
+uniform float uEtchTime;
+float cut;    // cut through to raw metal (0..1)
+float opened; // the laser has passed here (0 or 1)
+float heat;   // freshly cut, still glowing`,
+      )
       .replace(
         '#include <color_fragment>',
-        '#include <color_fragment>\ncut = texture2D(uMask, vNormalMapUv).r * (255.0 / 200.0);\ndiffuseColor.rgb = mix(diffuseColor.rgb, uRaw, cut);',
+        `#include <color_fragment>
+float tCut = texture2D(uReveal, vNormalMapUv).r;
+opened = step(tCut, uEtchTime);
+cut = texture2D(uMask, vNormalMapUv).r * (255.0 / 200.0) * opened;
+heat = cut * exp(-max(uEtchTime - tCut, 0.0) / 0.8);
+diffuseColor.rgb = mix(diffuseColor.rgb, uRaw, cut);`,
       )
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.55, cut);');
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.55, cut);')
+      .replace('#include <normal_fragment_maps>', OPENED_NORMALS)
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+totalEmissiveRadiance += mix(vec3(0.5, 0.04, 0.0), vec3(1.0, 0.5, 0.12), heat) * heat * 2.5;`,
+      );
   };
   m.customProgramCacheKey = () => 'lid-engrave';
+  return uniforms;
 }
 
 export type LidState = 'closed' | 'leaving' | 'gone' | 'returning';
@@ -75,6 +118,9 @@ export class Lid {
   private mapW: number;
   private mapH: number;
   private links: (PxBox & { href: string })[];
+  /** The laser's route over the engraving. */
+  readonly etch: EtchSchedule;
+  private cut: { uEtchTime: { value: number } };
 
   constructor(private reduced: boolean) {
     const aspect = LD / LW;
@@ -109,7 +155,15 @@ export class Lid {
       clearcoatRoughness: 0.5,
       transparent: true,
     });
-    engrave(top, mask);
+    // The laser's route: name, role, then the socials, each with its time budget.
+    const px = eng.mask.getContext('2d')!.getImageData(0, 0, this.mapW, this.mapH).data;
+    const budget = (i: number) => (i === 0 ? 1.6 : i === 1 ? 0.8 : 1.1 / (eng.lines.length - 2));
+    this.etch = new EtchSchedule(
+      { data: px, width: this.mapW, height: this.mapH, stride: 4 },
+      eng.lines.map((b, i) => ({ ...b, duration: budget(i) })),
+      Math.max(2, Math.round(this.mapW / 700)),
+    );
+    this.cut = engrave(top, mask, revealTexture(this.etch));
     // Diamond-cut edges: polished raw aluminium (cut through the anodising), so they flash as the cursor moves.
     const edge = new THREE.MeshPhysicalMaterial({
       color: '#e4e6e9',
@@ -168,6 +222,16 @@ export class Lid {
     const x = (hit.uv.x / LW + 0.5) * this.mapW;
     const y = (0.5 - hit.uv.y / LD) * this.mapH;
     return this.links.find((l) => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1)?.href ?? null;
+  }
+
+  /** Seconds into the etch: what has been cut by then shows, and freshly cut metal glows. */
+  setEtchTime(t: number) {
+    this.cut.uEtchTime.value = t;
+  }
+
+  /** A point just above the lid's top (its own space) for engraving-map pixel (x, y). */
+  surfacePoint(x: number, y: number, out: THREE.Vector3) {
+    return out.set((x / this.mapW - 0.5) * LW, LID_TOP + 0.003, (y / this.mapH - 0.5) * LD);
   }
 
   update(dt: number, time: number) {
