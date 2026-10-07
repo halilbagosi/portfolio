@@ -1,9 +1,10 @@
-import { formatIssue, validate } from '../content/schema';
+import { formatIssue, siteOrder, validate } from '../content/schema';
 import { api, ApiError } from './api';
 import { h } from './dom';
 import { showIssues } from './fields';
 import { Store } from './state';
 import { cleanUnusedPhotos } from './views/housekeeping';
+import { renderAbout } from './views/about';
 import { renderList } from './views/list';
 import { photoStrip } from './views/photo-strip';
 import { Preview } from './views/preview';
@@ -34,6 +35,7 @@ function render() {
   const t = store.tab;
   if (t.kind === 'project' && store.content.projects[t.index])
     renderProjectForm(form, store, t.index, { rerender: render, refreshList: () => renderList(side, store, render) }, (i) => photoStrip(store, i));
+  else if (t.kind === 'about') renderAbout(form, store, render);
   else renderSettings(form, store);
   refresh();
   preview.show(previewHash());
@@ -42,10 +44,11 @@ function render() {
 /** The site opened on the edited project (visible ones only); otherwise the open box. */
 function previewHash() {
   const t = store.tab;
+  if (t.kind === 'about') return '#about';
   if (t.kind !== 'project') return '#open';
   const p = store.content.projects[t.index];
   if (!p?.visible) return '#open';
-  return `#open-${store.content.projects.filter((q) => q.visible).indexOf(p)}`;
+  return `#open-${siteOrder(store.content.projects).indexOf(p)}`;
 }
 
 /** Status line, problem list, field marks and button states, after any change. */

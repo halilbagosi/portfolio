@@ -1,6 +1,6 @@
 import type { Project, SiteContent } from '../content/schema';
 
-export type Tab = { kind: 'project'; index: number } | { kind: 'settings' };
+export type Tab = { kind: 'project'; index: number } | { kind: 'settings' } | { kind: 'about' };
 
 const snapshot = (c: SiteContent) => JSON.stringify(c);
 

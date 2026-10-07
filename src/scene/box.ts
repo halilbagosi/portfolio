@@ -4,9 +4,14 @@ import { basicVert, sdRoundGLSL } from './shaders';
 /**
  * Portrait screens (phones) get a tall, narrow box with the projects stacked as rows, seen from
  * a little higher so text lying on the plate reads larger. Decided once per load; main.ts reloads
- * if the viewport flips orientation.
+ * if the viewport flips orientation. Touch screens (tablets) switch as soon as they are taller than
+ * wide: a big iPad in portrait, minus Safari's toolbars, is only ~0.8 and would otherwise get the
+ * wide box squeezed into a tall screen.
  */
-export const isPortraitViewport = () => innerWidth / innerHeight < 0.8;
+export const isPortraitViewport = () => {
+  const r = innerWidth / innerHeight;
+  return r < 0.8 || (r < 1 && matchMedia('(any-pointer: coarse)').matches);
+};
 export const PORTRAIT = isPortraitViewport();
 export const INTERIOR_W = PORTRAIT ? 3.9 : 6;
 export const INTERIOR_D = PORTRAIT ? 7 : 3.9;
@@ -15,6 +20,10 @@ export const GAP = 0.14;
 export const TOP_Y = 0.9;
 /** Outer wall height: taller than the top plate sits above the table, so the box reads as a solid block. */
 export const WALL_H = 1.5;
+/** The box's foot, where the table is. */
+export const BOTTOM_Y = TOP_Y - WALL_H;
+/** The box's centre: what it turns about. Treat as read-only; clone it for anything that may write. */
+export const PIVOT = new THREE.Vector3(0, TOP_Y - WALL_H / 2, 0);
 export const CARD_DEPTH = 0.24;
 export const WELL_RADIUS = 0.2;
 export const OUTER_W = INTERIOR_W + MARGIN * 2;
@@ -74,7 +83,7 @@ export function updateTube(g: THREE.BufferGeometry, w: number, d: number, r: num
 }
 
 /** Rounded-rectangle outline on a shape or path (x, y), centred. */
-function roundedRectShape<T extends THREE.Path>(w: number, d: number, r: number, path: T): T {
+export function roundedRectShape<T extends THREE.Path>(w: number, d: number, r: number, path: T): T {
   const x = -w / 2;
   const y = -d / 2;
   r = Math.max(0.0001, r);
@@ -98,7 +107,12 @@ function roundedRectShape<T extends THREE.Path>(w: number, d: number, r: number,
 function createShell() {
   const geo = tubeGeometry(12);
   updateTube(geo, OUTER_W, OUTER_D, OUTER_R, WALL_H, 12);
-  const uniforms = { uSheen: { value: 0 } };
+  const uniforms = {
+    uSheen: { value: 0 },
+    /** The box's orientation as seen (Stage.orbit): shading follows the box, not the world. */
+    uOrbit: { value: new THREE.Matrix3() },
+    uPivot: { value: PIVOT.clone() },
+  };
   const mat = new THREE.ShaderMaterial({
     uniforms,
     // Outward faces only: the sections look through the box, and its inner faces must not block them.
@@ -116,23 +130,30 @@ function createShell() {
     fragmentShader: /* glsl */ `
       ${sdRoundGLSL}
       uniform float uSheen;
+      uniform mat3 uOrbit;
+      uniform vec3 uPivot;
       varying float vV;
       varying vec3 vWorld;
       void main() {
+        // Shade the box as it is seen: turned by the orbit, so the lit side stays put as it turns.
         // Flat-ish normal from screen derivatives: which way this bit of wall faces in plan.
-        vec3 n = normalize(cross(dFdx(vWorld), dFdy(vWorld)));
+        vec3 n = uOrbit * normalize(cross(dFdx(vWorld), dFdy(vWorld)));
+        vec3 p = uOrbit * (vWorld - uPivot);
         vec2 nxz = normalize(n.xz + 1e-5);
         float front = smoothstep(0.0, 1.0, abs(nxz.y));    // faces toward / away from the viewer
-        float left = smoothstep(0.2, 1.0, abs(nxz.x)) * step(vWorld.x, 0.0); // the key light is up and left
+        float left = smoothstep(0.2, 1.0, abs(nxz.x)) * step(p.x, 0.0); // the key light is up and left
         float face = 0.45 + 0.55 * front + 0.2 * left;
 
-        // Falloff into black: bright just under the rim, gone well before the table.
-        float fall = pow(1.0 - smoothstep(0.0, 0.85, vV), 1.8);
+        // Falloff into black: bright just under the edge that is up, gone well before the other.
+        float h = clamp(0.5 - p.y / ${WALL_H.toFixed(3)}, 0.0, 1.0);
+        float fall = pow(1.0 - smoothstep(0.0, 0.85, h), 1.8);
         vec3 col = vec3(0.042) * fall * face;
         // Sheen: a soft vertical band of light drifting across the front with the parallax.
-        col += vec3(0.03) * exp(-pow((vWorld.x - uSheen) / 1.6, 2.0)) * fall * front;
-        // Rim: a hairline where the wall meets the top, like a chamfer catching light.
-        col += vec3(0.06) * (1.0 - smoothstep(0.0, 0.035, vV)) * (0.6 + 0.4 * front);
+        col += vec3(0.03) * exp(-pow((p.x - uSheen) / 1.6, 2.0)) * fall * front;
+        // Rims: hairlines where the wall meets the top or the bottom, like a chamfer catching
+        // light, on whichever edge is up.
+        float rim = (1.0 - smoothstep(0.0, 0.035, vV)) + smoothstep(0.965, 1.0, vV);
+        col += vec3(0.06) * rim * (1.0 - h) * (0.6 + 0.4 * front);
         col += (hash(gl_FragCoord.xy) - 0.5) / 255.0; // dither: no banding in the long gradient
         gl_FragColor = vec4(max(col, 0.0), 1.0);
         #include <colorspace_fragment>
@@ -222,9 +243,9 @@ export function createBox() {
   table.holes.push(roundedRectShape(OUTER_W - 0.02, OUTER_D - 0.02, OUTER_R, new THREE.Path()));
   const tableMesh = new THREE.Mesh(new THREE.ShapeGeometry(table, 16), new THREE.MeshBasicMaterial({ color: '#000000' }));
   tableMesh.rotation.x = -Math.PI / 2;
-  tableMesh.position.y = TOP_Y - WALL_H; // at the foot of the walls
+  tableMesh.position.y = BOTTOM_Y; // at the foot of the walls
   tableMesh.renderOrder = -2;
   group.add(tableMesh);
 
-  return { group, top, shell: shell.uniforms };
+  return { group, top, shell: shell.uniforms, shellMesh: shell.mesh, table: tableMesh };
 }

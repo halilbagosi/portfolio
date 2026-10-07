@@ -1,7 +1,7 @@
 import { h } from '../dom';
 import { moveItem, newProject, type Store } from '../state';
 
-/** Projects in display order (drag to reorder), visibility toggles, add, and the Settings entry. */
+/** Projects in display order (drag to reorder), visibility toggles, add, and the About and Settings entries. */
 export function renderList(root: HTMLElement, store: Store, rerender: () => void) {
   const { projects } = store.content;
   const tab = store.tab;
@@ -22,6 +22,7 @@ export function renderList(root: HTMLElement, store: Store, rerender: () => void
       },
       h('span', { class: 'swatch', style: `background: linear-gradient(135deg, ${p.glow[0]}, ${p.glow[1]})` }),
       h('span', { class: 'item-title' }, p.title || 'Untitled'),
+      p.featured ? h('span', { class: 'featured-mark', title: 'Featured: gets the big tile' }, '★') : null,
       h(
         'button',
         {
@@ -85,6 +86,18 @@ export function renderList(root: HTMLElement, store: Store, rerender: () => void
     '+',
   );
 
+  const about = h(
+    'div',
+    {
+      class: `item about-item${tab.kind === 'about' ? ' active' : ''}`,
+      onclick: () => {
+        store.select({ kind: 'about' });
+        rerender();
+      },
+    },
+    h('span', { class: 'item-title' }, 'About & socials'),
+  );
+
   const settings = h(
     'div',
     {
@@ -97,5 +110,5 @@ export function renderList(root: HTMLElement, store: Store, rerender: () => void
     h('span', { class: 'item-title' }, 'Settings'),
   );
 
-  root.replaceChildren(h('div', { class: 'side-head' }, h('span', {}, 'Projects'), add), ...items, settings);
+  root.replaceChildren(h('div', { class: 'side-head' }, h('span', {}, 'Projects'), add), ...items, about, settings);
 }

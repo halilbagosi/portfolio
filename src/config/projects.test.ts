@@ -9,6 +9,12 @@ describe('loadContent', () => {
     expect(loadContent(c).projects.map((p) => p.id)).toEqual(['beta']);
   });
 
+  it('puts the featured project first, in the big tile', () => {
+    const c = validContent();
+    c.projects[1].featured = true;
+    expect(loadContent(c).projects.map((p) => p.id)).toEqual(['beta', 'alpha']);
+  });
+
   it('throws with every problem listed', () => {
     const c = validContent();
     c.projects[0].title = '';
@@ -23,6 +29,13 @@ describe('loadContent', () => {
     expect(loadContent(c, '/portfolio/').projects[0].images[0]).toBe(`/portfolio${path}`);
     expect(loadContent(c, '/').projects[0].images[0]).toBe(path);
     expect(c.projects[0].images[0]).toBe(path); // the input itself is left alone
+  });
+
+  it('serves the About portrait under the base path, and leaves no portrait empty', () => {
+    const c = validContent();
+    expect(loadContent(c, '/portfolio/').settings.about.photo).toBe('');
+    c.settings.about.photo = '/shots/about-1.jpg';
+    expect(loadContent(c, '/portfolio/').settings.about.photo).toBe('/portfolio/shots/about-1.jpg');
   });
 
   it('loads the real content', () => {

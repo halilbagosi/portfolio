@@ -82,6 +82,20 @@ export function renderProjectForm(
       set('visible')(v);
       cb.refreshList();
     }),
+    toggleField(
+      'Featured',
+      path('featured'),
+      p.featured === true,
+      (v) => {
+        // One featured project at most: featuring this one unfeatures the others.
+        store.change((c) => {
+          for (const q of c.projects) delete q.featured;
+          if (v) c.projects[index].featured = true;
+        });
+        cb.refreshList();
+      },
+      'Gets the big tile on the site. With none featured, the first project does.',
+    ),
 
     h('div', { class: 'section-title' }, 'Basics'),
     h(

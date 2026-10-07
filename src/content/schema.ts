@@ -9,11 +9,19 @@ export type ProjectKind = (typeof KINDS)[number];
 export const STATUSES = ['Shipped', 'In progress', 'Prototype'] as const;
 /** The box has this many sections at most. */
 export const MAX_PROJECTS = 12;
+/** The lid has room for this many engraved socials. */
+export const MAX_SOCIALS = 4;
+export const MAX_SKILLS = 12;
+export const MAX_TIMELINE = 4;
+export const MAX_BIO = 360;
+export const MAX_YEARS = 60;
 export const ID_PATTERN = /^[a-z0-9-]+$/;
 /** A photo served from public/shots (no folders, no dot-files). */
 export const SHOT_PATH = /^\/shots\/(?!\.)[A-Za-z0-9._-]+$/;
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const HREF = /^https?:\/\/\S+$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAILTO = /^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export interface ProjectLink {
   label: string;
@@ -25,6 +33,8 @@ export interface Project {
   id: string;
   /** Hidden projects stay in the dashboard but are not shown on the site. */
   visible: boolean;
+  /** Shown in the big lead tile. One project at most; with none, the first visible one is. */
+  featured?: boolean;
   title: string;
   kind: ProjectKind;
   /** Short line shown on the resting tile. */
@@ -46,10 +56,46 @@ export interface HintPair {
   touch: string;
 }
 
+/** A profile link, engraved on the lid (`text`) and listed on the About card (`label`). */
+export interface Social {
+  label: string;
+  text: string;
+  /** http(s):// or mailto: */
+  href: string;
+}
+
+export interface TimelineEntry {
+  role: string;
+  org: string;
+  period: string;
+}
+
+/** The About card on the box's underside: what a recruiter wants to know. */
+export interface About {
+  /** '' (initials are shown) or a /shots/<file> path. */
+  photo: string;
+  bio: string;
+  /** Shown as "N+". */
+  years: number;
+  location: string;
+  /** e.g. "Remote · open to relocation" ('' to leave out). */
+  workPreference: string;
+  available: boolean;
+  /** e.g. "Open to new roles". */
+  availability: string;
+  skills: string[];
+  email: string;
+  /** '' or an http(s):// link to a résumé. */
+  resume: string;
+  timeline: TimelineEntry[];
+}
+
 export interface Settings {
   identity: { name: string; role: string; title: string; description: string };
-  hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair };
+  hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair; flip: HintPair; back: HintPair };
   motion: { photoDwell: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
+  socials: Social[];
+  about: About;
 }
 
 export interface SiteContent {
@@ -62,6 +108,14 @@ export interface Issue {
   path: string;
   message: string;
   project?: string;
+}
+
+/** The projects the site shows, in its order: visible ones, the featured one first (the big tile). */
+export function siteOrder(projects: Project[]): Project[] {
+  const shown = projects.filter((p) => p.visible);
+  const lead = shown.findIndex((p) => p.featured);
+  if (lead > 0) shown.unshift(...shown.splice(lead, 1));
+  return shown;
 }
 
 export const formatIssue = (i: Issue) => (i.project ? `${i.project}: ${i.message}` : i.message);
@@ -83,7 +137,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
     issues.push({ path: 'settings', message: 'Settings are missing.' });
     return;
   }
-  const { identity, hints, motion } = s;
+  const { identity, hints, motion, socials, about } = s;
   if (!isObj(identity)) issues.push({ path: 'settings.identity', message: 'Identity is missing.' });
   else
     for (const k of ['name', 'role', 'title', 'description'])
@@ -91,7 +145,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
 
   if (!isObj(hints)) issues.push({ path: 'settings.hints', message: 'Hints are missing.' });
   else {
-    for (const k of ['open', 'section', 'close']) {
+    for (const k of ['open', 'section', 'close', 'flip', 'back']) {
       const pair = hints[k];
       for (const d of ['desktop', 'touch'])
         if (!isObj(pair) || !filled(pair[d])) issues.push({ path: `settings.hints.${k}.${d}`, message: 'This hint is required.' });
@@ -113,6 +167,53 @@ function validateSettings(s: unknown, issues: Issue[]) {
     for (const k of ['lidKnock', 'topDownOnOpen'])
       if (typeof motion[k] !== 'boolean') issues.push({ path: `settings.motion.${k}`, message: 'Must be on or off.' });
   }
+
+  validateSocials(socials, issues);
+  validateAbout(about, issues);
+}
+
+function validateSocials(list: unknown, issues: Issue[]) {
+  if (!Array.isArray(list)) {
+    issues.push({ path: 'settings.socials', message: 'Socials must be a list.' });
+    return;
+  }
+  if (list.length > MAX_SOCIALS) issues.push({ path: 'settings.socials', message: `At most ${MAX_SOCIALS} socials fit on the lid.` });
+  list.forEach((s: unknown, i) => {
+    const at = `settings.socials.${i}`;
+    if (!isObj(s) || !filled(s.label)) issues.push({ path: `${at}.label`, message: `Social ${i + 1}: label is required.` });
+    if (!isObj(s) || !filled(s.text)) issues.push({ path: `${at}.text`, message: `Social ${i + 1}: engraved text is required.` });
+    if (!isObj(s) || typeof s.href !== 'string' || !(HREF.test(s.href) || MAILTO.test(s.href)))
+      issues.push({ path: `${at}.href`, message: `Social ${i + 1}: needs an http(s):// or mailto: address.` });
+  });
+}
+
+function validateAbout(a: unknown, issues: Issue[]) {
+  const at = (k: string) => `settings.about.${k}`;
+  if (!isObj(a)) {
+    issues.push({ path: 'settings.about', message: 'About is missing.' });
+    return;
+  }
+  for (const k of ['bio', 'location', 'availability']) if (!filled(a[k])) issues.push({ path: at(k), message: `${k} is required.` });
+  if (typeof a.bio === 'string' && a.bio.length > MAX_BIO) issues.push({ path: at('bio'), message: `Keep the bio under ${MAX_BIO} characters.` });
+  if (typeof a.workPreference !== 'string') issues.push({ path: at('workPreference'), message: 'Work preference must be text (it may be empty).' });
+  if (typeof a.years !== 'number' || !Number.isInteger(a.years) || a.years < 0 || a.years > MAX_YEARS)
+    issues.push({ path: at('years'), message: `Must be a whole number between 0 and ${MAX_YEARS}.` });
+  if (typeof a.available !== 'boolean') issues.push({ path: at('available'), message: 'Must be on or off.' });
+  if (typeof a.email !== 'string' || !EMAIL.test(a.email)) issues.push({ path: at('email'), message: 'Needs a valid email address.' });
+  if (a.resume !== '' && (typeof a.resume !== 'string' || !HREF.test(a.resume)))
+    issues.push({ path: at('resume'), message: 'Needs an http(s):// address, or leave it empty.' });
+  if (a.photo !== '' && (typeof a.photo !== 'string' || !SHOT_PATH.test(a.photo)))
+    issues.push({ path: at('photo'), message: 'The portrait must be a /shots/<file> path, or empty.' });
+  if (!Array.isArray(a.skills) || a.skills.length < 1 || a.skills.length > MAX_SKILLS || !a.skills.every(filled))
+    issues.push({ path: at('skills'), message: `List 1 to ${MAX_SKILLS} skills, none empty.` });
+  if (!Array.isArray(a.timeline)) issues.push({ path: at('timeline'), message: 'Timeline must be a list.' });
+  else {
+    if (a.timeline.length > MAX_TIMELINE) issues.push({ path: at('timeline'), message: `At most ${MAX_TIMELINE} timeline entries.` });
+    a.timeline.forEach((t: unknown, i) => {
+      for (const k of ['role', 'org', 'period'])
+        if (!isObj(t) || !filled(t[k])) issues.push({ path: at(`timeline.${i}.${k}`), message: `Timeline ${i + 1}: ${k} is required.` });
+    });
+  }
 }
 
 function validateProjects(list: unknown, issues: Issue[]) {
@@ -122,6 +223,7 @@ function validateProjects(list: unknown, issues: Issue[]) {
   }
   const ids = new Set<string>();
   let visible = 0;
+  let featured = false;
   list.forEach((p: unknown, i) => {
     const at = (field: string) => `projects.${i}.${field}`;
     if (!isObj(p)) {
@@ -135,6 +237,11 @@ function validateProjects(list: unknown, issues: Issue[]) {
     else if (ids.has(p.id)) add('id', `id "${p.id}" is used twice.`);
     else ids.add(p.id);
     if (typeof p.visible !== 'boolean') add('visible', 'visible must be on or off.');
+    if (p.featured !== undefined && typeof p.featured !== 'boolean') add('featured', 'featured must be on or off.');
+    else if (p.featured === true) {
+      if (featured) add('featured', 'Only one project can be featured.');
+      featured = true;
+    }
     for (const k of ['title', 'caption', 'purpose', 'architecture', 'duration', 'status']) if (!filled(p[k])) add(k, `${k} is required.`);
     if (!(KINDS as readonly unknown[]).includes(p.kind)) add('kind', `kind must be one of ${KINDS.join(', ')}.`);
     if (!Array.isArray(p.stack) || !p.stack.every(filled)) add('stack', 'Stack entries cannot be empty.');

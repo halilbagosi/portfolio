@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatIssue, MAX_PROJECTS, validate, type SiteContent } from './schema';
+import { formatIssue, MAX_BIO, MAX_PROJECTS, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, siteOrder, validate, type SiteContent } from './schema';
 import site from './site.json';
 import { validContent } from './test-fixture';
 
@@ -102,6 +102,12 @@ describe('validate', () => {
     expectIssue((c) => c.projects.forEach((p) => (p.visible = false)), 'projects', 'At least one');
   });
 
+  it('allows one featured project at most', () => {
+    expect(issuesAfter((c) => (c.projects[1].featured = true))).toEqual([]);
+    expectIssue((c) => (c.projects[0].featured = 'yes' as unknown as boolean), 'projects.0.featured', 'on or off');
+    expectIssue((c) => c.projects.forEach((p) => (p.featured = true)), 'projects.1.featured', 'Only one project');
+  });
+
   it(`allows at most ${MAX_PROJECTS} visible projects`, () => {
     expectIssue(
       (c) => {
@@ -111,5 +117,94 @@ describe('validate', () => {
       'projects',
       `At most ${MAX_PROJECTS}`,
     );
+  });
+});
+
+describe('siteOrder', () => {
+  const ids = (c: SiteContent) => siteOrder(c.projects).map((p) => p.id);
+
+  it('keeps visible projects in order when none is featured', () => {
+    const c = validContent();
+    expect(ids(c)).toEqual(['alpha', 'beta']);
+    c.projects[0].visible = false;
+    expect(ids(c)).toEqual(['beta']);
+  });
+
+  it('puts the featured project first, the rest in order', () => {
+    const c = validContent();
+    c.projects.push({ ...c.projects[0], id: 'gamma' });
+    c.projects[1].featured = true;
+    expect(ids(c)).toEqual(['beta', 'alpha', 'gamma']);
+  });
+
+  it('ignores a featured project that is hidden', () => {
+    const c = validContent();
+    c.projects[1].featured = true;
+    c.projects[1].visible = false;
+    expect(ids(c)).toEqual(['alpha']);
+  });
+});
+
+describe('socials and about', () => {
+  it('requires the flip and back hints', () => {
+    expectIssue((c) => (c.settings.hints.flip.touch = ''), 'settings.hints.flip.touch', 'required');
+    expectIssue((c) => (c.settings.hints.back.desktop = ' '), 'settings.hints.back.desktop', 'required');
+  });
+
+  it('fits at most MAX_SOCIALS socials on the lid', () => {
+    expectIssue(
+      (c) => (c.settings.socials = Array.from({ length: MAX_SOCIALS + 1 }, (_, i) => ({ label: `S${i}`, text: 'x', href: 'https://x.dev' }))),
+      'settings.socials',
+      `At most ${MAX_SOCIALS}`,
+    );
+  });
+
+  it('accepts https and mailto social links only', () => {
+    expect(issuesAfter((c) => (c.settings.socials[0].href = 'mailto:a@b.co'))).toEqual([]);
+    expectIssue((c) => (c.settings.socials[0].href = 'ftp://x'), 'settings.socials.0.href', 'http(s)://');
+    expectIssue((c) => (c.settings.socials[1].href = 'mailto:nope'), 'settings.socials.1.href', 'mailto:');
+  });
+
+  it('requires each social label and engraved text', () => {
+    expectIssue((c) => (c.settings.socials[0].label = ''), 'settings.socials.0.label', 'required');
+    expectIssue((c) => (c.settings.socials[0].text = ' '), 'settings.socials.0.text', 'required');
+  });
+
+  it('requires the About text fields', () => {
+    expectIssue((c) => (c.settings.about.bio = ''), 'settings.about.bio', 'required');
+    expectIssue((c) => (c.settings.about.location = ' '), 'settings.about.location', 'required');
+    expectIssue((c) => (c.settings.about.availability = ''), 'settings.about.availability', 'required');
+  });
+
+  it('keeps the bio short', () => {
+    expectIssue((c) => (c.settings.about.bio = 'x'.repeat(MAX_BIO + 1)), 'settings.about.bio', `under ${MAX_BIO}`);
+  });
+
+  it('keeps years a whole number from 0 to 60', () => {
+    expectIssue((c) => (c.settings.about.years = 61), 'settings.about.years', 'whole number');
+    expectIssue((c) => (c.settings.about.years = 2.5), 'settings.about.years', 'whole number');
+  });
+
+  it('checks the email, résumé and portrait', () => {
+    expectIssue((c) => (c.settings.about.email = 'nope'), 'settings.about.email', 'valid email');
+    expectIssue((c) => (c.settings.about.resume = 'www.x.dev/cv.pdf'), 'settings.about.resume', 'http(s)://');
+    expectIssue((c) => (c.settings.about.photo = '/elsewhere/me.jpg'), 'settings.about.photo', '/shots/');
+    expect(issuesAfter((c) => ((c.settings.about.resume = 'https://x.dev/cv.pdf'), (c.settings.about.photo = '/shots/about-1.jpg')))).toEqual([]);
+  });
+
+  it('requires available to be on or off', () => {
+    expectIssue((c) => ((c.settings.about as unknown as Record<string, unknown>).available = 'yes'), 'settings.about.available', 'on or off');
+  });
+
+  it(`lists 1 to ${MAX_SKILLS} skills`, () => {
+    expectIssue((c) => (c.settings.about.skills = []), 'settings.about.skills', `1 to ${MAX_SKILLS}`);
+    expectIssue((c) => (c.settings.about.skills = Array.from({ length: MAX_SKILLS + 1 }, (_, i) => `S${i}`)), 'settings.about.skills', `1 to ${MAX_SKILLS}`);
+    expectIssue((c) => (c.settings.about.skills = ['Swift', '']), 'settings.about.skills', 'none empty');
+  });
+
+  it('limits and checks the timeline', () => {
+    const entry = { role: 'R', org: 'O', period: 'P' };
+    expectIssue((c) => (c.settings.about.timeline = Array.from({ length: MAX_TIMELINE + 1 }, () => ({ ...entry }))), 'settings.about.timeline', `At most ${MAX_TIMELINE}`);
+    expectIssue((c) => (c.settings.about.timeline[0].org = ''), 'settings.about.timeline.0.org', 'required');
   });
 });

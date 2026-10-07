@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { Spring } from '../anim/springs';
-import { ELEVATION, OUTER_D, OUTER_W, PORTRAIT, TOP_Y, WALL_H } from './box';
+import { ELEVATION, OUTER_D, OUTER_W, PIVOT, PORTRAIT, TOP_Y, WALL_H } from './box';
 
 /** Looking (almost) straight down on an open section: no foreshortening of its text and images. */
 const TOP_DOWN = THREE.MathUtils.degToRad(87);
@@ -10,6 +10,7 @@ const REST_W = PORTRAIT ? OUTER_W + 0.9 : 8.0;
 const REST_H = PORTRAIT ? OUTER_D * Math.sin(ELEVATION) + WALL_H * Math.cos(ELEVATION) + 1.5 : 6.3;
 /** Space kept around an open section when the camera frames it from above. */
 const VIEW_MARGIN = 0.7;
+const tmpQ = new THREE.Quaternion();
 
 export interface ViewRect {
   x: number;
@@ -27,10 +28,22 @@ export class Stage {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(24, 1, 0.1, 100);
   readonly lidLight: THREE.PointLight;
+  private readonly key: THREE.DirectionalLight;
+  /**
+   * The box's orientation as seen. Turning it is drawn as the camera and its lights circling the
+   * other way: the world stays put, so everything laid out in it (sections, hit-tests) still holds.
+   */
+  readonly orbit = new THREE.Quaternion();
+  private orbitInv = new THREE.Quaternion();
+  /** Where the lights sit with the box at rest; they circle with the camera. */
+  private keyRest = new THREE.Vector3(-4, 10, 6);
+  readonly lidLightRest = new THREE.Vector3(0, 3, 0.5);
+  /** The environment's sway with the cursor, before the orbit. */
+  readonly envSway = new THREE.Euler();
   /** Scene behind the glass chips, re-rendered each frame they are visible. */
   readonly backdrop: THREE.WebGLRenderTarget;
   readonly res = new THREE.Vector2();
-  readonly target = new THREE.Vector3(0, TOP_Y - WALL_H * 0.5, 0.05); // middle of the block
+  readonly target = new THREE.Vector3(0, PIVOT.y, 0.05); // middle of the block
 
   // Camera framing, all eased together (critically damped, ~0.7s): a touch slower than the
   // sections' own layout springs, so the view glides after the grid rather than racing it.
@@ -75,10 +88,11 @@ export class Stage {
     this.scene.environmentIntensity = 0.85;
     pmrem.dispose();
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.2);
-    key.position.set(-4, 10, 6);
+    this.key = new THREE.DirectionalLight(0xffffff, 1.2);
+    this.key.position.copy(this.keyRest);
     this.lidLight = new THREE.PointLight(0xffffff, 22, 14, 1.4);
-    this.scene.add(key, this.lidLight);
+    this.lidLight.position.copy(this.lidLightRest);
+    this.scene.add(this.key, this.lidLight);
 
     // Glass blurs what it shows, so its backdrop can be half resolution (a quarter of the pixels).
     this.backdrop = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: true });
@@ -108,18 +122,30 @@ export class Stage {
     return this.dpr;
   }
 
+  /** Screen pixels per world unit at distance 1 from the camera (for sizes divided by view depth, like point sprites). */
+  get pxPerUnitAtOne() {
+    return this.res.y / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
+  }
+
   /** Screen pixels per world unit at the box (for glass blur/refraction scale). */
   get pxPerUnit() {
-    const vfov = THREE.MathUtils.degToRad(this.camera.fov);
-    return this.res.y / (2 * Math.tan(vfov / 2) * this.dist);
+    return this.pxPerUnitAtOne / this.dist;
   }
 
   /**
    * Overview (null): the box at its usual tilt. A section: the camera moves over it and looks
-   * straight down, framing it, so nothing on it is foreshortened.
+   * straight down, framing it, so nothing on it is foreshortened. Underside: the same straight-on
+   * framing of the whole plate; with the box rolled onto its back (the orbit), that is its bottom.
    */
-  setView(r: ViewRect | null, snap = false) {
-    if (r) {
+  setView(r: ViewRect | 'underside' | null, snap = false) {
+    if (r === 'underside') {
+      this.vEl.target = TOP_DOWN;
+      this.vX.target = 0;
+      this.vY.target = TOP_Y;
+      this.vZ.target = 0;
+      this.vW.target = OUTER_W + VIEW_MARGIN;
+      this.vH.target = OUTER_D + VIEW_MARGIN;
+    } else if (r) {
       this.vEl.target = TOP_DOWN;
       this.vX.target = r.x;
       this.vY.target = TOP_Y;
@@ -129,7 +155,7 @@ export class Stage {
     } else {
       this.vEl.target = ELEVATION;
       this.vX.target = 0;
-      this.vY.target = TOP_Y - WALL_H * 0.5;
+      this.vY.target = PIVOT.y;
       this.vZ.target = 0.05;
       this.vW.target = REST_W;
       this.vH.target = REST_H;
@@ -141,10 +167,11 @@ export class Stage {
     return [this.vEl, this.vX, this.vY, this.vZ, this.vW, this.vH];
   }
 
-  /** Current camera elevation (radians), for content that compensates for the viewing angle. */
-  get elevation() {
-    return this.vEl.value;
-  }
+  /**
+   * Where the camera is without parallax, for content that compensates for the viewing angle.
+   * Parallax is left out on purpose: deep content shifting with it is what reads as depth.
+   */
+  readonly restEye = new THREE.Vector3();
 
   update(dt: number) {
     const [baseEl, x, y, z, fw, fh] = this.views.map((sp) => sp.step(dt));
@@ -153,6 +180,7 @@ export class Stage {
     const vfov = THREE.MathUtils.degToRad(this.camera.fov);
     const t = Math.tan(vfov / 2);
     this.dist = Math.max(fh / 2 / t, fw / 2 / (t * this.aspect));
+    this.restEye.set(x, y + Math.sin(baseEl) * this.dist, z + Math.cos(baseEl) * this.dist);
 
     // Parallax: orbiting a little in azimuth reads as depth at the tilt, but seen from straight
     // above it would spin the picture, so from above it becomes a slight sideways lean instead.
@@ -169,7 +197,17 @@ export class Stage {
     // Near straight-down, "up" from world Y is ill-defined (the lean above would roll the picture):
     // hand it over to the box's far edge, so the screen's top stays the box's back.
     this.camera.up.set(0, 1 - k, -k).normalize();
-    this.camera.lookAt(this.lookTarget.copy(tg));
+    // Orbit: the camera, its target and the lights circle the box's centre by the inverse of the
+    // box's turn, so on screen the box itself turns under a fixed studio light.
+    const inv = this.orbitInv.copy(this.orbit).invert();
+    const around = (v: THREE.Vector3) => v.sub(PIVOT).applyQuaternion(inv).add(PIVOT);
+    around(this.camera.position);
+    this.camera.up.applyQuaternion(inv);
+    this.camera.lookAt(around(this.lookTarget.copy(tg)));
+    around(this.restEye);
+    around(this.key.position.copy(this.keyRest));
+    around(this.lidLight.position.copy(this.lidLightRest));
+    this.scene.environmentRotation.setFromQuaternion(tmpQ.setFromEuler(this.envSway).premultiply(inv));
   }
 
   /**

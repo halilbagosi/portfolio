@@ -7,12 +7,58 @@
       "description": "Halil Bagosi, software engineer. Selected projects."
     },
     "hints": {
-      "open": { "desktop": "Click to open", "touch": "Tap to open" },
-      "begin": { "touch": "Tap to begin" },
-      "section": { "desktop": "Click a section to open it", "touch": "Tap a section to open it" },
-      "close": { "desktop": "Scroll up to close", "touch": "Swipe down to close" }
+      "open": {
+        "desktop": "Click To Open",
+        "touch": "Tap To Open"
+      },
+      "begin": {
+        "touch": "Tap To Begin"
+      },
+      "section": {
+        "desktop": "Click a section to open it",
+        "touch": "Tap a section to open it"
+      },
+      "close": {
+        "desktop": "Scroll up to close",
+        "touch": "Swipe down to close"
+      },
+      "flip": {
+        "desktop": "Scroll down to turn it over",
+        "touch": "Swipe up to turn it over"
+      },
+      "back": {
+        "desktop": "Scroll up to turn it back",
+        "touch": "Swipe down to turn it back"
+      }
     },
-    "motion": { "photoDwell": 2, "gyroDegrees": 18, "parallax": 1, "lidKnock": true, "topDownOnOpen": true }
+    "motion": {
+      "photoDwell": 1.5,
+      "gyroDegrees": 31,
+      "parallax": 1.5,
+      "lidKnock": true,
+      "topDownOnOpen": true
+    },
+    "socials": [
+      { "label": "GitHub", "text": "github.com/your-handle", "href": "https://github.com/your-handle" },
+      { "label": "LinkedIn", "text": "linkedin.com/in/your-handle", "href": "https://www.linkedin.com/in/your-handle" },
+      { "label": "Email", "text": "you@example.com", "href": "mailto:you@example.com" }
+    ],
+    "about": {
+      "photo": "",
+      "bio": "Placeholder bio — edit in the dashboard. Two or three sentences on what you build, how you work and what you are looking for next.",
+      "years": 5,
+      "location": "City, Country",
+      "workPreference": "Remote · open to relocation",
+      "available": true,
+      "availability": "Open to new roles",
+      "skills": ["Swift", "SwiftUI", "TypeScript", "three.js", "WebGL"],
+      "email": "you@example.com",
+      "resume": "",
+      "timeline": [
+        { "role": "Role title", "org": "Company", "period": "20XX–now" },
+        { "role": "Role title", "org": "Company", "period": "20XX–20XX" }
+      ]
+    }
   },
   "projects": [
     {
@@ -22,13 +68,33 @@
       "kind": "macOS app",
       "caption": "Code snippets for macOS",
       "purpose": "A native macOS app to organize, search and live-preview code snippets.",
-      "stack": ["Swift", "SwiftUI", "SwiftData", "WebKit", "Metal"],
+      "stack": [
+        "Swift",
+        "SwiftUI",
+        "SwiftData",
+        "WebKit",
+        "Metal"
+      ],
       "architecture": "SwiftData + multi-engine previews",
       "duration": "4 months",
       "status": "In progress",
-      "links": [{ "label": "GitHub", "href": "https://github.com/halilbagosi/snippets" }],
-      "glow": ["#2fc8ff", "#5a5bff"],
-      "images": ["/shots/snippets-1.jpg", "/shots/snippets-2.jpg", "/shots/snippets-3.jpg", "/shots/snippets-4.jpg"]
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/halilbagosi/snippets"
+        }
+      ],
+      "glow": [
+        "#2fc8ff",
+        "#5a5bff"
+      ],
+      "images": [
+        "/shots/snippets-1.jpg",
+        "/shots/snippets-2.jpg",
+        "/shots/snippets-3.jpg",
+        "/shots/snippets-4.jpg"
+      ],
+      "featured": true
     },
     {
       "id": "palettes",
@@ -37,13 +103,32 @@
       "kind": "iOS app",
       "caption": "Color palettes for iPhone and iPad",
       "purpose": "Generates color palettes with color theory and on-device Apple Intelligence.",
-      "stack": ["Swift", "SwiftUI", "CloudKit", "Foundation Models", "Metal"],
+      "stack": [
+        "Swift",
+        "SwiftUI",
+        "CloudKit",
+        "Foundation Models",
+        "Metal"
+      ],
       "architecture": "MVVM, iCloud sync",
       "duration": "5 months",
       "status": "In progress",
-      "links": [{ "label": "GitHub", "href": "https://github.com/halilbagosi/Palettes2.0" }],
-      "glow": ["#c56bff", "#ff5fae"],
-      "images": ["/shots/palettes-1.jpg", "/shots/palettes-2.jpg", "/shots/palettes-3.jpg", "/shots/palettes-4.jpg"]
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/halilbagosi/Palettes2.0"
+        }
+      ],
+      "glow": [
+        "#c56bff",
+        "#ff5fae"
+      ],
+      "images": [
+        "/shots/palettes-1.jpg",
+        "/shots/palettes-2.jpg",
+        "/shots/palettes-3.jpg",
+        "/shots/palettes-4.jpg"
+      ]
     },
     {
       "id": "memorylane",
@@ -52,13 +137,32 @@
       "kind": "Cross-platform app",
       "caption": "Memory care for iOS and Android",
       "purpose": "Helps people with dementia keep recognizing loved ones through caregiver-made quizzes.",
-      "stack": ["TypeScript", "React Native", "Expo", "NestJS", "PostgreSQL"],
+      "stack": [
+        "TypeScript",
+        "React Native",
+        "Expo",
+        "NestJS",
+        "PostgreSQL"
+      ],
       "architecture": "Expo app + NestJS REST API",
       "duration": "6 weeks",
       "status": "Prototype",
-      "links": [{ "label": "GitHub", "href": "https://github.com/halilbagosi/memorylane" }],
-      "glow": ["#2fe0a0", "#1f9fb0"],
-      "images": ["/shots/memorylane-1.jpg", "/shots/memorylane-2.jpg", "/shots/memorylane-3.jpg", "/shots/memorylane-4.jpg"]
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/halilbagosi/memorylane"
+        }
+      ],
+      "glow": [
+        "#2fe0a0",
+        "#1f9fb0"
+      ],
+      "images": [
+        "/shots/memorylane-1.jpg",
+        "/shots/memorylane-2.jpg",
+        "/shots/memorylane-3.jpg",
+        "/shots/memorylane-4.jpg"
+      ]
     },
     {
       "id": "artpage",
@@ -67,13 +171,61 @@
       "kind": "Website",
       "caption": "Art, photography and film portfolio",
       "purpose": "A triptych portfolio where art, photography and film each open into their own world.",
-      "stack": ["TypeScript", "Next.js", "React", "Tailwind", "Framer Motion"],
+      "stack": [
+        "TypeScript",
+        "Next.js",
+        "React",
+        "Tailwind",
+        "Framer Motion"
+      ],
       "architecture": "Static Next.js, markdown content",
       "duration": "4 days",
       "status": "In progress",
-      "links": [{ "label": "GitHub", "href": "https://github.com/halilbagosi/artpage" }],
-      "glow": ["#ffb43d", "#ff5f7a"],
-      "images": ["/shots/artpage-1.jpg", "/shots/artpage-2.jpg", "/shots/artpage-3.jpg", "/shots/artpage-4.jpg"]
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/halilbagosi/artpage"
+        }
+      ],
+      "glow": [
+        "#ffb43d",
+        "#ff5f7a"
+      ],
+      "images": [
+        "/shots/artpage-1.jpg",
+        "/shots/artpage-2.jpg",
+        "/shots/artpage-3.jpg",
+        "/shots/artpage-4.jpg"
+      ]
+    },
+    {
+      "id": "portfolio",
+      "visible": true,
+      "title": "Portfolio",
+      "kind": "Website",
+      "caption": "One line about it",
+      "purpose": "What it does, and for whom.",
+      "stack": [
+        "ThreeJS",
+        "Vite",
+        "WebGL"
+      ],
+      "architecture": "How it is built",
+      "duration": "1 month",
+      "status": "In progress",
+      "links": [
+        {
+          "label": "GitHub",
+          "href": "https://github.com/halilbagosi"
+        }
+      ],
+      "glow": [
+        "#e63b7a",
+        "#e32400"
+      ],
+      "images": [
+        "/shots/portfolio-1.jpg"
+      ]
     }
   ]
 }
