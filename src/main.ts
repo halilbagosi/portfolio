@@ -7,6 +7,7 @@ import { Orbit, type Face } from './input/orbit';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
 import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
+import { aboutLines, contactLinks } from './scene/about-card';
 import { ChipSet } from './scene/chips';
 import { expandedLayout, focusSizes, packLayout, rectsFrom, restSizes, type Sizes } from './scene/layout';
 import { Laser } from './scene/laser';
@@ -33,6 +34,15 @@ function showFallback() {
     li.appendChild(a);
     list.appendChild(li);
   }
+  // The About as plain text and links, above the project list (textContent: it comes from site.json).
+  const about = document.getElementById('fallback-about')!;
+  for (const line of aboutLines(settings.about)) about.appendChild(Object.assign(document.createElement('p'), { textContent: line }));
+  const contact = document.createElement('p');
+  for (const l of contactLinks(settings.about, settings.socials)) {
+    const a = Object.assign(document.createElement('a'), { href: l.href, textContent: l.label });
+    contact.append(a, ' ');
+  }
+  about.appendChild(contact);
   document.getElementById('fallback')!.hidden = false;
 }
 
@@ -55,6 +65,8 @@ const orbit = new Orbit(
 );
 /** A tap on the lid while the box is turned: it opens once the box has settled on its top. */
 let pendingOpen = false;
+/** "Turn the box over" with the lid off: it turns once the lid is back on. */
+let pendingFlip = false;
 /** The face the camera is framed for: the overview (top) or the About card straight on (bottom). */
 let shownFace: Face = 'top';
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
@@ -237,6 +249,43 @@ const openBtn = document.createElement('button');
 openBtn.textContent = `Open the box: ${settings.identity.name}, ${settings.identity.role}`;
 openBtn.addEventListener('click', openLid);
 a11y.appendChild(openBtn);
+
+function a11yLink(text: string, href: string) {
+  const a = document.createElement('a');
+  a.href = href;
+  if (!href.startsWith('mailto:')) {
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
+  a.textContent = text;
+  return a;
+}
+// The lid's engraved socials are canvas-only, so they get real links here.
+for (const s of settings.socials) a11y.appendChild(a11yLink(`${s.label}: ${s.text}`, s.href));
+
+/** Turn the box onto its back (putting the lid on first if it is off). */
+function showAbout() {
+  pendingOpen = false;
+  if (lid.state === 'closed') orbit.flip('bottom');
+  else {
+    closeLid();
+    // closeLid refuses while the viewer is up; then there is no lid on its way, so nothing to wait for.
+    pendingFlip = lid.state === 'returning';
+  }
+}
+const aboutBtn = document.createElement('button');
+aboutBtn.textContent = `Turn the box over: About ${settings.identity.name}`;
+aboutBtn.addEventListener('click', showAbout);
+a11y.appendChild(aboutBtn);
+const aboutSection = document.createElement('section');
+aboutSection.setAttribute('aria-label', `About ${settings.identity.name}`);
+for (const line of aboutLines(settings.about)) aboutSection.appendChild(Object.assign(document.createElement('p'), { textContent: line }));
+for (const l of contactLinks(settings.about, settings.socials)) aboutSection.appendChild(a11yLink(l.label, l.href));
+const backBtn = document.createElement('button');
+backBtn.textContent = 'Turn the box back';
+backBtn.addEventListener('click', () => orbit.flip('top'));
+aboutSection.appendChild(backBtn);
+a11y.appendChild(aboutSection);
 const a11yButtons = projects.slice(0, n).map((p, i) => {
   const b = document.createElement('button');
   b.textContent = `${p.title}, ${p.kind}: ${p.purpose} Built with ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.status}.`;
@@ -261,6 +310,7 @@ const a11yButtons = projects.slice(0, n).map((p, i) => {
 // ---- Pointer -------------------------------------------------------------------------
 function openLid() {
   if (lid.state !== 'closed' && lid.state !== 'returning') return;
+  pendingFlip = false; // asking for the lid off overrides a turn that was waiting on it
   // Turned or still moving: bring it back onto its top first; it opens once settled.
   if (lid.state === 'closed' && (!orbit.atRest || orbit.face !== 'top')) {
     orbit.flip('top');
@@ -472,10 +522,14 @@ function frame() {
   // lid is moving.
   orbit.setLimits(lid.state === 'closed', !canTurn());
   orbit.update(dt);
-  if (orbit.dragging) pendingOpen = false; // grabbed again while coming back: the hand wins
+  if (orbit.dragging) pendingOpen = pendingFlip = false; // grabbed again while coming back: the hand wins
   if (pendingOpen && orbit.atRest && orbit.face === 'top') {
     pendingOpen = false;
     openLid();
+  }
+  if (pendingFlip && lid.state === 'closed' && orbit.atRest) {
+    pendingFlip = false;
+    orbit.flip('bottom');
   }
   // Lying on its back, the camera frames the About card straight on; upright, the usual overview.
   if (orbit.face !== shownFace && focused < 0) {
