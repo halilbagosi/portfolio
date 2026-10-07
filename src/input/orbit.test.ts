@@ -128,6 +128,25 @@ describe('Orbit', () => {
     expect(o.face).toBe('top');
   });
 
+  it('leaves a turn alone when flipped toward the face it is already settling to', () => {
+    // A quick touch flick up rolls it to the bottom on release, then the swipe asks for the same flip.
+    const o = make();
+    o.begin(400, 700, 0);
+    o.move(400, 600, 16);
+    o.move(400, 450, 32);
+    o.move(400, 300, 48);
+    o.end(50);
+    expect(o.face).toBe('bottom');
+    o.update(1 / 60);
+    const q = o.quaternion.clone();
+    const w = o.omega.clone();
+    o.flip('bottom');
+    expect(o.quaternion.equals(q)).toBe(true);
+    expect(o.omega.equals(w)).toBe(true);
+    settle(o);
+    expect(angleTo(o, 'bottom')).toBeLessThan(1e-3);
+  });
+
   it('settles back to the top when locked mid-turn', () => {
     const o = make();
     o.flip('bottom');

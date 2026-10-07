@@ -132,10 +132,18 @@ export class Stage {
 
   /**
    * Overview (null): the box at its usual tilt. A section: the camera moves over it and looks
-   * straight down, framing it, so nothing on it is foreshortened.
+   * straight down, framing it, so nothing on it is foreshortened. Underside: the same straight-on
+   * framing of the whole plate; with the box rolled onto its back (the orbit), that is its bottom.
    */
-  setView(r: ViewRect | null, snap = false) {
-    if (r) {
+  setView(r: ViewRect | 'underside' | null, snap = false) {
+    if (r === 'underside') {
+      this.vEl.target = TOP_DOWN;
+      this.vX.target = 0;
+      this.vY.target = TOP_Y;
+      this.vZ.target = 0;
+      this.vW.target = OUTER_W + VIEW_MARGIN;
+      this.vH.target = OUTER_D + VIEW_MARGIN;
+    } else if (r) {
       this.vEl.target = TOP_DOWN;
       this.vX.target = r.x;
       this.vY.target = TOP_Y;

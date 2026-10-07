@@ -3,7 +3,7 @@ import { Spring } from './anim/springs';
 import { projects, settings } from './config/projects';
 import { Gestures } from './input/gestures';
 import { Motion } from './input/motion';
-import { Orbit } from './input/orbit';
+import { Orbit, type Face } from './input/orbit';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
 import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
@@ -54,12 +54,32 @@ const orbit = new Orbit(
 );
 /** A tap on the lid while the box is turned: it opens once the box has settled on its top. */
 let pendingOpen = false;
+/** The face the camera is framed for: the overview (top) or the About card straight on (bottom). */
+let shownFace: Face = 'top';
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
 const copy = settings.hints;
 let openHint = touch ? (motion.needsPermission ? copy.begin.touch : copy.open.touch) : copy.open.desktop;
 const closeHint = touch ? copy.close.touch : copy.close.desktop;
 const sectionHint = touch ? copy.section.touch : copy.section.desktop;
 hint.textContent = openHint;
+const flipHint = touch ? copy.flip.touch : copy.flip.desktop;
+const backHint = touch ? copy.back.touch : copy.back.desktop;
+
+let swapTimer = 0;
+function showHint(text: string) {
+  clearTimeout(swapTimer);
+  hint.textContent = text;
+  hint.classList.add('show');
+}
+function hideHint() {
+  clearTimeout(swapTimer);
+  hint.classList.remove('show');
+}
+/** Cross-fades the hint to new text: out, swap, in. */
+function swapHint(text: string) {
+  hideHint();
+  swapTimer = window.setTimeout(() => showHint(text), 400);
+}
 
 const box = createBox();
 scene.add(box.group);
@@ -244,7 +264,7 @@ function openLid() {
     return;
   }
   lid.open();
-  hint.classList.remove('show');
+  hideHint();
 }
 
 /** Put the lid back on: sections fold away first, then it comes back down. */
@@ -252,7 +272,7 @@ function closeLid() {
   if ((lid.state !== 'gone' && lid.state !== 'leaving') || lightbox.isOpen || viewerReturning) return;
   setFocus(-1);
   lid.close();
-  hint.classList.remove('show');
+  hideHint();
   closeHintTill = 0;
   openHintAt = clock.elapsedTime + 1.6;
 }
@@ -263,11 +283,14 @@ function openLink(href: string) {
   else window.open(href, '_blank', 'noopener');
 }
 
-/** One scroll or swipe: down / up lifts the lid off, up / down puts it back on. */
+/**
+ * One scroll or swipe, along a single axis: lid off ←(up / down)— lid on —(down / up)→ on its
+ * back, showing the About card. Opposite to putting the lid on, so it reads as "further down".
+ */
 function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
   if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
-  if (dir > 0) openLid();
-  else closeLid();
+  if (lid.state === 'closed') orbit.flip(dir > 0 ? 'bottom' : 'top');
+  else if (dir < 0) closeLid();
 }
 
 function onTap() {
@@ -346,6 +369,13 @@ if (import.meta.env.DEV && location.hash.startsWith('#open')) {
   }
 }
 
+// Dev convenience: /#about starts with the box on its back, showing the About card.
+if (import.meta.env.DEV && location.hash === '#about') {
+  orbit.snap('bottom');
+  shownFace = 'bottom';
+  stage.setView('underside', true);
+}
+
 // Dev: /?stats shows the live render resolution and frame rate (to check sharpness on a phone).
 const stats = import.meta.env.DEV && new URLSearchParams(location.search).has('stats') ? document.createElement('div') : null;
 if (stats) {
@@ -366,6 +396,12 @@ let closeHintAt = 0;
 let closeHintTill = 0;
 /** After closing: bring the open hint back once the lid has settled. */
 let openHintAt = 0;
+/** Lid on, until the box has been turned over once: the open hint takes turns with how to turn it. */
+let flippedOnce = false;
+let cycleAt = 0;
+/** On its back: how to turn it back, once. */
+let backHintShown = false;
+let backHintTill = 0;
 /** Cursor / tilt as the scene uses it: frozen while the box is held, easing back in after. */
 let ambX = 0;
 let ambY = 0;
@@ -408,12 +444,17 @@ function frame() {
   }
   // Turning: free with the lid on, above the rim with it off, not while a section is open or the
   // lid is moving.
-  orbit.setLimits(lid.state === 'closed', focused >= 0 || lightbox.isOpen || (lid.state !== 'closed' && lid.state !== 'gone'));
+  orbit.setLimits(lid.state === 'closed', !canTurn());
   orbit.update(dt);
   if (orbit.dragging) pendingOpen = false; // grabbed again while coming back: the hand wins
   if (pendingOpen && orbit.atRest && orbit.face === 'top') {
     pendingOpen = false;
     openLid();
+  }
+  // Lying on its back, the camera frames the About card straight on; upright, the usual overview.
+  if (orbit.face !== shownFace && focused < 0) {
+    shownFace = orbit.face;
+    stage.setView(shownFace === 'bottom' ? 'underside' : null, reduced);
   }
   stage.orbit.copy(orbit.quaternion);
   const par = reduced ? 0 : settings.motion.parallax;
@@ -496,12 +537,11 @@ function frame() {
   else if (!lidOffAt) lidOffAt = time;
   if (!sectionOpened && !sectionHintOn && lidOffAt && time - lidOffAt > 0.6) {
     sectionHintOn = true;
-    hint.textContent = sectionHint;
-    hint.classList.add('show');
+    showHint(sectionHint);
   }
   if (sectionHintOn && (focused >= 0 || lid.state !== 'gone')) {
     sectionHintOn = false;
-    hint.classList.remove('show');
+    hideHint();
   }
   if (sectionOpened && !closeHintShown && focused < 0 && lid.state === 'gone') {
     closeHintShown = true;
@@ -511,23 +551,45 @@ function frame() {
   if (closeHintAt && time > closeHintAt) {
     closeHintAt = 0;
     if (lid.state === 'gone' && focused < 0) {
-      hint.textContent = closeHint;
-      hint.classList.add('show');
+      showHint(closeHint);
       closeHintTill = time + 3.5;
     }
   }
   if (closeHintTill && time > closeHintTill) {
     closeHintTill = 0;
-    hint.classList.remove('show');
+    hideHint();
   }
-  if (openHintAt && time > openHintAt && lid.state === 'closed') {
+
+  // Lid on. Turning the box puts the hints aside; back at rest on its top, the open hint returns.
+  const introDone = time > 1.5;
+  const restingTop = lid.state === 'closed' && orbit.face === 'top' && orbit.atRest;
+  if (orbit.face === 'bottom') flippedOnce = true;
+  if (orbit.engaged && hintShown) {
+    if (hint.classList.contains('show') && !backHintTill) hideHint();
+    if (lid.state === 'closed') openHintAt = time + 1.2;
+  }
+  if (openHintAt && time > openHintAt && restingTop) {
     openHintAt = 0;
-    hint.textContent = openHint;
-    hint.classList.add('show');
+    showHint(openHint);
+    cycleAt = time + 4;
   }
-  if (!hintShown && time > 1.5 && lid.state === 'closed') {
+  if (!hintShown && introDone && restingTop) {
     hintShown = true;
-    hint.classList.add('show');
+    showHint(openHint);
+    cycleAt = time + 4;
+  }
+  if (restingTop && !flippedOnce && cycleAt && time > cycleAt && hint.classList.contains('show')) {
+    cycleAt = time + 4;
+    swapHint(hint.textContent === openHint ? flipHint : openHint);
+  }
+  if (orbit.face === 'bottom' && orbit.atRest && !backHintShown) {
+    backHintShown = true;
+    swapHint(backHint);
+    backHintTill = time + 3.5;
+  }
+  if (backHintTill && (time > backHintTill || orbit.face !== 'bottom')) {
+    backHintTill = 0;
+    hideHint();
   }
   requestAnimationFrame(frame);
 }

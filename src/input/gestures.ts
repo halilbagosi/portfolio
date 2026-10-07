@@ -114,7 +114,7 @@ export class Gestures {
     if (!d || e.pointerId !== d.id) return;
     this.down = null;
     const turned = this.dragging;
-    if (this.dragging) {
+    if (turned) {
       this.dragging = false;
       this.swallowClick = true;
       this.h.dragEnd();
