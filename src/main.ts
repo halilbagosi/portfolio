@@ -289,8 +289,8 @@ function openLink(href: string) {
  * back. Opening the lid is a tap or click only.
  */
 function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
-  pendingOpen = false; // a scroll mid-roll changes course: a tap's pending open no longer applies
   if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
+  if (dir > 0 && lid.state === 'closed') pendingOpen = false; // turning away from the top drops a tap's pending open
   if (lid.state === 'closed') orbit.flip(dir > 0 ? 'bottom' : 'top');
   else if (dir < 0) closeLid();
 }
@@ -404,6 +404,7 @@ let cycleAt = 0;
 /** On its back: how to turn it back, once. */
 let backHintShown = false;
 let backHintTill = 0;
+/** The face the hints last reacted to: a change of it (even a snap) puts them aside and re-arms the open hint. */
 let hintFace: Face = 'top';
 /** Cursor / tilt as the scene uses it: frozen while the box is held, easing back in after. */
 let ambX = 0;
@@ -567,11 +568,15 @@ function frame() {
   const introDone = time > 1.5;
   const restingTop = lid.state === 'closed' && orbit.face === 'top' && orbit.atRest;
   if (orbit.face === 'bottom') flippedOnce = true;
-  if (orbit.engaged && hintShown && !backHintTill) hideHint(); // also cancels a swap still waiting out its fade
+  // hideHint also cancels a swap still waiting out its fade. Lid off: the section hint stays.
+  if (orbit.engaged && hintShown && lid.state === 'closed' && !backHintTill) hideHint();
   // Armed by a change of face as well as by grabbing: with reduced motion the turn snaps within a frame.
   if (orbit.face !== hintFace) {
     hintFace = orbit.face;
-    if (hintShown && lid.state === 'closed') openHintAt = time + 1.2;
+    if (hintShown && lid.state === 'closed') {
+      openHintAt = time + 1.2;
+      if (!backHintTill) hideHint(); // reduced motion snaps the turn, so nothing else has hidden the hint
+    }
   }
   if (orbit.engaged && hintShown && lid.state === 'closed') openHintAt = time + 1.2;
   if (openHintAt && time > openHintAt && restingTop) {
