@@ -136,7 +136,7 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
   `scene.environmentRotation` are transformed the same way, so the light rig stays fixed
   relative to the viewer.
 - **Underside framing:** `setView('underside')` targets the box's bottom centre and frames the
-  plate nearly face-on (like the section top-down view, elevation ~85°, `OUTER_W/D` plus margin),
+  plate nearly face-on (like the section top-down view, elevation 87°, `OUTER_W/D` plus margin),
   so the About text reads at phone size. It is used when the orbit settles on the bottom face.
 - **Shell:** the face lighting in the fragment shader moves from world-`xz` normals to view-space
   normals, so the lit side stays consistent as the box turns. The bottom edge gets the same
@@ -154,9 +154,9 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
 - **Base:** `MeshPhysicalMaterial`, metalness 1, Space Gray tint (sRGB `#7d7e80` as a starting point,
   tuned by eye against a MacBook reference), roughness ~0.42, **no anisotropy**, and a
   faint clearcoat (0.15, roughness 0.5) for the anodised oxide layer.
-- **Bead-blast micro-texture:** `beadBlastMaps()` replaces `brushedRoughness`. It provides a
-  fine isotropic noise roughness map (±0.04) and a very low-strength normal map, giving a soft,
-  even, matte sheen with no streaks.
+- **Bead-blast micro-texture:** `beadBlastRoughness()` replaces `brushedRoughness`. It provides a
+  fine isotropic noise roughness map (±0.04) and no normal map, giving a soft, even, matte sheen
+  with no streaks.
 - **Chamfer:** stays polished (diamond-cut edges, as on a MacBook), re-tinted to bright raw
   aluminium (`#e4e6e9`) because the cut goes through the anodising.
 - **Engraving look:** where etched, the surface is raw aluminium. Colour lifts toward `#d9dbde`,
@@ -168,7 +168,7 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
 - **Name** (as now), **role** (as now), then a smaller **socials** line: each social's `text`
   (e.g. `github.com/handle`) in tracked caps separated by ` · `. In portrait the socials stack
   one per line.
-- `engravingMaps()` also returns each line's ink bounding box and each social's UV rectangle.
+- `engravingMaps()` also returns each line's ink box and each social's box with its `href`, in map pixels.
 - **Socials are links:** hovering one shows the `pointer` cursor.
   Clicking opens `href` (`mailto:` allowed). Clicking anywhere else on the lid opens it as before.
 
@@ -180,9 +180,9 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
   ~3 px of the map. Rows with no ink are jumped over in a fixed short time. Timing is about
   1.6 s for the name, 0.8 s for the role and 1.1 s for the socials, ~3.5 s in total.
 - **A reveal-time map:** a `HalfFloatType` `DataTexture`, at quarter resolution of the engraving
-  map with linear filtering. Each texel holds the moment (seconds from the start) the spot
-  passes over it. Texels outside every line hold 0: nothing is cut there, and keeping them small
-  means linear filtering never delays the edge of a glyph.
+  map with `NearestFilter`. Each texel holds the moment (seconds from the start) the spot
+  passes over it. Texels outside every line hold 0, and linear filtering would blend that 0 into
+  a glyph's edge texels, so the edges would reveal long before the laser reached them.
 - `spotAt(t) → { u, v, firing }`: the spot position along the path, and whether there is ink
   under it (from the mask).
 
@@ -213,7 +213,7 @@ One place decides what a pointer, wheel or touch sequence means, and emits inten
 - **Look:** the box's bottom as a dark anodised plate (the shell's colour) with the About card
   laid out like the fine print on the underside of an Apple device. It uses the same supersampled
   canvas text as the labels (`PX`, `SS`, `sharpenText`), is mostly unlit for legibility, and has
-  a faint sheen that follows the orbit.
+  a faint sheen that follows the cursor.
 - **Card layout** (wide and tall variants, matching `PORTRAIT`):
   - Round portrait window. With no photo, an initials monogram.
   - Name and role.
@@ -278,7 +278,7 @@ accident:
 
 - A new **About & socials** view next to Settings, built from the existing fields (`textField`,
   `toggleField`, `rangeField`) and the same issue display.
-- **Portrait:** upload via `processPhoto` (square crop, saved as `/shots/about-portrait.jpg`
+- **Portrait:** upload via `processPhoto` (square crop, saved as `/shots/about-<n>.jpg`
   through the existing photo API), with remove (back to the monogram).
 - **Socials:** a list editor (add, remove, reorder) capped at 4. Hint text: "Engraved on the lid."
 - **Skills:** a comma- or tag-style entry. **Timeline:** a list editor capped at 4.
@@ -297,9 +297,9 @@ accident:
 
 ## Error handling
 
+- **A refused drag** (a section is open, the lid is moving) still clicks on mouse release; deliberate.
 - **Portrait fails to load:** keep the monogram, `console.warn` once.
-- **Half-float textures unavailable** (should not happen with WebGL2): skip the etch and show
-  the engraving complete.
+- **Half-float textures:** no fallback; WebGL2 guarantees them.
 - **Invalid content:** blocked by `validate()` exactly as today. The site loader throws in dev,
   and the dashboard shows the issues.
 - **Orbit numerics:** the quaternion is renormalised each step, `ω` is clamped (≤ 12 rad/s), and
