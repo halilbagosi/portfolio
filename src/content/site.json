@@ -41,17 +41,17 @@
     "socials": [
       {
         "label": "GitHub",
-        "text": "Halil Bagosi",
+        "text": "GitHub",
         "href": "https://github.com/halilbagosi"
       },
       {
         "label": "LinkedIn",
-        "text": "Halil Bagosi",
+        "text": "LinkedIn",
         "href": "https://www.linkedin.com/in/halil-bagosi"
       },
       {
         "label": "Email",
-        "text": "halilbagosi24@icloud.com",
+        "text": "Email",
         "href": "mailto:halilbagosi24@icloud.com"
       }
     ],
