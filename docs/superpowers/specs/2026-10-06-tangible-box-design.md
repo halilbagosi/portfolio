@@ -26,8 +26,9 @@ Make the bento box feel like a real object in the hand:
 - **Release: glide, then settle.** After a flick the box keeps turning with its momentum, then
   springs to the nearest resting face, **Top** or **Underside**. It never rests at an odd angle.
 - **Gestures share one vertical axis:**
-  `Open ←(scroll up / swipe down)— Lid on —(scroll down / swipe up)→ Underside`.
-  Tap or click on the lid still opens it. Scroll down / swipe up no longer opens the lid.
+  `Lid off —(scroll up / swipe down)→ Lid on —(scroll down / swipe up)→ Underside`, and scroll up /
+  swipe down rolls the box back from the underside. Tap or click on the lid opens it; scroll down /
+  swipe up no longer does.
 - **Content lives in `site.json`** under `settings`, validated like everything else and editable
   in the dashboard, including the portrait upload. Seeded with obvious placeholders.
 - **Lid finish: Space Gray anodised aluminium.** The laser cuts through the anodised layer and
