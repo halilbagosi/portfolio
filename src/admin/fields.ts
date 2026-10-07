@@ -25,10 +25,11 @@ export function textField(
   path: string,
   value: string,
   set: (v: string) => void,
-  o: { hint?: string; multiline?: boolean; suggestions?: readonly string[]; type?: string } = {},
+  o: { hint?: string; multiline?: boolean; suggestions?: readonly string[]; type?: string; maxLength?: number } = {},
 ) {
   const id = nextId();
   const input = o.multiline ? h('textarea', { id, rows: 3 }) : h('input', { id, type: o.type ?? 'text' });
+  if (o.maxLength) input.maxLength = o.maxLength;
   input.value = value;
   input.addEventListener('input', () => set(input.value));
   const el = field(label, path, input, o.hint, id);
@@ -89,8 +90,8 @@ export function colorsField(label: string, path: string, value: [string, string]
   return field(label, path, h('div', { class: 'colors' }, ...inputs), 'The light glowing up from the section, left to right.');
 }
 
-/** Chips with an input: Enter or comma adds, × or Backspace on an empty input removes. */
-export function tagsField(label: string, path: string, values: string[], set: (v: string[]) => void, hint?: string) {
+/** Chips with an input: Enter or comma adds, × or Backspace on an empty input removes. `max` stops adding past a limit. */
+export function tagsField(label: string, path: string, values: string[], set: (v: string[]) => void, hint?: string, max = Infinity) {
   const id = nextId();
   const list = [...values];
   const input = h('input', { id, type: 'text', placeholder: 'Add, then press Enter' });
@@ -100,7 +101,9 @@ export function tagsField(label: string, path: string, values: string[], set: (v
     draw();
     input.focus();
   };
-  const draw = () =>
+  const draw = () => {
+    input.disabled = list.length >= max;
+    input.placeholder = input.disabled ? `Up to ${max}` : 'Add, then press Enter';
     box.replaceChildren(
       ...list.map((t, i) =>
         h(
@@ -112,8 +115,9 @@ export function tagsField(label: string, path: string, values: string[], set: (v
       ),
       input,
     );
+  };
   const add = () => {
-    for (const t of input.value.split(',').map((s) => s.trim()).filter(Boolean)) if (!list.includes(t)) list.push(t);
+    for (const t of input.value.split(',').map((s) => s.trim()).filter(Boolean)) if (!list.includes(t) && list.length < max) list.push(t);
     input.value = '';
     commit();
   };

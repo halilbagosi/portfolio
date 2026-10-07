@@ -39,6 +39,12 @@ describe('Store', () => {
     expect(s.dirty).toBe(false);
   });
 
+  it('can select the About tab', () => {
+    const s = new Store(validContent());
+    s.select({ kind: 'about' });
+    expect(s.tab).toEqual({ kind: 'about' });
+  });
+
   it('starts on settings when there are no projects', () => {
     const c = validContent();
     c.projects = [];

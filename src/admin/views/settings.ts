@@ -7,7 +7,7 @@ import type { Store } from '../state';
 export function renderSettings(root: HTMLElement, store: Store) {
   const s = store.content.settings;
   const edit = (fn: (s: Settings) => void) => store.change((c) => fn(c.settings));
-  const hint = (label: string, key: 'open' | 'section' | 'close') =>
+  const hint = (label: string, key: 'open' | 'section' | 'close' | 'flip' | 'back') =>
     h(
       'div',
       { class: 'grid2' },
@@ -38,6 +38,8 @@ export function renderSettings(root: HTMLElement, store: Store) {
     ),
     hint('Open a section', 'section'),
     hint('Put the lid back', 'close'),
+    hint('Turn it over (About)', 'flip'),
+    hint('Turn it back', 'back'),
 
     h('div', { class: 'section-title' }, 'Motion'),
     rangeField('Time on each photo', 'settings.motion.photoDwell', s.motion.photoDwell, { min: 0.5, max: 10, step: 0.5, unit: 's' }, (v) =>
