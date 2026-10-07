@@ -24,10 +24,16 @@ export class WheelSum {
 }
 
 /** A deliberate, mostly vertical flick: 1 = swipe up (like scrolling down), -1 = swipe down, 0 = not one. */
-export function swipeDir(dx: number, dy: number, ms: number): 1 | -1 | 0 {
-  if (Math.abs(dy) < 60 || Math.abs(dy) < Math.abs(dx) * 1.5 || ms > 700) return 0;
+export function swipeDir(dx: number, dy: number, ms: number, maxMs = 700): 1 | -1 | 0 {
+  if (Math.abs(dy) < 60 || Math.abs(dy) < Math.abs(dx) * 1.5 || ms > maxMs) return 0;
   return dy < 0 ? 1 : -1;
 }
+
+/**
+ * A drag that turned the box only counts as a swipe if it was a quick flick. Otherwise a slow drag
+ * down to tilt the lid-off box (60px in under 700ms is easy) would also read as "swipe down".
+ */
+export const FLICK_MS = 350;
 
 /** Pixels a press may wander and still be a tap. */
 export const DRAG_SLOP = 6;
@@ -80,9 +86,11 @@ export class Gestures {
   }
 
   private onDown(e: PointerEvent) {
-    // A new press: a click swallowed after a touch drag (which never sends one) can't eat this one.
-    this.swallowClick = false;
     if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0) || !this.h.enabled()) return;
+    // A new primary press: a click swallowed after a touch drag (which never sends one) can't eat this
+    // one. Only here, so a second finger or the right button mid-drag can't clear it for the click
+    // that ends the drag.
+    this.swallowClick = false;
     this.down = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), touch: e.pointerType !== 'mouse', refused: false };
   }
 
@@ -105,13 +113,14 @@ export class Gestures {
     const d = this.down;
     if (!d || e.pointerId !== d.id) return;
     this.down = null;
+    const turned = this.dragging;
     if (this.dragging) {
       this.dragging = false;
       this.swallowClick = true;
       this.h.dragEnd();
     }
     if (!cancelled && d.touch && this.h.enabled()) {
-      const dir = swipeDir(e.clientX - d.x, e.clientY - d.y, performance.now() - d.t);
+      const dir = swipeDir(e.clientX - d.x, e.clientY - d.y, performance.now() - d.t, turned ? FLICK_MS : undefined);
       if (dir) this.fire(dir, 'swipe');
     }
   }

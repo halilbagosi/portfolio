@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { swipeDir, WheelSum } from './gestures';
+import { FLICK_MS, swipeDir, WheelSum } from './gestures';
 
 describe('WheelSum', () => {
   it('fires once the deltas of one gesture add past 70px', () => {
@@ -31,5 +31,11 @@ describe('swipeDir', () => {
     expect(swipeDir(0, -40, 200)).toBe(0);
     expect(swipeDir(0, -120, 900)).toBe(0);
     expect(swipeDir(100, -120, 200)).toBe(0);
+  });
+
+  it('takes a shorter window when asked (a drag that turned the box must be a quick flick)', () => {
+    expect(swipeDir(0, -120, 500)).toBe(1);
+    expect(swipeDir(0, -120, 500, FLICK_MS)).toBe(0);
+    expect(swipeDir(0, -120, 200, FLICK_MS)).toBe(1);
   });
 });
