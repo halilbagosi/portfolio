@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { Spring } from '../anim/springs';
-import { ELEVATION, OUTER_D, OUTER_W, PORTRAIT, TOP_Y, WALL_H } from './box';
+import { ELEVATION, OUTER_D, OUTER_W, PIVOT, PORTRAIT, TOP_Y, WALL_H } from './box';
 
 /** Looking (almost) straight down on an open section: no foreshortening of its text and images. */
 const TOP_DOWN = THREE.MathUtils.degToRad(87);
@@ -10,8 +10,6 @@ const REST_W = PORTRAIT ? OUTER_W + 0.9 : 8.0;
 const REST_H = PORTRAIT ? OUTER_D * Math.sin(ELEVATION) + WALL_H * Math.cos(ELEVATION) + 1.5 : 6.3;
 /** Space kept around an open section when the camera frames it from above. */
 const VIEW_MARGIN = 0.7;
-/** The box's centre: what it turns about. */
-export const PIVOT = new THREE.Vector3(0, TOP_Y - WALL_H / 2, 0);
 const tmpQ = new THREE.Quaternion();
 
 export interface ViewRect {
@@ -45,7 +43,7 @@ export class Stage {
   /** Scene behind the glass chips, re-rendered each frame they are visible. */
   readonly backdrop: THREE.WebGLRenderTarget;
   readonly res = new THREE.Vector2();
-  readonly target = new THREE.Vector3(0, TOP_Y - WALL_H * 0.5, 0.05); // middle of the block
+  readonly target = new THREE.Vector3(0, PIVOT.y, 0.05); // middle of the block
 
   // Camera framing, all eased together (critically damped, ~0.7s): a touch slower than the
   // sections' own layout springs, so the view glides after the grid rather than racing it.
@@ -157,7 +155,7 @@ export class Stage {
     } else {
       this.vEl.target = ELEVATION;
       this.vX.target = 0;
-      this.vY.target = TOP_Y - WALL_H * 0.5;
+      this.vY.target = PIVOT.y;
       this.vZ.target = 0.05;
       this.vW.target = REST_W;
       this.vH.target = REST_H;

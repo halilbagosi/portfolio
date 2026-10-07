@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OUTER_D, OUTER_R, OUTER_W, roundedRectShape, TOP_Y, WALL_H } from './box';
+import { BOTTOM_Y, OUTER_D, OUTER_R, OUTER_W, roundedRectShape } from './box';
 import { TEXT_LOD_BIAS } from './textures';
 import { CARD_PX, CARD_SS, drawAbout, fitAbout, initialsOf, linkAtUv, type CardInput, type CardLink, type Measure } from './about-card';
 
@@ -49,7 +49,7 @@ export class Underside {
     this.mesh = new THREE.Mesh(geo, mat);
     // Facing down; shape +y runs to the box's front (+z), so the card's top is the front edge.
     this.mesh.rotation.x = Math.PI / 2;
-    this.mesh.position.y = TOP_Y - WALL_H;
+    this.mesh.position.y = BOTTOM_Y;
   }
 
   get texture(): THREE.Texture {

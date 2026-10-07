@@ -20,6 +20,10 @@ export const GAP = 0.14;
 export const TOP_Y = 0.9;
 /** Outer wall height: taller than the top plate sits above the table, so the box reads as a solid block. */
 export const WALL_H = 1.5;
+/** The box's foot, where the table is. */
+export const BOTTOM_Y = TOP_Y - WALL_H;
+/** The box's centre: what it turns about. Treat as read-only; clone it for anything that may write. */
+export const PIVOT = new THREE.Vector3(0, TOP_Y - WALL_H / 2, 0);
 export const CARD_DEPTH = 0.24;
 export const WELL_RADIUS = 0.2;
 export const OUTER_W = INTERIOR_W + MARGIN * 2;
@@ -107,7 +111,7 @@ function createShell() {
     uSheen: { value: 0 },
     /** The box's orientation as seen (Stage.orbit): shading follows the box, not the world. */
     uOrbit: { value: new THREE.Matrix3() },
-    uPivot: { value: new THREE.Vector3(0, TOP_Y - WALL_H / 2, 0) },
+    uPivot: { value: PIVOT.clone() },
   };
   const mat = new THREE.ShaderMaterial({
     uniforms,
@@ -239,7 +243,7 @@ export function createBox() {
   table.holes.push(roundedRectShape(OUTER_W - 0.02, OUTER_D - 0.02, OUTER_R, new THREE.Path()));
   const tableMesh = new THREE.Mesh(new THREE.ShapeGeometry(table, 16), new THREE.MeshBasicMaterial({ color: '#000000' }));
   tableMesh.rotation.x = -Math.PI / 2;
-  tableMesh.position.y = TOP_Y - WALL_H; // at the foot of the walls
+  tableMesh.position.y = BOTTOM_Y; // at the foot of the walls
   tableMesh.renderOrder = -2;
   group.add(tableMesh);
 

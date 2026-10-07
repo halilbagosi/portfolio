@@ -89,6 +89,12 @@ function hideHint() {
   hint.classList.remove('show');
 }
 /** Cross-fades the hint to new text: out, swap, in. */
+/** Motion permission was asked: the open hint is now the plain one, but a hint already showing something else stays. */
+function permissionAsked() {
+  if (hint.textContent === openHint) hint.textContent = copy.open.touch;
+  openHint = copy.open.touch;
+}
+
 function swapHint(text: string) {
   hideHint();
   swapTimer = window.setTimeout(() => showHint(text), 400);
@@ -98,7 +104,12 @@ const box = createBox();
 scene.add(box.group);
 const underside = new Underside();
 box.group.add(underside.mesh);
-underside.showAbout({ name: settings.identity.name, role: settings.identity.role, about: settings.about, socials: settings.socials }, settings.about.photo);
+try {
+  const { identity, about, socials } = settings;
+  underside.showAbout({ name: identity.name, role: identity.role, about, socials }, about.photo);
+} catch (err) {
+  console.warn('About card failed to draw; the back of the box stays blank.', err); // never take the scene down
+}
 const lid = new Lid(reduced);
 scene.add(lid.group);
 
@@ -264,9 +275,16 @@ function a11yLink(text: string, href: string) {
 for (const s of settings.socials) a11y.appendChild(a11yLink(`${s.label}: ${s.text}`, s.href));
 
 /** Turn the box onto its back (putting the lid on first if it is off). */
-function showAbout() {
+function turnOver() {
   pendingOpen = false;
-  if (lid.state === 'closed') orbit.flip('bottom');
+  if (lid.state === 'closed') {
+    if (focused >= 0) {
+      // A project button focused under the closed lid would keep the orbit locked; the lock is only re-read per frame.
+      setFocus(-1);
+      orbit.setLimits(true, !canTurn());
+    }
+    orbit.flip('bottom');
+  }
   else {
     closeLid();
     // closeLid refuses while the viewer is up; then there is no lid on its way, so nothing to wait for.
@@ -275,7 +293,7 @@ function showAbout() {
 }
 const aboutBtn = document.createElement('button');
 aboutBtn.textContent = `Turn the box over: About ${settings.identity.name}`;
-aboutBtn.addEventListener('click', showAbout);
+aboutBtn.addEventListener('click', turnOver);
 a11y.appendChild(aboutBtn);
 const aboutSection = document.createElement('section');
 aboutSection.setAttribute('aria-label', `About ${settings.identity.name}`);
@@ -297,11 +315,11 @@ document.body.appendChild(faceStatus);
 let a11yFace: Face = 'top';
 function syncFaceControls(face: Face) {
   const back = face === 'bottom';
+  // A disabled button drops focus to the page, so note who had it first and hand it to the button that took over.
+  const active = document.activeElement;
   aboutBtn.disabled = back;
   backBtn.disabled = !back;
-  // A disabled button drops focus to the page; hand it to the button that took over.
-  const stranded = back ? aboutBtn : backBtn;
-  if (document.activeElement === stranded) (back ? backBtn : aboutBtn).focus();
+  if (active === (back ? aboutBtn : backBtn)) (back ? backBtn : aboutBtn).focus();
 }
 backBtn.disabled = true;
 const a11yButtons = projects.slice(0, n).map((p, i) => {
@@ -362,7 +380,7 @@ function openLink(href: string) {
  * back. Opening the lid is a tap or click only.
  */
 function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
-  if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
+  if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(permissionAsked);
   if (dir > 0 && lid.state === 'closed') pendingOpen = false; // turning away from the top drops a tap's pending open
   if (lid.state === 'closed') orbit.flip(dir > 0 ? 'bottom' : 'top');
   else if (dir < 0) closeLid();
@@ -386,7 +404,7 @@ function onTap() {
   // iOS grants motion only from a tap. The first tap on the closed lid asks for it and leaves the
   // lid on, so the steel can follow the tilt before it opens; the next tap opens it.
   if (touch && motion.needsPermission && lid.state === 'closed') {
-    void motion.enable().finally(() => (openHint = hint.textContent = copy.open.touch));
+    void motion.enable().finally(permissionAsked);
     return;
   }
   if (touch) void motion.enable();
@@ -621,7 +639,8 @@ function frame() {
   });
 
   let cursor = '';
-  if (gestures.dragging) cursor = 'grabbing';
+  if (touch) cursor = ''; // no cursor on touch: skip the raycast chain
+  else if (gestures.dragging) cursor = 'grabbing';
   else if (lid.state === 'returning' && pointer.inside && pointer.cast([lid.hit], false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(chipSets[focused].linkMeshes, false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(tiles[focused].stack.meshes, false).length) cursor = 'zoom-in';

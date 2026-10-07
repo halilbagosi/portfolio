@@ -42,6 +42,7 @@ const glowMat = (map: THREE.Texture, color: string) =>
 export class Laser {
   done = false;
   private t = -DELAY;
+  private glow: THREE.Texture;
   private core: THREE.Sprite;
   private halo: THREE.Sprite;
   /**
@@ -64,7 +65,7 @@ export class Laser {
     private lid: Lid,
     scene: THREE.Object3D,
   ) {
-    const glow = glowTexture();
+    const glow = (this.glow = glowTexture());
     this.core = new THREE.Sprite(glowMat(glow, '#ffffff'));
     this.core.scale.setScalar(0.05);
     this.halo = new THREE.Sprite(glowMat(glow, '#8f7dff'));
@@ -146,7 +147,13 @@ export class Laser {
     if (this.done) return;
     this.done = true;
     this.lid.setEtchTime(1e4);
-    this.core.visible = this.halo.visible = this.sparks.visible = false;
+    // Put away for good (update returns early from here): out of the lid's group, and the GPU memory freed.
+    this.lid.group.remove(this.core, this.halo, this.sparks);
+    this.glow.dispose();
+    this.core.material.dispose();
+    this.halo.material.dispose();
+    this.sparks.geometry.dispose();
+    (this.sparks.material as THREE.Material).dispose();
     this.light.intensity = 0; // stays in the scene, always: the number of lights is part of every lit shader
   }
 

@@ -339,6 +339,12 @@ export function fitAbout(input: CardInput, w: number, h: number, measure: Measur
   return { ops: base.ops, links: base.links, scale: 1, lw: w, lh: h };
 }
 
+/** roundRect where it exists; Safari before 16 lacks it, and square corners beat a card that fails to draw. */
+function rrect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, w, h, r);
+  else ctx.rect(x, y, w, h);
+}
+
 function portrait(ctx: CanvasRenderingContext2D, op: Extract<Op, { kind: 'photo' }>, initials: string, photo?: HTMLImageElement) {
   ctx.save();
   ctx.beginPath();
@@ -394,7 +400,7 @@ export function drawAbout(
   ctx.strokeStyle = 'rgba(255,255,255,0.06)';
   ctx.lineWidth = 1.5 / scale;
   ctx.beginPath();
-  ctx.roundRect(inset, inset, w - 2 * inset, h - 2 * inset, Math.max(4, o.corner - 20) / scale);
+  rrect(ctx, inset, inset, w - 2 * inset, h - 2 * inset, Math.max(4, o.corner - 20) / scale);
   ctx.stroke();
   for (const op of ops) {
     ctx.textAlign = 'left';
@@ -409,7 +415,7 @@ export function drawAbout(
       ctx.strokeStyle = 'rgba(255,255,255,0.12)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.roundRect(op.x, op.y, op.w, op.h, op.h / 2);
+      rrect(ctx, op.x, op.y, op.w, op.h, op.h / 2);
       ctx.fill();
       ctx.stroke();
     } else if (op.kind === 'dot') {
