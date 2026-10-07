@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OUTER_D, OUTER_R, OUTER_W, roundedRectShape, TOP_Y, WALL_H } from './box';
 import { TEXT_LOD_BIAS } from './textures';
+import { CARD_PX, CARD_SS, drawAbout, initialsOf, layoutAbout, type CardInput, type CardLink, type Measure } from './about-card';
 
 /** Dark anodised plate until the About card is drawn. */
 function plainPlate() {
@@ -17,6 +18,7 @@ function plainPlate() {
 export class Underside {
   readonly mesh: THREE.Mesh;
   private uniforms = { uMap: { value: plainPlate() as THREE.Texture }, uSheen: { value: 0 } };
+  private links: CardLink[] = [];
 
   constructor() {
     const geo = new THREE.ShapeGeometry(roundedRectShape(OUTER_W, OUTER_D, OUTER_R, new THREE.Shape()), 16);
@@ -57,6 +59,44 @@ export class Underside {
   /** Sheen position across the plate (0 = centre). */
   set sheen(x: number) {
     this.uniforms.uSheen.value = x;
+  }
+
+  /** Draws the About card onto the plate, and again once the portrait has loaded. */
+  showAbout(input: CardInput, photoUrl: string) {
+    const w = Math.round(OUTER_W * CARD_PX);
+    const h = Math.round(OUTER_D * CARD_PX);
+    const canvas = document.createElement('canvas');
+    canvas.width = w * CARD_SS;
+    canvas.height = h * CARD_SS;
+    const ctx = canvas.getContext('2d')!;
+    const measure: Measure = (t, font, tracking = 0) => {
+      ctx.font = font;
+      return ctx.measureText(t).width + tracking * Math.max(0, [...t].length - 1);
+    };
+    const { ops, links } = layoutAbout(input, w, h, measure);
+    this.links = links;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    const look = { initials: initialsOf(input.name), corner: OUTER_R * CARD_PX };
+    const draw = (photo?: HTMLImageElement) => {
+      drawAbout(ctx, ops, w, h, { ...look, photo });
+      tex.needsUpdate = true;
+    };
+    draw();
+    this.setCard(tex);
+    if (!photoUrl) return;
+    const img = new Image();
+    img.onload = () => draw(img);
+    img.onerror = () => console.warn(`The About portrait did not load (${photoUrl}); showing initials.`);
+    img.src = photoUrl;
+  }
+
+  /** The link on the card at a hit's uv, if any. */
+  linkAt(uv: THREE.Vector2): string | null {
+    const x = uv.x;
+    const y = 1 - uv.y; // the card runs top-down, uv bottom-up
+    return this.links.find((l) => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1)?.href ?? null;
   }
 
   setCard(tex: THREE.Texture) {

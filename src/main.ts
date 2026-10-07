@@ -85,6 +85,7 @@ const box = createBox();
 scene.add(box.group);
 const underside = new Underside();
 box.group.add(underside.mesh);
+underside.showAbout({ name: settings.identity.name, role: settings.identity.role, about: settings.about, socials: settings.socials }, settings.about.photo);
 const lid = new Lid(reduced);
 scene.add(lid.group);
 
@@ -137,7 +138,7 @@ function prewarm() {
   // Sealed under the lid the wells are hidden; show them for the warm-up (the frame re-hides them).
   tiles.forEach((t) => (t.group.visible = true));
   box.table.visible = true;
-  stage.warm([...tiles.flatMap((t) => t.stack.textures), ...chipSets.flatMap((c) => c.textures)]);
+  stage.warm([...tiles.flatMap((t) => t.stack.textures), ...chipSets.flatMap((c) => c.textures), underside.texture]);
   chipSets.forEach((c, k) => (c.group.visible = vis[k]));
 }
 // The box's shape is fixed per load (wide on landscape screens, tall on portrait ones). When the
@@ -295,6 +296,15 @@ function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
   else if (dir < 0) closeLid();
 }
 
+/** The link under the pointer, if any: on the About card when the box rests on its back. */
+function linkUnderPointer(): string | null {
+  if (orbit.face === 'bottom' && orbit.atRest) {
+    const hit = pointer.cast([underside.mesh], false)[0];
+    return hit?.uv ? underside.linkAt(hit.uv) : null;
+  }
+  return null;
+}
+
 function onTap() {
   // iOS grants motion only from a tap. The first tap on the closed lid asks for it and leaves the
   // lid on, so the steel can follow the tilt before it opens; the next tap opens it.
@@ -303,6 +313,9 @@ function onTap() {
     return;
   }
   if (touch) void motion.enable();
+  const link = linkUnderPointer();
+  if (link) return openLink(link);
+  if (orbit.face === 'bottom') return; // on its back only the card's links respond
   if (lid.state === 'closed' || lid.state === 'returning') {
     if (pointer.cast([lid.hit], false).length) openLid();
     return;
@@ -526,6 +539,7 @@ function frame() {
   else if (focused >= 0 && pointer.cast(chipSets[focused].linkMeshes, false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(tiles[focused].stack.meshes, false).length) cursor = 'zoom-in';
   else if (hovered >= 0 && hovered !== focused) cursor = 'pointer';
+  else if (!gestures.dragging && linkUnderPointer()) cursor = 'pointer';
   else if (canTurn() && pointer.inside && pointer.cast(grabbable, false).length) cursor = 'grab';
   host.style.cursor = cursor;
 
