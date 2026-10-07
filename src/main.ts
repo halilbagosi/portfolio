@@ -539,7 +539,7 @@ function frame() {
   else if (focused >= 0 && pointer.cast(chipSets[focused].linkMeshes, false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(tiles[focused].stack.meshes, false).length) cursor = 'zoom-in';
   else if (hovered >= 0 && hovered !== focused) cursor = 'pointer';
-  else if (!gestures.dragging && linkUnderPointer()) cursor = 'pointer';
+  else if (pointer.inside && linkUnderPointer()) cursor = 'pointer';
   else if (canTurn() && pointer.inside && pointer.cast(grabbable, false).length) cursor = 'grab';
   host.style.cursor = cursor;
 

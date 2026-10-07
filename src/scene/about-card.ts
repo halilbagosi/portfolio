@@ -14,7 +14,10 @@ const GREY = '#8e8e93';
 const f = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 const LABEL = f(600, 13);
 const LABEL_TRACK = 1.8;
-const GAP = 28;
+const GAP = 24;
+/** A link's touch target: its row height, and how far it reaches past the text sideways. */
+const TAP_H = 48;
+const TAP_X = 10;
 
 /** One thing to draw, in layout px (y down; text at its baseline). */
 export type Op =
@@ -38,6 +41,15 @@ export interface CardInput {
   role: string;
   about: About;
   socials: Social[];
+}
+
+/** The margin kept clear on every side of the card; the layout never draws into it. */
+export const cardPad = (w: number, h: number) => (w > h ? 64 : 56);
+
+/** The link at a uv hit (u right, v up), if any. */
+export function linkAtUv(links: CardLink[], u: number, v: number): string | null {
+  const y = 1 - v; // the card runs top-down, uv bottom-up
+  return links.find((l) => u >= l.x0 && u <= l.x1 && y >= l.y0 && y <= l.y1)?.href ?? null;
 }
 
 /** Width of text in a font, with optional tracking between characters. */
@@ -74,19 +86,23 @@ export function aboutLines(a: About): string[] {
   ];
 }
 
-/** Text cut to fit a width, with an ellipsis. */
+/** Text cut to fit a width, with an ellipsis. Cuts by code point, so an emoji is never split. */
 function fit(text: string, font: string, maxW: number, measure: Measure, tracking = 0) {
   if (measure(text, font, tracking) <= maxW) return text;
-  let t = text;
-  while (t && measure(`${t}…`, font, tracking) > maxW) t = t.slice(0, -1);
-  return `${t.trimEnd()}…`;
+  const chars = [...text];
+  while (chars.length && measure(`${chars.join('')}…`, font, tracking) > maxW) chars.pop();
+  return `${chars.join('').trimEnd()}…`;
 }
 
-/** Words wrapped to a width, at most `maxLines` (the last one ellipsed if cut). */
+/**
+ * Words wrapped to a width, at most `maxLines` (the last one ellipsed if cut). A word wider than
+ * the column (a URL) is ellipsed on its own rather than hard-broken: a URL split mid-way is no more
+ * readable, and one cut word keeps the line count, so the block's height stays bounded.
+ */
 function wrap(text: string, font: string, maxW: number, maxLines: number, measure: Measure) {
   const out: string[] = [];
   let cur = '';
-  for (const word of text.split(/\s+/).filter(Boolean)) {
+  for (const word of text.split(/\s+/).filter(Boolean).map((wd) => fit(wd, font, maxW, measure))) {
     const next = cur ? `${cur} ${word}` : word;
     if (cur && measure(next, font) > maxW) {
       out.push(cur);
@@ -96,7 +112,7 @@ function wrap(text: string, font: string, maxW: number, maxLines: number, measur
   if (cur) out.push(cur);
   if (out.length <= maxLines) return out;
   const kept = out.slice(0, maxLines);
-  kept[maxLines - 1] = fit(`${kept[maxLines - 1]}…`, font, maxW, measure).replace(/……$/, '…');
+  kept[maxLines - 1] = fit(`${kept[maxLines - 1]}…`, font, maxW, measure);
   return kept;
 }
 
@@ -110,7 +126,7 @@ export function layoutAbout(input: CardInput, w: number, h: number, measure: Mea
   const links: CardLink[] = [];
   const a = input.about;
   const wide = w > h;
-  const pad = wide ? 64 : 56;
+  const pad = cardPad(w, h);
 
   const text = (x: number, y: number, t: string, font: string, color: string, tracking = 0) => {
     ops.push({ kind: 'text', x, y, text: t, font, color, tracking });
@@ -184,11 +200,19 @@ export function layoutAbout(input: CardInput, w: number, h: number, measure: Mea
       const lw = measure(t, font);
       if (cx > x && cx + lw > x + colW) {
         cx = x;
-        y += 30;
+        y += TAP_H;
       }
       text(cx, y + 20, t, font, LINK);
-      links.push({ href: l.href, x0: Math.max(0, cx - 4) / w, y0: (y - 2) / h, x1: Math.min(w, cx + lw + 4) / w, y1: (y + 26) / h });
-      cx += lw + 22;
+      // A finger-sized target around the text (the card is a third of its size on a phone). Rows are
+      // TAP_H apart and items 2 * TAP_X + 4 apart, so neighbouring rects never overlap.
+      links.push({
+        href: l.href,
+        x0: (cx - TAP_X) / w,
+        y0: (y + 14 - TAP_H / 2) / h,
+        x1: (cx + lw + TAP_X) / w,
+        y1: (y + 14 + TAP_H / 2) / h,
+      });
+      cx += lw + 2 * TAP_X + 4;
     }
     return y + 26;
   };

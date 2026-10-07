@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OUTER_D, OUTER_R, OUTER_W, roundedRectShape, TOP_Y, WALL_H } from './box';
 import { TEXT_LOD_BIAS } from './textures';
-import { CARD_PX, CARD_SS, drawAbout, initialsOf, layoutAbout, type CardInput, type CardLink, type Measure } from './about-card';
+import { CARD_PX, CARD_SS, drawAbout, initialsOf, layoutAbout, linkAtUv, type CardInput, type CardLink, type Measure } from './about-card';
 
 /** Dark anodised plate until the About card is drawn. */
 function plainPlate() {
@@ -94,9 +94,7 @@ export class Underside {
 
   /** The link on the card at a hit's uv, if any. */
   linkAt(uv: THREE.Vector2): string | null {
-    const x = uv.x;
-    const y = 1 - uv.y; // the card runs top-down, uv bottom-up
-    return this.links.find((l) => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1)?.href ?? null;
+    return linkAtUv(this.links, uv.x, uv.y);
   }
 
   setCard(tex: THREE.Texture) {
