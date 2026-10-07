@@ -23,6 +23,10 @@ const RAW = new THREE.Color('#d9dbde');
 const DONE = 1e4;
 /** The normal map's chunk with the groove relief scaled by whether the laser has passed. */
 const OPENED_NORMALS = THREE.ShaderChunk.normal_fragment_maps.replace('mapN.xy *= normalScale;', 'mapN.xy *= normalScale * opened;');
+// A three.js upgrade that rewords the chunk would make the replace above miss: the grooves would then show before they are cut.
+if (import.meta.env.DEV && OPENED_NORMALS === THREE.ShaderChunk.normal_fragment_maps) {
+  console.warn('lid: normal_fragment_maps no longer contains "mapN.xy *= normalScale;"; grooves will show before the laser cuts them');
+}
 
 /** The etch's reveal times as a half-float texture (rows flipped: a DataTexture's first row is v = 0). */
 function revealTexture(etch: EtchSchedule) {
@@ -121,6 +125,7 @@ export class Lid {
   /** The laser's route over the engraving. */
   readonly etch: EtchSchedule;
   private cut: { uEtchTime: { value: number } };
+  private etchTime = DONE;
 
   constructor(private reduced: boolean) {
     const aspect = LD / LW;
@@ -215,8 +220,9 @@ export class Lid {
     return this.progress.value;
   }
 
-  /** The social engraved where a ray hit the lid's top, if any. */
+  /** The social engraved where a ray hit the lid's top, if any. None before the laser has cut them: a tap there opens the lid. */
   linkAt(hit: THREE.Intersection): string | null {
+    if (this.etchTime < this.etch.total) return null;
     if (!hit.uv || !hit.face || hit.face.normal.y < 0.9) return null; // the top cap only
     // Cap uvs are shape coordinates; the map's y runs down while shape y runs to the back.
     const x = (hit.uv.x / LW + 0.5) * this.mapW;
@@ -226,6 +232,7 @@ export class Lid {
 
   /** Seconds into the etch: what has been cut by then shows, and freshly cut metal glows. */
   setEtchTime(t: number) {
+    this.etchTime = t;
     this.cut.uEtchTime.value = t;
   }
 

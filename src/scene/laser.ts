@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { LID_TOP, type Lid } from './lid';
 
+/**
+ * Above the lid (a transparent mesh at order 0) and the section glass (2): the spot is drawn over
+ * the metal it is on, whichever way the sort by depth would have put them.
+ */
+const ORDER = 3;
+
 const SPARKS = 200;
 const GRAVITY = -4.5;
 /** Seconds before the laser starts: shaders and textures have warmed by then. */
@@ -28,8 +34,9 @@ const glowMat = (map: THREE.Texture, color: string) =>
 
 /**
  * The laser at work on the lid when the page first loads: a white-hot spot with a violet halo, a
- * small light skimming the metal with it, and orange sparks thrown off while it cuts. It lives in
- * the lid's group, so it rides the lid's knocks. It drives the lid's etch time; the lid shades what
+ * small light skimming the metal with it, and orange sparks thrown off while it cuts. The visible
+ * parts live in the lid's group, so they ride the lid's knocks; the light lives in the scene (see
+ * `light`) and is placed from the lid's transform. It drives the lid's etch time; the lid shades what
  * has been cut, and the glow of fresh grooves.
  */
 export class Laser {
@@ -37,7 +44,12 @@ export class Laser {
   private t = -DELAY;
   private core: THREE.Sprite;
   private halo: THREE.Sprite;
+  /**
+   * In the scene, not the lid's group: three only counts lights of visible objects, and the lid is
+   * hidden once it is gone, which would change the light count and recompile every lit material.
+   */
   private light = new THREE.PointLight('#d4c8ff', 0, 0.9, 2);
+  private at = new THREE.Vector3();
   private sparks: THREE.Points;
   private pos = new Float32Array(SPARKS * 3);
   private vel = new Float32Array(SPARKS * 3);
@@ -48,7 +60,10 @@ export class Laser {
   private carry = 0;
   private spot = new THREE.Vector3();
 
-  constructor(private lid: Lid) {
+  constructor(
+    private lid: Lid,
+    scene: THREE.Object3D,
+  ) {
     const glow = glowTexture();
     this.core = new THREE.Sprite(glowMat(glow, '#ffffff'));
     this.core.scale.setScalar(0.05);
@@ -84,7 +99,9 @@ export class Laser {
       }),
     );
     this.sparks.frustumCulled = false; // they fly about; the bounds would go stale
-    lid.group.add(this.core, this.halo, this.light, this.sparks);
+    for (const o of [this.core, this.halo, this.sparks]) o.renderOrder = ORDER;
+    lid.group.add(this.core, this.halo, this.sparks);
+    scene.add(this.light);
     lid.setEtchTime(-1); // nothing cut yet
   }
 
@@ -108,7 +125,9 @@ export class Laser {
     this.halo.position.copy(this.spot);
     this.core.material.opacity = on ? flicker : active ? 0.08 : 0;
     this.halo.material.opacity = on ? 0.55 * flicker : active ? 0.04 : 0;
-    this.light.position.copy(this.spot).y += 0.06;
+    this.lid.group.updateWorldMatrix(true, false); // the lid moved this frame; its world matrix is only refreshed at render
+    this.light.position.copy(this.lid.group.localToWorld(this.at.copy(this.spot)));
+    this.light.position.y += 0.06;
     this.light.intensity = on ? 2.5 * flicker : 0;
     if (on) {
       this.carry += dt * 120;
@@ -128,14 +147,19 @@ export class Laser {
     this.done = true;
     this.lid.setEtchTime(1e4);
     this.core.visible = this.halo.visible = this.sparks.visible = false;
-    this.light.intensity = 0; // stays in the scene: removing a light would recompile the lid's shader
+    this.light.intensity = 0; // stays in the scene, always: the number of lights is part of every lit shader
   }
 
   private emit() {
     const i = this.next;
     this.next = (this.next + 1) % SPARKS;
-    this.pos.set([this.spot.x, this.spot.y, this.spot.z], i * 3);
-    this.vel.set([(Math.random() - 0.5) * 1.6, 0.6 + Math.random(), (Math.random() - 0.5) * 1.6], i * 3);
+    const k = i * 3;
+    this.pos[k] = this.spot.x;
+    this.pos[k + 1] = this.spot.y;
+    this.pos[k + 2] = this.spot.z;
+    this.vel[k] = (Math.random() - 0.5) * 1.6;
+    this.vel[k + 1] = 0.6 + Math.random();
+    this.vel[k + 2] = (Math.random() - 0.5) * 1.6;
     this.life[i] = this.span[i] = 0.3 + Math.random() * 0.4;
   }
 

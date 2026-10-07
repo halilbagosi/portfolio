@@ -124,10 +124,14 @@ export class Stage {
     return this.dpr;
   }
 
+  /** Screen pixels per world unit at distance 1 from the camera (for sizes divided by view depth, like point sprites). */
+  get pxPerUnitAtOne() {
+    return this.res.y / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2));
+  }
+
   /** Screen pixels per world unit at the box (for glass blur/refraction scale). */
   get pxPerUnit() {
-    const vfov = THREE.MathUtils.degToRad(this.camera.fov);
-    return this.res.y / (2 * Math.tan(vfov / 2) * this.dist);
+    return this.pxPerUnitAtOne / this.dist;
   }
 
   /**

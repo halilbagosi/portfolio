@@ -170,7 +170,7 @@ if (reopen) {
   reveal.snap(1);
 }
 // First load: a laser engraves the lid. Not on a reopen, under reduced motion, or for dev hashes.
-const laser = reduced || reopen || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid);
+const laser = reduced || reopen || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
 
 const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
 if (idle) idle(prewarm);
@@ -494,7 +494,7 @@ function frame() {
   underside.sheen = ambX * 0.35;
 
   lid.update(dt, time);
-  laser?.update(dt, stage.res.y / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)));
+  laser?.update(dt, stage.pxPerUnitAtOne);
 
   reveal.target = lid.openness > 0.25 ? 1 : 0;
   const rv = reveal.step(dt);
