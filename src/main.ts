@@ -296,11 +296,16 @@ function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
   else if (dir < 0) closeLid();
 }
 
-/** The link under the pointer, if any: on the About card when the box rests on its back. */
+/** The link under the pointer, if any: a social on the closed lid, or on the About card. */
 function linkUnderPointer(): string | null {
-  if (orbit.face === 'bottom' && orbit.atRest) {
+  if (!orbit.atRest) return null;
+  if (orbit.face === 'bottom') {
     const hit = pointer.cast([underside.mesh], false)[0];
     return hit?.uv ? underside.linkAt(hit.uv) : null;
+  }
+  if (lid.state === 'closed') {
+    const hit = pointer.cast([lid.hit], false)[0];
+    return hit ? lid.linkAt(hit) : null;
   }
   return null;
 }

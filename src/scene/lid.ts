@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Spring } from '../anim/springs';
 import { settings } from '../config/projects';
 import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, TOP_Y } from './box';
-import { brushedRoughness, engravingMaps, heightToNormal } from './textures';
+import { beadBlastRoughness, engravingMaps, heightToNormal, type PxBox } from './textures';
 
 const LW = OUTER_W + 0.06;
 const LD = OUTER_D + 0.06;
@@ -10,6 +10,32 @@ const LR = OUTER_R + 0.03;
 const LT = 0.2;
 const CHAMFER = 0.035;
 const REST_Y = TOP_Y + CHAMFER;
+
+/** The lid's top surface in its own space (the extrusion's front cap: depth plus the bevel). */
+export const LID_TOP = LT - CHAMFER;
+/** Space Gray anodised aluminium, as on a MacBook. */
+const ANODISED = '#7d7e80';
+/** Raw aluminium, where the laser has cut through the anodising: bright and a little frosted. */
+const RAW = new THREE.Color('#d9dbde');
+
+/**
+ * Shades the engraving as cut metal: where the mask says the laser went through the anodising,
+ * the surface turns raw aluminium (lighter, a little rougher). The normal map gives the groove.
+ */
+function engrave(m: THREE.MeshPhysicalMaterial, mask: THREE.Texture) {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uMask = { value: mask };
+    sh.uniforms.uRaw = { value: RAW };
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D uMask;\nuniform vec3 uRaw;\nfloat cut;')
+      .replace(
+        '#include <color_fragment>',
+        '#include <color_fragment>\ncut = texture2D(uMask, vNormalMapUv).r * (255.0 / 200.0);\ndiffuseColor.rgb = mix(diffuseColor.rgb, uRaw, cut);',
+      )
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.55, cut);');
+  };
+  m.customProgramCacheKey = () => 'lid-engrave';
+}
 
 export type LidState = 'closed' | 'leaving' | 'gone' | 'returning';
 
@@ -31,8 +57,8 @@ function lidShape() {
 }
 
 /**
- * Machined aluminium lid: brushed top with a diamond-cut chamfer, engraved with a name
- * and role. The only lit object in the scene.
+ * Space Gray anodised aluminium lid: bead-blasted top with a diamond-cut chamfer, laser-engraved
+ * with name, role and socials (raw metal shows where the laser cut). The only lit object in the scene.
  */
 export class Lid {
   readonly group = new THREE.Group();
@@ -45,41 +71,48 @@ export class Lid {
   private nextKnock = 2.0;
   private queued: number[] = [];
   private mats: THREE.MeshPhysicalMaterial[];
+  /** The engraving map's size, and each engraved social's box on it. */
+  private mapW: number;
+  private mapH: number;
+  private links: (PxBox & { href: string })[];
 
   constructor(private reduced: boolean) {
     const aspect = LD / LW;
     // The tall (portrait) lid spans a phone's width (~1200 device px at 3x): a bit over that keeps
     // the engraving crisp without the full desktop map's cost.
-    const res = PORTRAIT ? 1600 : 2048;
-    // Narrow lid: set the name larger so it reads at phone size.
-    const { height, mask } = engravingMaps(res, Math.round(res * aspect), settings.identity.name, settings.identity.role, PORTRAIT ? 1.3 : 1);
-    const normal = heightToNormal(height, 3.6);
-    const rough = brushedRoughness(1024, Math.round(1024 * aspect), mask);
-    const color = new THREE.CanvasTexture(height);
-    color.colorSpace = THREE.SRGBColorSpace;
-    color.anisotropy = 8;
+    this.mapW = PORTRAIT ? 1600 : 2048;
+    this.mapH = Math.round(this.mapW * aspect);
+    // Narrow lid: larger type, and the socials one per line.
+    const eng = engravingMaps(this.mapW, this.mapH, settings.identity.name, settings.identity.role, settings.socials, {
+      scale: PORTRAIT ? 1.3 : 1,
+      stack: PORTRAIT,
+    });
+    this.links = eng.links;
+    const normal = heightToNormal(eng.height, 3.6);
+    const rough = beadBlastRoughness(1024, Math.round(1024 * aspect));
     // Extrude caps use shape coordinates as UVs: map them onto 0..1.
-    for (const t of [normal, rough, color]) {
+    for (const t of [normal, rough]) {
       t.repeat.set(1 / LW, 1 / LD);
       t.offset.set(0.5, 0.5);
     }
+    // Sampled through the normal map's (already mapped) uv in the shader patch.
+    const mask = new THREE.CanvasTexture(eng.mask);
+    mask.colorSpace = THREE.NoColorSpace;
 
-    const tint = new THREE.Color('#d6d9de');
     const top = new THREE.MeshPhysicalMaterial({
-      color: tint,
-      map: color,
+      color: ANODISED,
       metalness: 1,
       roughness: 1,
       roughnessMap: rough,
       normalMap: normal,
-      anisotropy: 0.7,
-      clearcoat: 0.1,
-      clearcoatRoughness: 0.4,
+      clearcoat: 0.15, // the anodised oxide layer
+      clearcoatRoughness: 0.5,
       transparent: true,
     });
-    // Diamond-cut edges: polished, so they flash as the cursor moves.
+    engrave(top, mask);
+    // Diamond-cut edges: polished raw aluminium (cut through the anodising), so they flash as the cursor moves.
     const edge = new THREE.MeshPhysicalMaterial({
-      color: '#eef0f3',
+      color: '#e4e6e9',
       metalness: 1,
       roughness: 0.08,
       transparent: true,
@@ -126,6 +159,15 @@ export class Lid {
 
   get openness() {
     return this.progress.value;
+  }
+
+  /** The social engraved where a ray hit the lid's top, if any. */
+  linkAt(hit: THREE.Intersection): string | null {
+    if (!hit.uv || !hit.face || hit.face.normal.y < 0.9) return null; // the top cap only
+    // Cap uvs are shape coordinates; the map's y runs down while shape y runs to the back.
+    const x = (hit.uv.x / LW + 0.5) * this.mapW;
+    const y = (0.5 - hit.uv.y / LD) * this.mapH;
+    return this.links.find((l) => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1)?.href ?? null;
   }
 
   update(dt: number, time: number) {
