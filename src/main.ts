@@ -3,13 +3,15 @@ import { Spring } from './anim/springs';
 import { projects, settings } from './config/projects';
 import { Gestures } from './input/gestures';
 import { Motion } from './input/motion';
+import { Orbit } from './input/orbit';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
-import { createBox, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
+import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
 import { ChipSet } from './scene/chips';
 import { expandedLayout, focusSizes, packLayout, rectsFrom, restSizes, type Sizes } from './scene/layout';
 import { Lid } from './scene/lid';
 import { Stage } from './scene/stage';
+import { Underside } from './scene/underside';
 import { Well } from './scene/well';
 
 const host = document.getElementById('stage')!;
@@ -44,6 +46,14 @@ try {
 const { scene, camera } = stage;
 const pointer = new Pointer(host, camera);
 const motion = new Motion();
+// The box in the hand: drags turn it, a flick up rolls it onto its back (the About card).
+const orbit = new Orbit(
+  new THREE.Vector3(0, Math.sin(ELEVATION), Math.cos(ELEVATION)),
+  () => Math.PI / Math.max(1, host.clientHeight),
+  reduced,
+);
+/** A tap on the lid while the box is turned: it opens once the box has settled on its top. */
+let pendingOpen = false;
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
 const copy = settings.hints;
 let openHint = touch ? (motion.needsPermission ? copy.begin.touch : copy.open.touch) : copy.open.desktop;
@@ -53,6 +63,8 @@ hint.textContent = openHint;
 
 const box = createBox();
 scene.add(box.group);
+const underside = new Underside();
+box.group.add(underside.mesh);
 const lid = new Lid(reduced);
 scene.add(lid.group);
 
@@ -102,6 +114,9 @@ function prewarm() {
   });
   const vis = chipSets.map((c) => c.group.visible);
   chipSets.forEach((c) => (c.group.visible = true));
+  // Sealed under the lid the wells are hidden; show them for the warm-up (the frame re-hides them).
+  tiles.forEach((t) => (t.group.visible = true));
+  box.table.visible = true;
   stage.warm([...tiles.flatMap((t) => t.stack.textures), ...chipSets.flatMap((c) => c.textures)]);
   chipSets.forEach((c, k) => (c.group.visible = vis[k]));
 }
@@ -222,6 +237,12 @@ const a11yButtons = projects.slice(0, n).map((p, i) => {
 // ---- Pointer -------------------------------------------------------------------------
 function openLid() {
   if (lid.state !== 'closed' && lid.state !== 'returning') return;
+  // Turned or still moving: bring it back onto its top first; it opens once settled.
+  if (lid.state === 'closed' && (!orbit.atRest || orbit.face !== 'top')) {
+    orbit.flip('top');
+    pendingOpen = true;
+    return;
+  }
   lid.open();
   hint.classList.remove('show');
 }
@@ -281,14 +302,17 @@ function onTap() {
   setFocus(i === focused ? -1 : i);
 }
 
-new Gestures(host, {
+const gestures = new Gestures(host, {
   tap: onTap,
-  dragStart: () => false, // turning the box comes with the orbit
-  dragMove: () => {},
-  dragEnd: () => {},
+  dragStart: (x, y) => orbit.begin(x, y),
+  dragMove: (x, y) => orbit.move(x, y),
+  dragEnd: () => orbit.end(),
   vertical: onVertical,
   enabled: () => !lightbox.isOpen,
 });
+/** What the pointer can grab to turn the box. */
+const grabbable = [lid.hit, box.shellMesh, box.top.mesh, underside.mesh];
+const canTurn = () => focused < 0 && !lightbox.isOpen && (lid.state === 'closed' || lid.state === 'gone');
 
 /** The section under the pointer (in its current or opening layout), or -1. */
 function sectionUnderPointer() {
@@ -342,6 +366,11 @@ let closeHintAt = 0;
 let closeHintTill = 0;
 /** After closing: bring the open hint back once the lid has settled. */
 let openHintAt = 0;
+/** Cursor / tilt as the scene uses it: frozen while the box is held, easing back in after. */
+let ambX = 0;
+let ambY = 0;
+let ambientIn = 1;
+const orbitM4 = new THREE.Matrix4();
 const clock = new THREE.Clock();
 function frame() {
   const raw = clock.getDelta();
@@ -369,15 +398,33 @@ function frame() {
     px = Math.sin(time * 0.35) * 0.5;
     py = Math.cos(time * 0.27) * 0.3;
   }
+  // Holding the box: the hand turns it, so the cursor and tilt stop steering the view and the
+  // light. They ease back in once it has settled.
+  ambientIn = orbit.engaged ? 0 : Math.min(1, ambientIn + dt / 0.4);
+  if (ambientIn > 0) {
+    const k = ambientIn * ambientIn * (3 - 2 * ambientIn);
+    ambX += (px - ambX) * k;
+    ambY += (py - ambY) * k;
+  }
+  // Turning: free with the lid on, above the rim with it off, not while a section is open or the
+  // lid is moving.
+  orbit.setLimits(lid.state === 'closed', focused >= 0 || lightbox.isOpen || (lid.state !== 'closed' && lid.state !== 'gone'));
+  orbit.update(dt);
+  if (orbit.dragging) pendingOpen = false; // grabbed again while coming back: the hand wins
+  if (pendingOpen && orbit.atRest && orbit.face === 'top') {
+    pendingOpen = false;
+    openLid();
+  }
+  stage.orbit.copy(orbit.quaternion);
   const par = reduced ? 0 : settings.motion.parallax;
-  stage.setParallax(px * par, py * par);
-  stage.update(dt);
-
+  stage.setParallax(ambX * par, ambY * par);
   // Cursor shapes the steel only: the light slides above the lid, env rotates with it.
-  stage.lidLight.position.set(px * 6, 3.0, -py * 4 + 0.5);
-  scene.environmentRotation.y = px * 0.6;
-  scene.environmentRotation.x = -py * 0.15;
-  box.shell.uSheen.value = px * OUTER_W * 0.45;
+  stage.lidLightRest.set(ambX * 6, 3.0, -ambY * 4 + 0.5);
+  stage.envSway.set(-ambY * 0.15, ambX * 0.6, 0);
+  stage.update(dt);
+  box.shell.uSheen.value = ambX * OUTER_W * 0.45;
+  box.shell.uOrbit.value.setFromMatrix4(orbitM4.makeRotationFromQuaternion(orbit.quaternion));
+  underside.sheen = ambX * 0.35;
 
   lid.update(dt, time);
 
@@ -429,11 +476,19 @@ function frame() {
   });
 
   let cursor = '';
-  if ((lid.state === 'closed' || lid.state === 'returning') && pointer.cast([lid.hit], false).length) cursor = 'pointer';
+  if (gestures.dragging) cursor = 'grabbing';
+  else if (lid.state === 'returning' && pointer.cast([lid.hit], false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(chipSets[focused].linkMeshes, false).length) cursor = 'pointer';
   else if (focused >= 0 && pointer.cast(tiles[focused].stack.meshes, false).length) cursor = 'zoom-in';
   else if (hovered >= 0 && hovered !== focused) cursor = 'pointer';
+  else if (canTurn() && pointer.inside && pointer.cast(grabbable, false).length) cursor = 'grab';
   host.style.cursor = cursor;
+
+  // Lid fully on: nothing inside can be seen. Hidden, so the depth-ignoring shafts and the deep
+  // cards can't show through the walls or the bottom while the box is turned.
+  const sealed = lid.state === 'closed';
+  box.table.visible = !sealed;
+  for (const t of tiles) t.group.visible = !sealed;
 
   stage.render(glassGroups);
   if (focused >= 0) sectionOpened = true;
