@@ -1,4 +1,4 @@
-import { MAX_BIO, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, type About, type Settings } from '../../content/schema';
+import { MAX_BIO, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, MAX_YEARS, type About, type Settings } from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
 import { rangeField, tagsField, textField, toggleField } from '../fields';
@@ -25,6 +25,14 @@ function rowActions(i: number, n: number, move: (from: number, to: number) => vo
 const listField = (path: string, ...rows: HTMLElement[]) =>
   h('div', { class: 'field list-field', 'data-path': path }, h('small', { class: 'field-error' }), ...rows);
 
+/** One row of a list editor: three fields side by side, then the row's buttons. */
+const listRow = (fields: HTMLElement[], ...actions: Parameters<typeof rowActions>) =>
+  h('div', { class: 'list-row' }, h('div', { class: 'grid3' }, ...fields), rowActions(...actions));
+
+/** The "add a row" button under a list: disabled, and saying why, once the list is full. */
+const addButton = (full: boolean, fullLabel: string, label: string, add: () => void) =>
+  h('button', { class: 'btn', type: 'button', disabled: full, onclick: add }, full ? fullLabel : label);
+
 /**
  * The About card on the box's underside (portrait, bio, experience, contact) and the socials
  * engraved on its lid. Field edits change the store in place; adding, removing or moving rows
@@ -46,8 +54,12 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
   const file = h('input', { type: 'file', accept: 'image/*', 'aria-label': 'Upload a portrait' });
   file.addEventListener('change', async () => {
     const f = file.files?.[0];
+    // Reset so choosing the same file again still fires `change`.
+    file.value = '';
     if (!f) return;
     status.textContent = 'Uploading…';
+    // One upload at a time: a second pick mid-flight would race the first and leave an orphan file.
+    file.disabled = true;
     try {
       const { blob, warning } = await processPhoto(f);
       const { path } = await api.uploadPhoto('about', blob);
@@ -55,6 +67,8 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
       if (warning) alert(warning);
     } catch (e) {
       status.textContent = e instanceof Error ? e.message : String(e);
+    } finally {
+      file.disabled = false;
     }
   });
   const removePhoto = () => restructure((x) => (x.about.photo = ''));
@@ -76,44 +90,32 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
   const socials = s.socials.map((so, i) => {
     const at = `settings.socials.${i}`;
     const set = (k: keyof typeof so) => (v: string) => edit((x) => (x.socials[i][k] = v));
-    return h(
-      'div',
-      { class: 'list-row' },
-      h(
-        'div',
-        { class: 'grid3' },
+    return listRow(
+      [
         textField('Label', `${at}.label`, so.label, set('label'), { hint: 'On the About card, e.g. GitHub.' }),
         textField('Engraved text', `${at}.text`, so.text, set('text'), { hint: 'On the lid, e.g. github.com/you.' }),
         textField('Link', `${at}.href`, so.href, set('href'), { hint: 'https://… or mailto:…' }),
-      ),
-      rowActions(
-        i,
-        s.socials.length,
-        (from, to) => restructure((x) => moveItem(x.socials, from, to)),
-        () => restructure((x) => x.socials.splice(i, 1)),
-      ),
+      ],
+      i,
+      s.socials.length,
+      (from, to) => restructure((x) => moveItem(x.socials, from, to)),
+      () => restructure((x) => x.socials.splice(i, 1)),
     );
   });
 
   const timeline = a.timeline.map((t, i) => {
     const at = `settings.about.timeline.${i}`;
     const set = (k: keyof typeof t) => (v: string) => ed((x) => (x.timeline[i][k] = v));
-    return h(
-      'div',
-      { class: 'list-row' },
-      h(
-        'div',
-        { class: 'grid3' },
+    return listRow(
+      [
         textField('Role', `${at}.role`, t.role, set('role')),
         textField('Company or school', `${at}.org`, t.org, set('org')),
         textField('Period', `${at}.period`, t.period, set('period'), { hint: 'e.g. 2022–now' }),
-      ),
-      rowActions(
-        i,
-        a.timeline.length,
-        (from, to) => restructure((x) => moveItem(x.about.timeline, from, to)),
-        () => restructure((x) => x.about.timeline.splice(i, 1)),
-      ),
+      ],
+      i,
+      a.timeline.length,
+      (from, to) => restructure((x) => moveItem(x.about.timeline, from, to)),
+      () => restructure((x) => x.about.timeline.splice(i, 1)),
     );
   });
 
@@ -125,15 +127,8 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
 
     h('div', { class: 'section-title' }, 'Socials — engraved on the lid'),
     listField('settings.socials', ...socials),
-    h(
-      'button',
-      {
-        class: 'btn',
-        type: 'button',
-        disabled: socialsFull,
-        onclick: () => restructure((x) => x.socials.push({ label: '', text: '', href: 'https://' })),
-      },
-      socialsFull ? `The lid fits ${MAX_SOCIALS}` : 'Add a social',
+    addButton(socialsFull, `The lid fits ${MAX_SOCIALS}`, 'Add a social', () =>
+      restructure((x) => x.socials.push({ label: '', text: '', href: 'https://' })),
     ),
 
     h('div', { class: 'section-title' }, 'About — on the underside'),
@@ -143,7 +138,7 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
       maxLength: MAX_BIO,
       hint: `Two or three sentences, up to ${MAX_BIO} characters.`,
     }),
-    rangeField('Years of experience', 'settings.about.years', a.years, { min: 0, max: 60, step: 1, unit: 'years' }, (v) => ed((x) => (x.years = v)), 'Shown as “N+”.'),
+    rangeField('Years of experience', 'settings.about.years', a.years, { min: 0, max: MAX_YEARS, step: 1, unit: 'years' }, (v) => ed((x) => (x.years = v)), 'Shown as “N+”.'),
     h(
       'div',
       { class: 'grid2' },
@@ -170,15 +165,8 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
 
     h('div', { class: 'section-title' }, 'Experience'),
     listField('settings.about.timeline', ...timeline),
-    h(
-      'button',
-      {
-        class: 'btn',
-        type: 'button',
-        disabled: timelineFull,
-        onclick: () => restructure((x) => x.about.timeline.push({ role: '', org: '', period: '' })),
-      },
-      timelineFull ? `Up to ${MAX_TIMELINE} entries` : 'Add an entry',
+    addButton(timelineFull, `Up to ${MAX_TIMELINE} entries`, 'Add an entry', () =>
+      restructure((x) => x.about.timeline.push({ role: '', org: '', period: '' })),
     ),
   );
 }

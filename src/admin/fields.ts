@@ -99,11 +99,12 @@ export function tagsField(label: string, path: string, values: string[], set: (v
   const commit = () => {
     set([...list]);
     draw();
-    input.focus();
+    // At the cap nothing more can be typed, so keep keyboard focus on the chips rather than on a dead input.
+    if (list.length >= max) box.querySelector<HTMLElement>('.tag:last-of-type button')?.focus();
+    else input.focus();
   };
   const draw = () => {
-    input.disabled = list.length >= max;
-    input.placeholder = input.disabled ? `Up to ${max}` : 'Add, then press Enter';
+    input.placeholder = list.length >= max ? `Up to ${max}` : 'Add, then press Enter';
     box.replaceChildren(
       ...list.map((t, i) =>
         h(

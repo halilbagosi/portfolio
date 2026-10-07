@@ -14,6 +14,7 @@ export const MAX_SOCIALS = 4;
 export const MAX_SKILLS = 12;
 export const MAX_TIMELINE = 4;
 export const MAX_BIO = 360;
+export const MAX_YEARS = 60;
 export const ID_PATTERN = /^[a-z0-9-]+$/;
 /** A photo served from public/shots (no folders, no dot-files). */
 export const SHOT_PATH = /^\/shots\/(?!\.)[A-Za-z0-9._-]+$/;
@@ -195,8 +196,8 @@ function validateAbout(a: unknown, issues: Issue[]) {
   for (const k of ['bio', 'location', 'availability']) if (!filled(a[k])) issues.push({ path: at(k), message: `${k} is required.` });
   if (typeof a.bio === 'string' && a.bio.length > MAX_BIO) issues.push({ path: at('bio'), message: `Keep the bio under ${MAX_BIO} characters.` });
   if (typeof a.workPreference !== 'string') issues.push({ path: at('workPreference'), message: 'Work preference must be text (it may be empty).' });
-  if (typeof a.years !== 'number' || !Number.isInteger(a.years) || a.years < 0 || a.years > 60)
-    issues.push({ path: at('years'), message: 'Must be a whole number between 0 and 60.' });
+  if (typeof a.years !== 'number' || !Number.isInteger(a.years) || a.years < 0 || a.years > MAX_YEARS)
+    issues.push({ path: at('years'), message: `Must be a whole number between 0 and ${MAX_YEARS}.` });
   if (typeof a.available !== 'boolean') issues.push({ path: at('available'), message: 'Must be on or off.' });
   if (typeof a.email !== 'string' || !EMAIL.test(a.email)) issues.push({ path: at('email'), message: 'Needs a valid email address.' });
   if (a.resume !== '' && (typeof a.resume !== 'string' || !HREF.test(a.resume)))
