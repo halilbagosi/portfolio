@@ -519,10 +519,17 @@ let ambY = 0;
 let ambientIn = 1;
 const orbitM4 = new THREE.Matrix4();
 const clock = new THREE.Clock();
-function frame() {
+/** The previous frame's display timestamp (ms), from requestAnimationFrame. */
+let lastStamp = -1;
+function frame(stamp?: number) {
   const raw = clock.getDelta();
   const dt = Math.min(raw, 1 / 30);
-  stage.adapt(raw);
+  // Pace by the display's own timestamps: callbacks run late after a long frame and then catch up
+  // a few ms apart, which read as a refresh far faster than the screen's and cost phones their 3x.
+  if (stamp !== undefined) {
+    if (lastStamp >= 0) stage.adapt((stamp - lastStamp) / 1000);
+    lastStamp = stamp;
+  }
   const time = clock.elapsedTime;
   if (stats) {
     statFrames++;
