@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { Cadence } from '../anim/cadence';
 import { Spring } from '../anim/springs';
 import { ELEVATION, OUTER_D, OUTER_W, PIVOT, PORTRAIT, TOP_Y, WALL_H } from './box';
 
@@ -59,10 +60,7 @@ export class Stage {
   private dpr = 1;
   /** Lowest the pixel ratio may step down to: below 2x, text and edges visibly soften. */
   private minDpr = 1;
-  private slow = 0;
-  private age = 0;
-  /** The display's own frame interval (shortest seen): 30 Hz in Low Power Mode, 60 or 120 otherwise. */
-  private base = 1;
+  private cadence = new Cadence();
   private lookTarget = new THREE.Vector3();
   private parallax = { x: 0, y: 0 };
   private aspect = 1;
@@ -210,25 +208,12 @@ export class Stage {
     this.scene.environmentRotation.setFromQuaternion(tmpQ.setFromEuler(this.envSway).premultiply(inv));
   }
 
-  /**
-   * Steps the pixel ratio down if frames keep running long (keeps motion smooth on slower GPUs).
-   * The first seconds are ignored: texture uploads, shader compiles and the lid's normal map make
-   * startup frames long on any device, and must not cost the whole session its sharpness.
-   */
+  /** Steps the pixel ratio down if frames keep missing the display's cadence (keeps motion smooth on slower GPUs). */
   adapt(rawDt: number) {
-    this.age += rawDt;
-    if (rawDt > 0.004) this.base = Math.min(this.base, rawDt);
-    if (this.age < 4) return;
-    // Slow means missing the display's own cadence, not merely under 60 fps: a phone capped at
-    // 30 Hz (Low Power Mode) is keeping up, and lowering resolution would only blur it.
-    if (rawDt > this.base * 1.5 && rawDt < 0.25) this.slow += rawDt;
-    else this.slow = Math.max(0, this.slow - rawDt * 0.5);
-    if (this.slow > 1.5 && this.dpr > this.minDpr) {
-      this.dpr = Math.max(this.minDpr, this.dpr - 0.25);
-      this.renderer.setPixelRatio(this.dpr);
-      this.resize();
-      this.slow = 0;
-    }
+    if (!this.cadence.push(rawDt) || this.dpr <= this.minDpr) return;
+    this.dpr = Math.max(this.minDpr, this.dpr - 0.25);
+    this.renderer.setPixelRatio(this.dpr);
+    this.resize();
   }
 
   /** Compile every shader and upload textures up front, so opening a section the first time does not hitch. */
