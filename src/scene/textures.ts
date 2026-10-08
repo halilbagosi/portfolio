@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { drawGlyph, glyphFor } from './glyphs';
 
 export const FONT = `ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif`;
 
@@ -34,7 +35,7 @@ export function drawTracked(
  * Bead-blasted anodised aluminium (a MacBook's finish): an even, fine-grained matte. Per-pixel
  * noise around the base roughness and no direction, so the sheen is soft, with no streaks.
  */
-export function beadBlastRoughness(w: number, h: number, base = 0.42, spread = 0.04): THREE.CanvasTexture {
+export function beadBlastRoughness(w: number, h: number, base = 0.52, spread = 0.05): THREE.CanvasTexture {
   const c = canvas(w, h);
   const ctx = c.getContext('2d')!;
   const img = ctx.createImageData(w, h);
@@ -106,8 +107,7 @@ function trackedWidth(ctx: CanvasRenderingContext2D, text: string, tracking: num
 }
 
 /**
- * Engraving maps: name and role, then the socials in smaller type (as many per line as fit, or
- * one per line on the tall lid), all centred as one block.
+ * Engraving maps: name and role centred, and the socials as engraved logos (no text) in a row along the bottom.
  */
 export function engravingMaps(
   w: number,
@@ -124,43 +124,18 @@ export function engravingMaps(
   hc.fillStyle = '#000';
   hc.textBaseline = 'alphabetic';
   const u = (w / 100) * (o.scale ?? 1); // layout unit
-  // The socials are the lid's only clickable text, so they are set large enough to read and tap:
-  // twice the base size one per line on the tall lid, a little over a quarter more in rows.
-  // The role keeps at least their size, so the hierarchy runs name > role >= socials.
   const stack = !!o.stack;
-  const socialSize = u * (stack ? 2.0 : 1.3);
   const type = {
     name: { size: u * 4.4, track: u * 0.85 },
     role: stack ? { size: u * 2.1, track: u * 1.0 } : { size: u * 1.35, track: u * 0.7 },
-    social: { size: socialSize, track: socialSize * 0.45 },
   };
   const font = (t: { size: number }) => `500 ${t.size}px ${FONT}`;
   /** Widest a line may be: it stays inside the lid's rounded corners. */
   const maxW = w * 0.86;
 
-  // Socials: as many per line as fit (one per line when stacked). An item wider than a whole line
-  // has its type shrunk to fit, so nothing runs off the lid.
-  const gap = socialSize * 2.4;
-  hc.font = font(type.social);
-  type Item = { text: string; href: string; w: number; size: number; track: number };
-  const rows: Item[][] = [];
-  for (const s of socials) {
-    const text = s.text.toUpperCase();
-    const width = trackedWidth(hc, text, type.social.track);
-    const k = Math.min(1, maxW / width); // type and tracking both scale, so the width does too
-    const item: Item = { text, href: s.href, w: width * k, size: type.social.size * k, track: type.social.track * k };
-    const row = rows[rows.length - 1];
-    const used = row ? row.reduce((a, b) => a + b.w + gap, 0) : 0;
-    if (row && !stack && used + item.w <= maxW) row.push(item);
-    else rows.push([item]);
-  }
-
-  // Baselines below the name's. The block (the name's cap top to the last baseline) is centred.
+  // Name and role are centred on the lid; the socials sit along its bottom as logos only.
   const roleAt = u * (stack ? 4.2 : 3.4);
-  const socialAt = roleAt + u * (stack ? 5.4 : 4.0);
-  const socialLine = u * (stack ? 5.0 : 3.2); // row pitch; it is also the height of a link's hit area
-  const lastAt = rows.length ? socialAt + socialLine * (rows.length - 1) : roleAt;
-  const yName = h / 2 + (type.name.size * 0.74 - lastAt) / 2;
+  const yName = h / 2 + (type.name.size * 0.74 - roleAt) / 2;
 
   const pad = Math.ceil(u * 0.3);
   const box = (x: number, width: number, y: number, size: number): PxBox => ({
@@ -169,16 +144,6 @@ export function engravingMaps(
     y0: Math.max(0, y - size * 0.8 - pad),
     y1: Math.min(h, y + size * 0.25 + pad),
   });
-  /** A link's hit area: its row's full pitch, and half the gap to its neighbours on each side. */
-  const hitBox = (x: number, width: number, y: number, size: number): PxBox => {
-    const mid = y - size * 0.275; // the ink's vertical centre
-    return {
-      x0: Math.max(0, x - gap / 2),
-      x1: Math.min(w, x + width + gap / 2),
-      y0: Math.max(0, mid - socialLine / 2),
-      y1: Math.min(h, mid + socialLine / 2),
-    };
-  };
   const lines: PxBox[] = [];
   const links: (PxBox & { href: string })[] = [];
   const line = (text: string, y: number, t: { size: number; track: number }) => {
@@ -192,18 +157,31 @@ export function engravingMaps(
   };
   line(name.toUpperCase(), yName, type.name);
   line(role.toUpperCase(), yName + roleAt, type.role);
-  rows.forEach((row, r) => {
-    const y = yName + socialAt + socialLine * r;
-    const total = row.reduce((a, b) => a + b.w, 0) + gap * (row.length - 1);
-    let x = w / 2 - total / 2;
-    for (const item of row) {
-      hc.font = font(item);
-      drawTracked(hc, item.text, 0, y, item.track, x);
-      links.push({ ...hitBox(x, item.w, y, item.size), href: item.href });
-      x += item.w + gap;
+
+  // Logos: a row near the bottom edge, shrunk if there are too many to fit. Each link's hit area is
+  // its logo plus half the gap each side, and well above and below it, so it is easy to tap.
+  if (socials.length) {
+    const n = socials.length;
+    const natural = u * (stack ? 6 : 4.6);
+    const k = Math.min(1, maxW / (n * natural * 2.5 - natural * 1.5));
+    const size = natural * k;
+    const gap = size * 1.5;
+    const cy = h - u * (stack ? 10 : 9);
+    hc.fillStyle = hc.strokeStyle = '#000';
+    let x = w / 2 - (n * size + (n - 1) * gap) / 2;
+    for (const s of socials) {
+      drawGlyph(hc, glyphFor(s.href), x + size / 2, cy, size);
+      lines.push({ x0: Math.max(0, x - pad), x1: Math.min(w, x + size + pad), y0: cy - size / 2 - pad, y1: Math.min(h, cy + size / 2 + pad) });
+      links.push({
+        x0: Math.max(0, x - gap / 2),
+        x1: Math.min(w, x + size + gap / 2),
+        y0: Math.max(0, cy - size * 1.2),
+        y1: Math.min(h, cy + size * 1.2),
+        href: s.href,
+      });
+      x += size + gap;
     }
-    lines.push(box(w / 2 - total / 2, total, y, row[0].size));
-  });
+  }
 
   const mask = canvas(w, h);
   const mc = mask.getContext('2d')!;
@@ -342,7 +320,8 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxPx: number) {
  * then small tracked labels over plain values. Hierarchy from type alone; colour only where it
  * carries meaning (the kind, and a status dot).
  */
-export function specSheetTexture(s: SpecSheet, widthUnits: number, textScale = 1) {
+/** pairAll: a wide sheet sets every two rows side by side, wrapping within their columns. */
+export function specSheetTexture(s: SpecSheet, widthUnits: number, textScale = 1, pairAll = false) {
   const W = Math.round((widthUnits * PX) / textScale);
   const pad = 42;
   const inner = W - pad * 2;
@@ -360,11 +339,17 @@ export function specSheetTexture(s: SpecSheet, widthUnits: number, textScale = 1
     };
     ctx.textBaseline = 'middle';
 
+    const eyebrow = s.eyebrow.toUpperCase();
     ctx.font = `600 18px ${FONT}`;
+    const ew = ctx.measureText(eyebrow).width + 2.2 * Math.max(0, [...eyebrow].length - 1);
+    if (ew > inner) ctx.font = `600 ${Math.floor((18 * inner) / ew)}px ${FONT}`;
     ctx.fillStyle = s.eyebrowColor;
-    if (draw) drawTracked(ctx, s.eyebrow.toUpperCase(), 0, y + 12, 2.2, pad);
+    if (draw) drawTracked(ctx, eyebrow, 0, y + 12, 2.2, pad);
     y += 24 + 6;
-    text(s.title, `600 58px ${FONT}`, '#ffffff', pad, 66);
+    // A long name in a narrow sheet steps down rather than running past the edge.
+    ctx.font = `600 58px ${FONT}`;
+    const ts = Math.min(58, Math.floor((58 * inner) / Math.max(1, ctx.measureText(s.title).width)));
+    text(s.title, `600 ${ts}px ${FONT}`, '#ffffff', pad, 66 * (ts / 58));
     y += 6;
     ctx.font = `400 24px ${FONT}`;
     for (const l of wrapText(ctx, s.body, inner)) text(l, `400 24px ${FONT}`, 'rgba(245,245,247,0.72)', pad, 33);
@@ -377,7 +362,11 @@ export function specSheetTexture(s: SpecSheet, widthUnits: number, textScale = 1
     y += 1.5 + 22;
 
     for (let i = 0; i < s.rows.length; i++) {
-      const pair = s.rows[i].half && s.rows[i + 1]?.half ? [s.rows[i], s.rows[++i]] : [s.rows[i]];
+      // Half rows share a line only where both values fit their column; a narrow sheet stacks them.
+      ctx.font = value;
+      const fits = (r: SpecSheet['rows'][number]) => ctx.measureText(r.value).width + (r.dot ? 20 : 0) <= (inner - colGap) / 2;
+      const next = s.rows[i + 1];
+      const pair = next && (pairAll || (s.rows[i].half && next.half && fits(s.rows[i]) && fits(next))) ? [s.rows[i], s.rows[++i]] : [s.rows[i]];
       const colW = pair.length === 2 ? (inner - colGap) / 2 : inner;
       const top = y;
       let bottom = y;

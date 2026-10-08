@@ -8,9 +8,10 @@ html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
 body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helvetica Neue", sans-serif; color: #d9dce1; -webkit-font-smoothing: antialiased; }
 #stage { position: fixed; inset: 0; touch-action: none; }
 #stage canvas { display: block; width: 100%; height: 100%; outline: none; }
-#vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0,0,0,.55) 100%); }
-#hint { position: fixed; left: 0; right: 0; bottom: max(28px, env(safe-area-inset-bottom)); margin: 0; text-align: center; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: rgba(217,220,225,.55); opacity: 0; transition: opacity 0.35s var(--ease-out); pointer-events: none; }
-#hint.show { opacity: 1; transition-duration: 1.2s; }
+.hint { position: fixed; left: 0; right: 0; margin: 0; text-align: center; font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: rgba(217,220,225,.55); opacity: 0; transition: opacity 0.35s var(--ease-out); pointer-events: none; }
+#hint { bottom: max(28px, env(safe-area-inset-bottom)); }
+#hint-top { top: max(28px, env(safe-area-inset-top)); }
+.hint.show { opacity: 1; transition-duration: 1.2s; }
 /* Scrolls when the About and the list outgrow the viewport (the page itself is overflow: hidden). The first and
    last children's auto margins keep it centred when it fits, without clipping the top when it doesn't. */
 #fallback { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 24px; overflow-y: auto; }
@@ -18,44 +19,51 @@ body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helv
 #fallback > :last-child { margin-bottom: auto; }
 #fallback[hidden] { display: none; }
 .fallback { position: fixed; inset: 0; display: grid; place-content: center; margin: 0; }
-@media (prefers-reduced-motion: reduce) { #hint { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .hint { transition: none; } }
 .sr-only { position: fixed; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .sr-only:focus-within { /* keep offscreen; the 3D scene shows focus */ }
 
-/* Screenshot viewer. Opens on the iOS sheet curve; closes the same way, a touch faster. */
-#lightbox { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; }
+/* Screenshot viewer. Opens on the iOS sheet curve; closes the same way, a touch faster. The controls
+   are liquid glass like the chips in the scene: a frosted capsule with a lit top edge. */
+#lightbox { position: fixed; inset: 0; z-index: 10; --ease-swipe: cubic-bezier(0.22, 1, 0.36, 1); }
 #lightbox[hidden] { display: none; }
-.lb-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.78); -webkit-backdrop-filter: blur(28px) saturate(130%); backdrop-filter: blur(28px) saturate(130%); opacity: 0; transition: opacity 0.45s var(--ease-drawer); }
+.lb-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.8); -webkit-backdrop-filter: blur(28px) saturate(130%); backdrop-filter: blur(28px) saturate(130%); opacity: 0; transition: opacity 0.45s var(--ease-drawer); }
 #lightbox.open .lb-backdrop { opacity: 1; }
 #lightbox.closing .lb-backdrop { transition-duration: 0.36s; }
-.lb-figure { position: relative; margin: 0; width: 100%; height: 100%; display: grid; place-items: center; padding: max(56px, 6vh) max(16px, 7vw); box-sizing: border-box; pointer-events: auto; }
-.lb-img { max-width: none; max-height: none; object-fit: contain; border-radius: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 30px 90px rgba(0, 0, 0, 0.55), 0 0 0 0.5px rgba(255, 255, 255, 0.14); transform-origin: center; transition: transform 0.5s var(--ease-drawer), opacity 0.22s var(--ease-out), translate 0.3s var(--ease-out); will-change: transform; }
+#lightbox.dragging .lb-backdrop { transition: none; }
+.lb-figure { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 72px 7vw 116px; touch-action: none; user-select: none; -webkit-user-select: none; overflow: hidden; }
+.lb-img { grid-area: 1 / 1; max-width: none; max-height: none; object-fit: contain; border-radius: 12px; corner-shape: squircle; box-shadow: 0 2px 6px rgba(0, 0, 0, calc(0.35 * var(--lift, 1))), 0 30px 90px rgba(0, 0, 0, calc(0.55 * var(--lift, 1))), 0 0 0 0.5px rgba(255, 255, 255, calc(0.14 * var(--lift, 1))); transform-origin: center; transition: transform 0.5s var(--ease-drawer); will-change: transform, translate; -webkit-user-drag: none; }
 #lightbox.closing .lb-img { transition: transform 0.42s var(--ease-drawer); }
-/* Swap: leaves quickly the way it's going, arrives from the other side. */
-.lb-img.out-left, .lb-img.out-right { opacity: 0; transition: transform 0.5s var(--ease-drawer), opacity 0.14s var(--ease-out), translate 0.14s var(--ease-out); }
-.lb-img.out-left { translate: -24px 0; }
-.lb-img.out-right { translate: 24px 0; }
-.lb-img.in-right { opacity: 0; translate: 32px 0; transition: none; }
-.lb-img.in-left { opacity: 0; translate: -32px 0; transition: none; }
-.lb-btn { position: absolute; width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.1); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); color: #f5f5f7; font: 400 24px/1 ui-sans-serif, -apple-system, sans-serif; cursor: pointer; opacity: 0; scale: 0.96; transition: opacity 0.15s var(--ease-out), scale 0.15s var(--ease-out), background-color 0.15s ease, transform 0.16s var(--ease-out); }
-/* Controls follow the image in, and get out of its way first on close. */
-#lightbox.open .lb-btn { opacity: 1; scale: 1; transition-duration: 0.3s, 0.3s, 0.15s, 0.16s; transition-delay: 0.12s, 0.12s, 0s, 0s; }
-@media (hover: hover) and (pointer: fine) { .lb-btn:hover { background-color: rgba(255, 255, 255, 0.18); } }
-.lb-btn:active { transform: scale(0.95); }
-.lb-btn:focus-visible { outline: 2px solid #f5f5f7; outline-offset: 2px; }
-.lb-prev { left: max(12px, 2vw); top: 50%; margin-top: -22px; }
-.lb-next { right: max(12px, 2vw); top: 50%; margin-top: -22px; }
-.lb-close { right: max(12px, 2vw); top: max(12px, 2vh); font-size: 16px; }
-.lb-label { position: absolute; bottom: max(14px, 2.5vh); left: 0; right: 0; margin: 0; text-align: center; color: rgba(245, 245, 247, 0.7); font: 500 12px/1 ui-sans-serif, -apple-system, sans-serif; letter-spacing: 0.08em; opacity: 0; transition: opacity 0.15s var(--ease-out); }
-#lightbox.open .lb-label { opacity: 1; transition-duration: 0.3s; transition-delay: 0.16s; }
-/* Phones: the image takes the width, so the arrows move down beside the counter (swipe works too). */
+.lb-spare { pointer-events: none; }
+
+.lb-glass { color: #f5f5f7; background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06)); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.42), inset 0 0 0 0.5px rgba(255, 255, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.38); }
+.lb-btn { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 20px; color: inherit; background: transparent; cursor: pointer; transition: background-color 0.15s ease, scale 0.16s var(--ease-out); -webkit-tap-highlight-color: transparent; }
+.lb-btn svg { display: block; }
+@media (hover: hover) and (pointer: fine) { .lb-btn:hover { background-color: rgba(255, 255, 255, 0.12); } }
+.lb-btn:active { scale: 0.9; background-color: rgba(255, 255, 255, 0.16); }
+.lb-btn:focus-visible { outline: 2px solid rgba(245, 245, 247, 0.9); outline-offset: 2px; }
+.lb-close { position: absolute; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); width: 44px; height: 44px; border-radius: 22px; }
+.lb-close.lb-glass { color: #f5f5f7; }
+.lb-bar { position: absolute; left: 50%; bottom: max(28px, calc(env(safe-area-inset-bottom) + 12px)); display: flex; align-items: center; gap: 6px; height: 52px; padding: 0 6px; border-radius: 26px; translate: -50% 0; }
+.lb-meta { display: grid; justify-items: center; gap: 6px; min-width: 120px; padding: 0 6px; }
+.lb-title { margin: 0; font: 600 13px/1 ui-sans-serif, -apple-system, "SF Pro Text", sans-serif; letter-spacing: -0.005em; color: rgba(245, 245, 247, 0.92); white-space: nowrap; }
+.lb-dots { display: flex; gap: 5px; height: 5px; }
+.lb-dots i { width: 5px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.3); transition: width 0.35s var(--ease-swipe), background-color 0.35s var(--ease-out); }
+.lb-dots i.on { width: 14px; background: rgba(255, 255, 255, 0.92); }
+#lightbox.single .lb-prev, #lightbox.single .lb-next, #lightbox.single .lb-dots { display: none; }
+#lightbox.single .lb-meta { padding: 0 14px; }
+
+/* Controls follow the image in (rising a little), and get out of its way first on close. A drag down fades them with the room. */
+.lb-bar, .lb-close { opacity: 0; transform: translateY(6px) scale(0.97); transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out); }
+.lb-close { transform: scale(0.94); }
+#lightbox.open .lb-bar, #lightbox.open .lb-close { opacity: var(--chrome, 1); transform: none; transition-duration: 0.34s; transition-delay: 0.1s; }
+#lightbox.dragging .lb-bar, #lightbox.dragging .lb-close { transition: none; }
+
+/* Phones: the image takes the screen between the close button and the bar. */
 @media (max-width: 640px) {
-  .lb-figure { padding: max(64px, env(safe-area-inset-top)) 16px max(88px, calc(env(safe-area-inset-bottom) + 72px)); }
-  .lb-prev, .lb-next { top: auto; margin-top: 0; bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px)); }
-  .lb-prev { left: 16px; }
-  .lb-next { right: 16px; }
-  .lb-label { bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px)); }
+  .lb-figure { padding: max(68px, calc(env(safe-area-inset-top) + 60px)) 12px max(96px, calc(env(safe-area-inset-bottom) + 80px)); }
+  .lb-bar { bottom: max(20px, calc(env(safe-area-inset-bottom) + 8px)); }
   .lb-close { top: max(12px, env(safe-area-inset-top)); right: 12px; }
 }
-@media (prefers-reduced-motion: reduce) { .lb-img, .lb-backdrop, .lb-btn, .lb-label, #lightbox.open .lb-btn, #lightbox.open .lb-label { transition: opacity 0.2s ease; transition-delay: 0s; scale: none; } }
-@media (prefers-reduced-transparency: reduce) { .lb-backdrop { background: rgba(0, 0, 0, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { .lb-img, .lb-backdrop, .lb-bar, .lb-close, #lightbox.open .lb-bar, #lightbox.open .lb-close { transition: opacity 0.2s ease; transition-delay: 0s; transform: none; } }
+@media (prefers-reduced-transparency: reduce) { .lb-backdrop { background: rgba(0, 0, 0, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; } .lb-glass { background: #2c2c2e; -webkit-backdrop-filter: none; backdrop-filter: none; } }

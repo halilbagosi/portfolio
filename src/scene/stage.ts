@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { Cadence } from '../anim/cadence';
 import { Spring } from '../anim/springs';
 import { ELEVATION, OUTER_D, OUTER_W, PIVOT, PORTRAIT, TOP_Y, WALL_H } from './box';
@@ -12,6 +11,30 @@ const REST_H = PORTRAIT ? OUTER_D * Math.sin(ELEVATION) + WALL_H * Math.cos(ELEV
 /** Space kept around an open section when the camera frames it from above. */
 const VIEW_MARGIN = 0.7;
 const tmpQ = new THREE.Quaternion();
+
+/**
+ * Studio environment for the steel: a soft sweep from one side to the other (a large softbox off
+ * to the left, dark card on the right) and nothing else. A gradient up or down would reflect across
+ * the flat lid as oval bands, but one along x only slides across it, so the lid gets a gentle
+ * diagonal sheen instead of a flat wash.
+ */
+function softEnvironment() {
+  const geo = new THREE.SphereGeometry(10, 128, 64);
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const bright = new THREE.Color(0.85, 0.85, 0.88);
+  const dark = new THREE.Color(0.22, 0.22, 0.24);
+  const c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i) / 10;
+    c.lerpColors(dark, bright, THREE.MathUtils.smoothstep(x, -1, 1));
+    c.toArray(colors, i * 3);
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const scene = new THREE.Scene();
+  scene.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+  return scene;
+}
 
 export interface ViewRect {
   x: number;
@@ -38,7 +61,10 @@ export class Stage {
   private orbitInv = new THREE.Quaternion();
   /** Where the lights sit with the box at rest; they circle with the camera. */
   private keyRest = new THREE.Vector3(-4, 10, 6);
-  readonly lidLightRest = new THREE.Vector3(0, 3, 0.5);
+  /** Low lights either side, raking across the chamfers so their edges catch a line of light. */
+  private rimRest = [new THREE.Vector3(-9, 2.5, 1), new THREE.Vector3(9, 2.5, -1)];
+  private readonly rims: THREE.DirectionalLight[];
+  readonly lidLightRest = new THREE.Vector3(0, 4.5, 0.5);
   /** The environment's sway with the cursor, before the orbit. */
   readonly envSway = new THREE.Euler();
   /** Scene behind the glass chips, re-rendered each frame they are visible. */
@@ -82,15 +108,16 @@ export class Stage {
 
     this.scene.background = new THREE.Color('#000000');
     const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this.scene.environment = pmrem.fromScene(softEnvironment(), 0.2).texture;
     this.scene.environmentIntensity = 0.85;
     pmrem.dispose();
 
     this.key = new THREE.DirectionalLight(0xffffff, 1.2);
     this.key.position.copy(this.keyRest);
-    this.lidLight = new THREE.PointLight(0xffffff, 22, 14, 1.4);
+    this.lidLight = new THREE.PointLight(0xffffff, 6, 16, 1.2);
     this.lidLight.position.copy(this.lidLightRest);
-    this.scene.add(this.key, this.lidLight);
+    this.rims = this.rimRest.map((p) => new THREE.DirectionalLight(0xffffff, 2.2).translateX(p.x));
+    this.scene.add(this.key, this.lidLight, ...this.rims);
 
     // Glass blurs what it shows, so its backdrop can be half resolution (a quarter of the pixels).
     this.backdrop = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: true });
@@ -205,6 +232,7 @@ export class Stage {
     around(this.restEye);
     around(this.key.position.copy(this.keyRest));
     around(this.lidLight.position.copy(this.lidLightRest));
+    this.rims.forEach((r, i) => around(r.position.copy(this.rimRest[i])));
     this.scene.environmentRotation.setFromQuaternion(tmpQ.setFromEuler(this.envSway).premultiply(inv));
   }
 

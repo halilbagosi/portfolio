@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Spring } from '../anim/springs';
 import { settings } from '../config/projects';
+import { type Quad } from '../anim/quad';
 import { CARD_RADIUS } from '../lightbox';
 import { sdRoundGLSL } from './shaders';
 
@@ -16,6 +16,8 @@ void main() {
 `;
 
 const SHADOW_PAD = 0.22;
+/** Seconds for a card the viewer has just returned to fade back in. */
+const HANDBACK = 0.09;
 
 const cardFrag = /* glsl */ `
 ${sdRoundGLSL}
@@ -76,10 +78,49 @@ const SLOT_ROT = [0, 0.045, -0.04, 0.07];
 
 /** How long each photo stays on top before the next flip, once it has arrived (s); set in the dashboard. */
 const DWELL = settings.motion.photoDwell;
-/** A flip: the top card slides aside for SWIPE s, dissolving over its last part, then fades in again at the back. */
-const SWIPE = 0.36;
-const DISSOLVE_FROM = 0.2;
-const RETURN_FADE = 0.3;
+/**
+ * A flip, all on timed curves (no springs, so nothing lurches off from rest or turns back mid-move):
+ * the top card eases aside for OUT s, dissolving as it goes, then fades in at the back already in
+ * place. The cards behind move up one slot along one eased curve, a beat after it starts leaving.
+ */
+const OUT = 0.56;
+const DISSOLVE_FROM = 0.3; // share of OUT before the leaving card starts to dissolve
+const RETURN_FADE = 0.4;
+const MOVE = 0.6;
+const MOVE_DELAY = 0.07;
+
+/** CSS-style cubic-bezier easing (x1, y1, x2, y2), solved for y at x. */
+function bezier(x1: number, y1: number, x2: number, y2: number) {
+  const a = (p1: number, p2: number) => 1 - 3 * p2 + 3 * p1;
+  const b = (p1: number, p2: number) => 3 * p2 - 6 * p1;
+  const c = (p1: number) => 3 * p1;
+  const at = (t: number, p1: number, p2: number) => ((a(p1, p2) * t + b(p1, p2)) * t + c(p1)) * t;
+  const slope = (t: number, p1: number, p2: number) => 3 * a(p1, p2) * t * t + 2 * b(p1, p2) * t + c(p1);
+  return (x: number) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 6; i++) {
+      const s = slope(t, x1, x2);
+      if (Math.abs(s) < 1e-6) break;
+      t -= (at(t, x1, x2) - x) / s;
+    }
+    return at(THREE.MathUtils.clamp(t, 0, 1), y1, y2);
+  };
+}
+/** Leaving: a soft start, then a long glide out (as a hand would slide it off). */
+const easeLeave = bezier(0.35, 0, 0.15, 1);
+/** Moving up a slot: gentle in and out, like the sheet curve used elsewhere. */
+const easeMove = bezier(0.4, 0, 0.2, 1);
+
+/** Pose of a card at a (fractional) slot, so a move between slots is one continuous blend. */
+function slotPose(f: number) {
+  const i = Math.min(Math.floor(f), SLOT_ROT.length - 1);
+  const j = Math.min(i + 1, SLOT_ROT.length - 1);
+  const k = Math.min(f, SLOT_ROT.length - 1) - i;
+  const deep = Math.min(f, 3);
+  return { rot: SLOT_ROT[i] + (SLOT_ROT[j] - SLOT_ROT[i]) * k, y: -f * 0.022, s: 1 - deep * 0.025, shade: deep * 0.16 };
+}
 
 const loader = new THREE.TextureLoader();
 const plane = new THREE.PlaneGeometry(1, 1);
@@ -90,20 +131,48 @@ class Card {
   readonly mat: THREE.ShaderMaterial;
   readonly tex: THREE.Texture;
   aspect = 1;
-  // Critically damped: no wobble, and the next card settles forward in ~0.4s.
-  x = new Spring(0, 150, 1);
-  rot = new Spring(0, 150, 1);
-  y = new Spring(0, 200, 1);
-  s = new Spring(1, 170, 1);
-  shade = new Spring(0, 140, 1);
-  /** When this card last swiped off the top (stack clock); it stays on top while t < SWIPE. */
+  /** Resolves once the image has loaded (or failed) and its aspect is known. */
+  readonly loaded: Promise<void>;
+  /** Where the card sits in the stack, eased between slots (0 = top). */
+  slotF = 0;
+  private from = 0;
+  private to = 0;
+  private moveAt = -Infinity;
+  /** When this card last swiped off the top (stack clock); it is leaving while t < OUT. */
   flipAt = -Infinity;
 
+  /** Head for a slot: from wherever the card is now, along the move curve. */
+  goTo(slot: number, now: number, snap: boolean) {
+    if (snap) {
+      this.slotF = this.from = this.to = slot;
+      this.moveAt = -Infinity;
+      return;
+    }
+    if (slot === this.to) return;
+    this.from = this.slotF;
+    this.to = slot;
+    this.moveAt = now;
+  }
+
+  stepSlot(now: number) {
+    const k = easeMove(THREE.MathUtils.clamp((now - this.moveAt - MOVE_DELAY) / MOVE, 0, 1));
+    this.slotF = this.from + (this.to - this.from) * k;
+    return this.slotF;
+  }
+
   constructor(url: string) {
-    this.tex = loader.load(url, (t) => {
-      const img = t.image as HTMLImageElement;
-      this.aspect = img.width / img.height;
-    });
+    let done = () => {};
+    this.loaded = new Promise((r) => (done = r));
+    this.tex = loader.load(
+      url,
+      (t) => {
+        const img = t.image as HTMLImageElement;
+        this.aspect = img.width / img.height;
+        done();
+      },
+      undefined,
+      () => done(),
+    );
     this.tex.colorSpace = THREE.SRGBColorSpace;
     this.tex.anisotropy = 8;
     this.tex.generateMipmaps = true;
@@ -146,7 +215,19 @@ export class CardStack {
   private clock = 0;
   private snapNext = false;
   /** The top card is out in the full-screen viewer; hide it here so there is only one of it. */
-  held = false;
+  get held() {
+    return this._held;
+  }
+
+  /** Taking hold hides the card at once; letting go brings it back over HANDBACK seconds, shadow and all. */
+  set held(v: boolean) {
+    this._held = v;
+    if (v) this.heldK = 0;
+  }
+
+  private _held = false;
+  /** 0 while the viewer holds the card, easing to 1 once it is let go. */
+  private heldK = 1;
 
   constructor(readonly urls: string[], private reduced: boolean) {
     this.cards = urls.map((u) => new Card(u));
@@ -159,6 +240,11 @@ export class CardStack {
 
   get textures() {
     return this.cards.map((c) => c.tex);
+  }
+
+  /** The first photo has loaded, so leadAspect is final. */
+  get leadLoaded() {
+    return this.cards[0].loaded;
   }
 
   /** Width / height of the first photo, the one on top at rest (1 until it has loaded). */
@@ -181,22 +267,19 @@ export class CardStack {
     this.snapNext = true;
   }
 
-  /** Screen-space rect (CSS px) of the top card, for animating the viewer from it. */
-  topRect(camera: THREE.Camera, canvas: HTMLCanvasElement) {
+  /** Screen-space corners (CSS px, clockwise from top-left) of the top card, for flying the viewer to and from it. */
+  topQuad(camera: THREE.Camera, canvas: HTMLCanvasElement): Quad {
     const c = this.cards[this.top];
     const u = c.mat.uniforms;
     const fx = u.uSize.value.x / (u.uSize.value.x + 2 * u.uPad.value) / 2;
     const fy = u.uSize.value.y / (u.uSize.value.y + 2 * u.uPad.value) / 2;
     c.mesh.updateWorldMatrix(true, false);
     const r = canvas.getBoundingClientRect();
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (const [px, py] of [[-fx, -fy], [fx, -fy], [fx, fy], [-fx, fy]]) {
-      const v = new THREE.Vector3(px, py, 0).applyMatrix4(c.mesh.matrixWorld).project(camera);
-      const sx = r.left + ((v.x + 1) / 2) * r.width;
-      const sy = r.top + ((1 - v.y) / 2) * r.height;
-      x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy);
-    }
-    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+    const v = new THREE.Vector3();
+    return [[-fx, fy], [fx, fy], [fx, -fy], [-fx, -fy]].map(([px, py]) => {
+      v.set(px, py, 0).applyMatrix4(c.mesh.matrixWorld).project(camera);
+      return [r.left + ((v.x + 1) / 2) * r.width, r.top + ((1 - v.y) / 2) * r.height];
+    }) as Quad;
   }
 
   setHovered(v: boolean) {
@@ -222,19 +305,20 @@ export class CardStack {
   /** crop: 0..1, how far portrait screenshots are cut to their top half (small sections at rest). */
   update(dt: number, aw: number, ad: number, dim: number, presence = 1, crop = 0) {
     this.clock += dt;
+    if (!this._held) this.heldK = Math.min(1, this.heldK + dt / HANDBACK);
     if (this.hovered && this.clock > this.nextAt) {
       this.next();
-      this.nextAt = this.clock + SWIPE + DWELL;
+      this.nextAt = this.clock + OUT + DWELL;
     }
     const n = this.cards.length;
     this.cards.forEach((c, i) => {
       const slot = (i - this.top + n) % n;
       const t = this.clock - c.flipAt;
-      const out = t < SWIPE;
+      const out = t < OUT;
       // Leaving: fully there, then dissolving as it clears the stack. Back in place: fading in behind.
       const flipFade = out
-        ? 1 - THREE.MathUtils.smoothstep(t, DISSOLVE_FROM, SWIPE)
-        : THREE.MathUtils.smoothstep(t, SWIPE, SWIPE + RETURN_FADE);
+        ? 1 - THREE.MathUtils.smoothstep(t, OUT * DISSOLVE_FROM, OUT)
+        : THREE.MathUtils.smoothstep(t, OUT, OUT + RETURN_FADE);
       const fw = aw * 0.9;
       const fd = ad * 0.9;
       const shown = shownHeight(c.aspect, crop);
@@ -242,17 +326,26 @@ export class CardStack {
       const cw = Math.min(fw, fd * va);
       const cd = cw / va;
 
-      // Swipe: slide out to the right (lifted, turning a little) while still on top, then tuck in at the back.
-      c.x.target = out ? cw * 0.6 : 0;
-      c.rot.target = out ? -0.1 : SLOT_ROT[Math.min(slot, SLOT_ROT.length - 1)];
-      c.y.target = out ? 0.02 : -slot * 0.022;
-      c.s.target = out ? 0.98 : 1 - Math.min(slot, 3) * 0.025;
-      c.shade.target = out ? 0 : Math.min(slot, 3) * 0.16;
-      if (this.snapNext) for (const sp of [c.x, c.rot, c.y, c.s, c.shade]) sp.snap(sp.target);
-
-      const s = c.s.step(dt);
-      c.pivot.position.set(c.x.step(dt), c.y.step(dt), 0);
-      c.pivot.rotation.y = c.rot.step(dt);
+      // The leaving card has already taken its slot at the back; it only shows there once it has
+      // dissolved off the top, so it never slides back in across the stack.
+      c.goTo(slot, this.clock, this.snapNext || this.reduced || out);
+      const pose = slotPose(c.stepSlot(this.clock));
+      let s = pose.s;
+      let x = 0;
+      let rot = pose.rot;
+      let y = pose.y;
+      let shade = pose.shade;
+      if (out) {
+        // Off to the right: lifted a touch, turning a little, easing down to a stop as it fades.
+        const e = easeLeave(t / OUT);
+        x = cw * 0.62 * e;
+        rot = -0.11 * e;
+        y = 0.022 * Math.min(1, e * 2.5);
+        s = 1 - 0.025 * e;
+        shade = 0;
+      }
+      c.pivot.position.set(x, y, 0);
+      c.pivot.rotation.y = rot;
       const w = cw * s;
       const h = cd * s;
       c.mesh.scale.set(w + SHADOW_PAD * 2, h + SHADOW_PAD * 2, 1);
@@ -263,9 +356,9 @@ export class CardStack {
       u.uCrop.value = shown;
       u.uFade.value = (1 - shown) * 2;
       u.uDim.value = dim;
-      u.uShade.value = c.shade.step(dt);
+      u.uShade.value = shade;
       // Only the top few cards show; deeper ones fade rather than pop.
-      u.uOpacity.value = (slot <= 3 || out ? 1 : 0) * flipFade * presence * (this.held && slot === 0 ? 0 : 1);
+      u.uOpacity.value = (slot <= 3 || out ? 1 : 0) * flipFade * presence * (slot === 0 ? this.heldK : 1);
       c.mesh.visible = presence > 0.01 && cw > 0.05 && cd > 0.05;
       // Explicit draw order (after the shaft at -1, before labels and glass at 1+): back to front.
       c.mesh.renderOrder = out ? -0.4 : -0.9 + (n - slot) * 0.05;

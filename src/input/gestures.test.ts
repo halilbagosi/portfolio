@@ -15,6 +15,32 @@ describe('WheelSum', () => {
     expect(w.push(20, 0, 400)).toBe(0);
   });
 
+  it('ignores trackpad momentum after firing, however long it streams', () => {
+    const w = new WheelSum();
+    let fired = 0;
+    // A flick: a quick push, then ~1.5s of decaying momentum, events 16ms apart.
+    let t = 0;
+    for (let d = 60; d > 0.5; d *= 0.95, t += 16) fired += Math.abs(w.push(d, 0, t));
+    expect(fired).toBe(1);
+  });
+
+  it('takes a fresh push during momentum as the next scroll', () => {
+    const w = new WheelSum();
+    let t = 0;
+    let fired = 0;
+    for (let i = 0; i < 30; i++, t += 16) fired += Math.abs(w.push(60 * 0.92 ** i, 0, t));
+    for (let i = 0; i < 4; i++, t += 16) fired += Math.abs(w.push(50, 0, t));
+    expect(fired).toBe(2);
+  });
+
+  it('steps again for a mouse wheel that keeps turning, and after a pause', () => {
+    const w = new WheelSum();
+    let fired = 0;
+    for (let t = 0; t <= 800; t += 50) fired += Math.abs(w.push(100, 0, t));
+    expect(fired).toBe(2);
+    expect(w.push(100, 0, 1200)).toBe(1);
+  });
+
   it('counts line-mode deltas as 16px lines, both ways', () => {
     const w = new WheelSum();
     expect(w.push(-5, 1, 0)).toBe(-1);

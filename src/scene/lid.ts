@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
 import { settings } from '../config/projects';
-import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, TOP_Y } from './box';
+import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, roundedRectShape, TOP_Y } from './box';
 import { EtchSchedule } from './etch';
 import { beadBlastRoughness, engravingMaps, heightToNormal, type PxBox } from './textures';
 
@@ -87,21 +87,7 @@ totalEmissiveRadiance += mix(vec3(0.5, 0.04, 0.0), vec3(1.0, 0.5, 0.12), heat) *
 export type LidState = 'closed' | 'leaving' | 'gone' | 'returning';
 
 /** Lid outline: the box's rounded rectangle, slightly oversized. */
-function lidShape() {
-  const s = new THREE.Shape();
-  const x = -LW / 2;
-  const y = -LD / 2;
-  s.moveTo(x + LR, y);
-  s.lineTo(x + LW - LR, y);
-  s.quadraticCurveTo(x + LW, y, x + LW, y + LR);
-  s.lineTo(x + LW, y + LD - LR);
-  s.quadraticCurveTo(x + LW, y + LD, x + LW - LR, y + LD);
-  s.lineTo(x + LR, y + LD);
-  s.quadraticCurveTo(x, y + LD, x, y + LD - LR);
-  s.lineTo(x, y + LR);
-  s.quadraticCurveTo(x, y, x + LR, y);
-  return s;
-}
+const lidShape = () => roundedRectShape(LW, LD, LR, new THREE.Shape(), 24);
 
 /**
  * Space Gray anodised aluminium lid: bead-blasted top with a diamond-cut chamfer, laser-engraved
@@ -156,24 +142,24 @@ export class Lid {
       roughness: 1,
       roughnessMap: rough,
       normalMap: normal,
-      clearcoat: 0.15, // the anodised oxide layer
+      clearcoat: 0.06, // the anodised oxide layer
       clearcoatRoughness: 0.5,
       transparent: true,
     });
     // The laser's route: name, role, then the socials, each with its time budget.
     const px = eng.mask.getContext('2d')!.getImageData(0, 0, this.mapW, this.mapH).data;
-    const budget = (i: number) => (i === 0 ? 1.6 : i === 1 ? 0.8 : 1.1 / (eng.lines.length - 2));
+    const budget = (i: number) => (i === 0 ? 1.6 : i === 1 ? 0.8 : 1.1 / Math.max(1, eng.lines.length - 2));
     this.etch = new EtchSchedule(
       { data: px, width: this.mapW, height: this.mapH, stride: 4 },
       eng.lines.map((b, i) => ({ ...b, duration: budget(i) })),
       Math.max(2, Math.round(this.mapW / 700)),
     );
     this.cut = engrave(top, mask, revealTexture(this.etch));
-    // Diamond-cut edges: polished raw aluminium (cut through the anodising), so they flash as the cursor moves.
+    // The chamfer: raw aluminium, satin, so it only catches a soft line of light.
     const edge = new THREE.MeshPhysicalMaterial({
-      color: '#e4e6e9',
+      color: '#a9abae',
       metalness: 1,
-      roughness: 0.08,
+      roughness: 0.4,
       transparent: true,
     });
     this.mats = [top, edge];
@@ -184,7 +170,6 @@ export class Lid {
       bevelThickness: CHAMFER,
       bevelSize: CHAMFER,
       bevelSegments: 1,
-      curveSegments: 24,
     });
     geo.rotateX(-Math.PI / 2);
     const lid = new THREE.Mesh(geo, [top, edge]);

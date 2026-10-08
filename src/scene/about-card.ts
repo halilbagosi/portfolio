@@ -1,4 +1,5 @@
 import type { About, Social } from '../content/schema';
+import { CORNER_K, CORNER_N } from './shaders';
 import { drawTracked, FONT } from './textures';
 
 /** Layout pixels per world unit (the labels' scale), and the canvas's backing scale on top. */
@@ -339,10 +340,27 @@ export function fitAbout(input: CardInput, w: number, h: number, measure: Measur
   return { ops: base.ops, links: base.links, scale: 1, lw: w, lh: h };
 }
 
-/** roundRect where it exists; Safari before 16 lacks it, and square corners beat a card that fails to draw. */
+/** A rounded rectangle with superellipse corners (continuous curvature, like the box's own), as a path on ctx. */
 function rrect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  if (typeof ctx.roundRect === 'function') ctx.roundRect(x, y, w, h, r);
-  else ctx.rect(x, y, w, h);
+  r = Math.min(r * CORNER_K, w / 2, h / 2);
+  const k = 2 / CORNER_N;
+  const SEG = 12;
+  const corner = (cx: number, cy: number, a0: number) => {
+    for (let i = 0; i <= SEG; i++) {
+      const a = a0 + (i / SEG) * (Math.PI / 2);
+      const c = Math.cos(a);
+      const s = Math.sin(a);
+      const px = cx + r * Math.sign(c) * Math.abs(c) ** k;
+      const py = cy + r * Math.sign(s) * Math.abs(s) ** k;
+      if (a0 === -Math.PI / 2 && i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+  };
+  corner(x + w - r, y + r, -Math.PI / 2); // canvas y runs down: this one is the top right, then clockwise
+  corner(x + w - r, y + h - r, 0);
+  corner(x + r, y + h - r, Math.PI / 2);
+  corner(x + r, y + r, Math.PI);
+  ctx.closePath();
 }
 
 function portrait(ctx: CanvasRenderingContext2D, op: Extract<Op, { kind: 'photo' }>, initials: string, photo?: HTMLImageElement) {
