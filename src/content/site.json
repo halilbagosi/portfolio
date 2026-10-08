@@ -47,7 +47,7 @@
       {
         "label": "LinkedIn",
         "text": "LinkedIn",
-        "href": "https://www.linkedin.com/in/halil-bagosi"
+        "href": "https://linkedin.com/in/halil-bagosi-8361a9317"
       },
       {
         "label": "Email",
@@ -56,10 +56,10 @@
       }
     ],
     "about": {
-      "photo": "",
-      "bio": "Placeholder bio — edit in the dashboard. Two or three sentences on what you build, how you work and what you are looking for next.",
-      "years": 5,
-      "location": "City, Country",
+      "photo": "/shots/about-1.jpg",
+      "bio": "Mobile and Web Developer specializing in intuitive design and UX. Developing multiple native Apple platform applications as well as websites and cross-platform apps using native components. Detail-oriented, perfectionist and eager to improve and polish existing software.",
+      "years": 2,
+      "location": "Kavajë, Albania",
       "workPreference": "Remote · open to relocation",
       "available": true,
       "availability": "Open to new roles",
@@ -67,21 +67,28 @@
         "Swift",
         "SwiftUI",
         "TypeScript",
-        "three.js",
-        "WebGL"
+        "WebGL",
+        "AI Training",
+        "React Native",
+        "NodeJS",
+        "Java",
+        "C",
+        "C++",
+        "Python",
+        "HTML"
       ],
       "email": "halilbagosi24@icloud.com",
       "resume": "",
       "timeline": [
         {
-          "role": "Role title",
-          "org": "Company",
-          "period": "20XX–now"
+          "role": "AI Trainer",
+          "org": "micro1",
+          "period": "2026–now"
         },
         {
-          "role": "Role title",
-          "org": "Company",
-          "period": "20XX–20XX"
+          "role": "Web Developer",
+          "org": "Prime Solutions SH.P.K",
+          "period": "2025–2026"
         }
       ]
     }
@@ -119,8 +126,7 @@
         "/shots/snippets-2.jpg",
         "/shots/snippets-3.jpg",
         "/shots/snippets-4.jpg"
-      ],
-      "featured": true
+      ]
     },
     {
       "id": "palettes",
@@ -188,12 +194,13 @@
         "/shots/memorylane-2.jpg",
         "/shots/memorylane-3.jpg",
         "/shots/memorylane-4.jpg"
-      ]
+      ],
+      "featured": true
     },
     {
       "id": "artpage",
       "visible": true,
-      "title": "artpage",
+      "title": "Art Portfolio",
       "kind": "Website",
       "caption": "Art, photography and film portfolio",
       "purpose": "A triptych portfolio where art, photography and film each open into their own world.",
@@ -226,7 +233,7 @@
     },
     {
       "id": "portfolio",
-      "visible": true,
+      "visible": false,
       "title": "Portfolio",
       "kind": "Website",
       "caption": "One line about it",
