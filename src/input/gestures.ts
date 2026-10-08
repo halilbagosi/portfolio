@@ -3,18 +3,46 @@
  * the box is never also a click, and trackpad momentum never fires a scroll twice.
  */
 
-/** Wheel deltas add up within one gesture; past 70px it counts as one scroll. */
+/**
+ * Wheel deltas add up within one gesture; past 70px it counts as one scroll. After firing, the
+ * rest of that gesture is ignored: trackpad momentum keeps streaming decaying deltas for a second
+ * or more, which would otherwise add up to a second scroll. A pause, a clear new push (deltas
+ * jumping up mid-decay) or a steady mouse wheel that never decays starts the next one.
+ */
 export class WheelSum {
   private sum = 0;
   private at = -Infinity;
+  private locked = false;
+  private firedAt = 0;
+  private peak = 0;
+  private last = 0;
 
   push(deltaY: number, deltaMode: number, now: number): 1 | -1 | 0 {
-    if (now - this.at > 250) this.sum = 0;
+    const d = deltaY * (deltaMode === 1 ? 16 : 1);
+    const a = Math.abs(d);
+    const gap = now - this.at;
     this.at = now;
-    this.sum += deltaY * (deltaMode === 1 ? 16 : 1);
+    if (gap > 200) {
+      this.sum = 0;
+      this.locked = false;
+    } else if (this.locked) {
+      const since = now - this.firedAt;
+      const fresh = since > 250 && a > Math.max(this.last * 1.6, this.last + 8);
+      const steady = since > 700 && a >= this.peak * 0.9;
+      this.peak = Math.max(this.peak, a);
+      this.last = a;
+      if (!fresh && !steady) return 0;
+      this.locked = false;
+      this.sum = 0;
+    }
+    this.last = a;
+    this.sum += d;
     if (Math.abs(this.sum) <= 70) return 0;
     const dir = this.sum > 0 ? 1 : -1;
     this.sum = 0;
+    this.locked = true;
+    this.firedAt = now;
+    this.peak = a;
     return dir;
   }
 
@@ -46,7 +74,7 @@ export interface GestureHandlers {
   dragMove(x: number, y: number): void;
   dragEnd(): void;
   /** One scroll or swipe step: 1 = scroll down / swipe up, -1 = scroll up / swipe down. */
-  vertical(dir: 1 | -1, source: 'wheel' | 'swipe'): void;
+  vertical(dir: 1 | -1, source: 'wheel' | 'swipe' | 'key'): void;
   /** False while something else (the photo viewer) owns the input. */
   enabled(): boolean;
 }
@@ -121,7 +149,10 @@ export class Gestures {
     }
     if (!cancelled && d.touch && this.h.enabled()) {
       const dir = swipeDir(e.clientX - d.x, e.clientY - d.y, performance.now() - d.t, turned ? FLICK_MS : undefined);
-      if (dir) this.fire(dir, 'swipe');
+      if (dir) {
+        this.fire(dir, 'swipe');
+        this.swallowClick = true; // a browser may still send a click for it: that would be a second action
+      }
     }
   }
 

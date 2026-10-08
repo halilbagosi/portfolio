@@ -128,12 +128,28 @@ const unitPlane = new THREE.PlaneGeometry(1, 1);
 
 /** In a tall focused section, the share of its depth given to the facts above the screenshots. */
 export const TALL_SPLIT = 0.6;
+/** Side by side in a tall section (phone screenshots): the share of its width given to the facts. */
+export const SIDE_SPLIT = 0.56;
+/** Margin of the photo area inside an open section, and the gap between the facts and the photos below them. */
+const FOCUS_INSET = 0.12;
+const PHOTOS_GAP = 0.1;
+/** Below this width/height the lead screenshot is a phone's. */
+const PHONE_SHOT = 0.75;
 
 interface Label {
   mesh: THREE.Mesh;
   w: number;
   h: number;
 }
+
+export interface LabelScales {
+  kind: number;
+  title: number;
+  caption: number;
+}
+
+const NO_CAPS: LabelScales = { kind: Infinity, title: Infinity, caption: Infinity };
+const GAP_TEXT = 0.12;
 
 /** One recessed bento section: an endless lit shaft, a screenshot stack and a resting title. */
 export class Well {
@@ -217,8 +233,41 @@ export class Well {
     if (snap) [this.sx, this.sz, this.sw, this.sd].forEach((s) => s.snap(s.target));
   }
 
+  /**
+   * The section's place in the overview. Its resting look (portrait photos cropped or whole,
+   * photos below or beside the labels) is decided from this, never from a size passed mid-motion,
+   * so going in and out of a section is one continuous move instead of a few sequential snaps.
+   */
+  restRect: Rect = { x: 0, z: 0, w: 1, d: 1 };
+  /** Where the section is headed (set on each focus change): the labels make room for it from the start. */
+  private dest: Rect = { x: 0, z: 0, w: 1, d: 1 };
+  setDest(r: Rect) {
+    this.dest = r;
+  }
+
+  /** Label scales shared with sections that should match (the overview's smaller ones). */
+  caps: LabelScales = { kind: Infinity, title: Infinity, caption: Infinity };
+  /** The label scales this section would use on its own at rest, before the caps. */
+  readonly restFit: LabelScales = { kind: 1, title: 1, caption: 1 };
+
   /** Focused, this section is taller than wide (portrait): facts on top, screenshots below. */
   focusTall = false;
+  private sideLock: boolean | undefined;
+  /** Tall and stacked: how far down the open section the facts reach (set once the glass is built). */
+  factsDepth = 0;
+  /** Tall and stacked: the depth the open section needs for its facts and full-width shots. */
+  stackedDepth(w: number) {
+    return this.factsDepth + PHOTOS_GAP + (w - FOCUS_INSET * 2) / this.stack.leadAspect + FOCUS_INSET;
+  }
+  /**
+   * Tall and showing phone screenshots: facts and photos side by side instead, so a portrait shot
+   * gets the section's full height rather than a short strip under the facts. Settled the first
+   * time it is asked (when the glass is built), so the photos and the glass always agree.
+   */
+  focusSide(): boolean {
+    this.sideLock ??= this.focusTall && this.stack.leadAspect < PHONE_SHOT;
+    return this.sideLock;
+  }
 
   private isFocused = false;
   private hovered = false;
@@ -260,6 +309,50 @@ export class Well {
     (l.mesh.material as THREE.MeshBasicMaterial).opacity = opacity;
   }
 
+  /**
+   * Resting layout of a w x d section: kind, title and caption top-left, sized to the width they
+   * may use, and the photo area below them or beside them. Beside, the photo column is only as
+   * wide as the photo needs (at most half) and the labels get the rest.
+   */
+  private plan(w: number, d: number, crop: number, roomy: number, caps: LabelScales) {
+    const lerp = THREE.MathUtils.lerp;
+    const pad = Math.min(0.24, w * 0.1);
+    const top = -d / 2 + pad;
+    const left = -w / 2 + pad;
+    const kh = this.kind.h;
+    // Label sizes for a text width, and where the block ends (bottom edge, right edge).
+    const fitLabels = (textW: number) => {
+      const kk = Math.min(1, textW / this.kind.w, caps.kind);
+      const k = Math.min(1 - 0.4 * (1 - roomy), textW / this.title.w, (d - 0.14) / this.title.h, caps.title);
+      const th = this.title.h * k;
+      const titleZ = lerp(0, top + kh + 0.03 + th / 2, roomy);
+      const ck = Math.min(1, textW / this.caption.w, caps.caption);
+      const right = left + Math.max(this.title.w * k, Math.max(this.kind.w * kk, this.caption.w * ck) * roomy);
+      return { textW, kk, k, th, titleZ, ck, bottom: titleZ + th / 2 + (0.03 + this.caption.h * ck) * roomy, right };
+    };
+    const m = Math.min(0.2, w * 0.08, d * 0.1) * 0.6;
+    const aspect = this.stack.leadAspect / shownHeight(this.stack.leadAspect, crop);
+    const photoW = Math.min((d - m * 2) * aspect, w * 0.5 - m);
+    const below = fitLabels(w - pad * 2);
+    const beside = fitLabels(Math.max(w * 0.5 - pad, w - pad - m - photoW - GAP_TEXT));
+    const belowA = { x0: -w / 2 + m, x1: w / 2 - m, z0: below.bottom + GAP_TEXT, z1: d / 2 - m };
+    const besideA = { x0: beside.right + GAP_TEXT, x1: w / 2 - m, z0: -d / 2 + m, z1: d / 2 - m };
+    const shown = (a: typeof belowA) => {
+      const cw = Math.min(Math.max(0, a.x1 - a.x0), Math.max(0, a.z1 - a.z0) * aspect);
+      return (cw * cw) / aspect;
+    };
+    return {
+      top,
+      left,
+      belowA,
+      besideA,
+      belowShown: shown(belowA),
+      besideShown: shown(besideA),
+      /** Labels for a blend of the two arrangements (0 = photos below, 1 = beside). */
+      labels: (side: number) => fitLabels(lerp(below.textW, beside.textW, side)),
+    };
+  }
+
   /** eye: the camera at rest (no parallax); the photos sit deeper than the opening and are placed as seen from it. */
   update(dt: number, time: number, reveal: number, eye: THREE.Vector3) {
     const x = this.sx.step(dt);
@@ -283,60 +376,47 @@ export class Well {
     const lerp = THREE.MathUtils.lerp;
     const smooth = THREE.MathUtils.smoothstep;
 
-    // Resting labels: kind, title, caption top-left, sized to the width they may use.
-    // Returns their sizes and where the block ends (bottom edge, right edge).
-    const pad = Math.min(0.24, w * 0.1);
-    this.roomy.target = smooth(d, 0.75, 1.0);
-    if (!this.placed) this.roomy.snap(this.roomy.target);
-    const roomy = this.roomy.step(dt);
-    const top = -d / 2 + pad;
-    const left = -w / 2 + pad;
-    const kh = this.kind.h;
-    const labels = (textW: number) => {
-      const kk = Math.min(1, textW / this.kind.w);
-      const k = Math.min(1 - 0.4 * (1 - roomy), textW / this.title.w, (d - 0.14) / this.title.h);
-      const th = this.title.h * k;
-      const titleZ = lerp(0, top + kh + 0.03 + th / 2, roomy);
-      const ck = Math.min(1, textW / this.caption.w);
-      const right = left + Math.max(this.title.w * k, Math.max(this.kind.w * kk, this.caption.w * ck) * roomy);
-      return { textW, kk, k, th, titleZ, ck, bottom: titleZ + th / 2 + (0.03 + this.caption.h * ck) * roomy, right };
-    };
-
-    // Photos at rest: below the labels, or beside them, whichever shows the first photo bigger.
-    // Beside, the photo column is only as wide as the photo needs (at most half), the labels get
-    // the rest. Decided per section and eased, so a change animates rather than jumps.
-    const m = Math.min(0.2, w * 0.08, d * 0.1) * 0.6;
-    const GAP_TEXT = 0.12;
-    // Small sections at rest show portrait screenshots by their top half (fading out below), so
-    // they read at a useful size; opening the section, or a big section, shows them whole.
-    const crop = (1 - smooth(Math.min(w, d), 1.8, 2.4)) * (1 - f);
-    const aspect = this.stack.leadAspect / shownHeight(this.stack.leadAspect, crop);
-    const photoW = Math.min((d - m * 2) * aspect, w * 0.5 - m);
-    const below = labels(w - pad * 2);
-    const beside = labels(Math.max(w * 0.5 - pad, w - pad - m - photoW - GAP_TEXT));
-    const belowA = { x0: -w / 2 + m, x1: w / 2 - m, z0: below.bottom + GAP_TEXT, z1: d / 2 - m };
-    const besideA = { x0: beside.right + GAP_TEXT, x1: w / 2 - m, z0: -d / 2 + m, z1: d / 2 - m };
-    const shown = (a: typeof belowA) => {
-      const cw = Math.min(Math.max(0, a.x1 - a.x0), Math.max(0, a.z1 - a.z0) * aspect);
-      return (cw * cw) / aspect;
-    };
-    // A little stickiness, so a section near the tipping point doesn't flip back and forth mid-motion.
+    // The resting look is settled from the overview rect: photos below or beside the labels
+    // (whichever shows the first one bigger, with a little stickiness), and how far portrait
+    // shots are cropped. Mid-motion sizes would flip these partway through a move.
+    const rest = this.restRect;
+    const restCrop = 1 - smooth(Math.min(rest.w, rest.d), 1.8, 2.4);
+    const rp = this.plan(rest.w, rest.d, restCrop, smooth(rest.d, 0.75, 1.0), NO_CAPS);
     const stay = this.side.target > 0.5 ? 1.15 : 1 / 1.15;
-    this.side.target = shown(besideA) * stay > shown(belowA) ? 1 : 0;
-    if (!this.placed) this.side.snap(this.side.target);
+    this.side.target = rp.besideShown * stay > rp.belowShown ? 1 : 0;
+    const fit = rp.labels(this.side.target);
+    this.restFit.kind = fit.kk;
+    this.restFit.title = fit.k;
+    this.restFit.caption = fit.ck;
+
+    // Room for the kind and caption lines follows where the section is going, so the labels
+    // rearrange alongside the move rather than when its height happens to pass a threshold.
+    this.roomy.target = smooth(this.dest.d, 0.75, 1.0);
+    if (!this.placed) {
+      this.roomy.snap(this.roomy.target);
+      this.side.snap(this.side.target);
+    }
     this.placed = true;
+    const roomy = this.roomy.step(dt);
     const side = this.side.step(dt);
-    const text = labels(lerp(below.textW, beside.textW, side));
+    // Small sections at rest show portrait screenshots by their top half (fading out below), so
+    // they read at a useful size; opening the section shows them whole. Eased in the square of the
+    // fold, so the shown part's widening aspect never outpaces the area shrinking around it (no swell).
+    const crop = restCrop * (1 - f) ** 2;
+    const lp = this.plan(w, d, crop, roomy, this.caps);
+    const { top, left } = lp;
+    const kh = this.kind.h;
+    const text = lp.labels(side);
     const restA = {
-      x0: lerp(belowA.x0, besideA.x0, side),
-      x1: belowA.x1,
-      z0: lerp(belowA.z0, besideA.z0, side),
-      z1: belowA.z1,
+      x0: lerp(lp.belowA.x0, lp.besideA.x0, side),
+      x1: lp.belowA.x1,
+      z0: lerp(lp.belowA.z0, lp.besideA.z0, side),
+      z1: lp.belowA.z1,
     };
     const focA =
-      this.focusTall
-        ? { x0: -w / 2 + 0.12, x1: w / 2 - 0.12, z0: -d / 2 + d * TALL_SPLIT, z1: d / 2 - 0.12 }
-        : { x0: -w / 2 + w * 0.5, x1: w / 2 - 0.12, z0: -d / 2 + 0.12, z1: d / 2 - 0.12 };
+      this.focusTall && !this.sideLock
+        ? { x0: -w / 2 + FOCUS_INSET, x1: w / 2 - FOCUS_INSET, z0: -d / 2 + (this.factsDepth ? this.factsDepth + PHOTOS_GAP : d * TALL_SPLIT), z1: d / 2 - FOCUS_INSET }
+        : { x0: -w / 2 + w * (this.sideLock ? SIDE_SPLIT : 0.5), x1: w / 2 - 0.08, z0: -d / 2 + 0.12, z1: d / 2 - 0.12 };
     const x0 = lerp(restA.x0, focA.x0, f);
     const x1 = lerp(restA.x1, focA.x1, f);
     const z0 = lerp(restA.z0, focA.z0, f);
@@ -347,8 +427,17 @@ export class Well {
     const reach = (eye.y - depth) / Math.max(eye.y - TOP_Y, 0.01);
     const cx = x + (x0 + x1) / 2;
     const cz = z + (z0 + z1) / 2;
-    const aw = Math.max(0.01, x1 - x0) * reach;
-    const ad = Math.max(0.01, z1 - z0) * reach;
+    // A section growing back to its resting size passes through photo areas larger than its final
+    // one while the labels and photos are still settling into their arrangement, so the photos
+    // swelled and then shrank. Past the final area, only the share that is still open counts.
+    const fp = this.plan(rest.w, rest.d, restCrop, this.roomy.target, this.caps);
+    const fs = this.side.target;
+    const finW = fp.belowA.x1 - lerp(fp.belowA.x0, fp.besideA.x0, fs);
+    const finD = fp.belowA.z1 - lerp(fp.belowA.z0, fp.besideA.z0, fs);
+    const openK = Math.min(1, f * 4);
+    const capped = (v: number, cap: number) => (v > cap ? cap + (v - cap) * openK : v);
+    const aw = capped(Math.max(0.01, x1 - x0), Math.max(0.01, finW)) * reach;
+    const ad = capped(Math.max(0.01, z1 - z0), Math.max(0.01, finD)) * reach;
     this.stack.group.position.set(eye.x + (cx - eye.x) * reach - x, depth, eye.z + (cz - eye.z) * reach - z);
     const presence = smooth(Math.min(w, d), 0.6, 1.0);
     this.stack.setClip(x, z, w / 2 - 0.01, d / 2 - 0.01, Math.min(WELL_RADIUS, w / 2, d / 2));

@@ -3,10 +3,10 @@ import { Spring } from './anim/springs';
 import { projects, settings } from './config/projects';
 import { Gestures } from './input/gestures';
 import { Motion } from './input/motion';
-import { Orbit, type Face } from './input/orbit';
+import { Orbit, topElevation, type Face } from './input/orbit';
 import { Pointer } from './input/pointer';
 import { Lightbox } from './lightbox';
-import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
+import { createBox, ELEVATION, GAP, INTERIOR_D, INTERIOR_W, isPortraitViewport, MAX_WELLS, OUTER_D, OUTER_W, PORTRAIT, TOP_Y } from './scene/box';
 import { aboutLines, contactLinks } from './scene/about-card';
 import { ChipSet } from './scene/chips';
 import { expandedLayout, focusSizes, packLayout, rectsFrom, restSizes, type Sizes } from './scene/layout';
@@ -18,12 +18,13 @@ import { Well } from './scene/well';
 
 const host = document.getElementById('stage')!;
 const hint = document.getElementById('hint')!;
+/** Above the box: how to open it. The flip and the other hints stay below it. */
+const hintTop = document.getElementById('hint-top')!;
 const a11y = document.getElementById('a11y')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touch = matchMedia('(pointer: coarse)').matches;
 
 function showFallback() {
-  document.getElementById('vignette')!.hidden = true;
   hint.hidden = true;
   const list = document.getElementById('fallback-list')!;
   for (const p of projects) {
@@ -58,8 +59,9 @@ const { scene, camera } = stage;
 const pointer = new Pointer(host, camera);
 const motion = new Motion();
 // The box in the hand: drags turn it, a flick up rolls it onto its back (the About card).
+const VIEW = new THREE.Vector3(0, Math.sin(ELEVATION), Math.cos(ELEVATION));
 const orbit = new Orbit(
-  new THREE.Vector3(0, Math.sin(ELEVATION), Math.cos(ELEVATION)),
+  VIEW,
   () => Math.PI / Math.max(1, host.clientHeight),
   reduced,
 );
@@ -67,6 +69,8 @@ const orbit = new Orbit(
 let pendingOpen = false;
 /** "Turn the box over" with the lid off: it turns once the lid is back on. */
 let pendingFlip = false;
+/** Swiping back from the About card with the lid off: the project to open once the box is upright. */
+let pendingFocus = -1;
 /** The face the camera is framed for: the overview (top) or the About card straight on (bottom). */
 let shownFace: Face = 'top';
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
@@ -74,7 +78,7 @@ const copy = settings.hints;
 let openHint = touch ? (motion.needsPermission ? copy.begin.touch : copy.open.touch) : copy.open.desktop;
 const closeHint = touch ? copy.close.touch : copy.close.desktop;
 const sectionHint = touch ? copy.section.touch : copy.section.desktop;
-hint.textContent = openHint;
+hintTop.textContent = openHint;
 const flipHint = touch ? copy.flip.touch : copy.flip.desktop;
 const backHint = touch ? copy.back.touch : copy.back.desktop;
 
@@ -87,10 +91,17 @@ function showHint(text: string) {
 function hideHint() {
   clearTimeout(swapTimer);
   hint.classList.remove('show');
+  hintTop.classList.remove('show');
+}
+/** The two hints for a box at rest with its lid on: open above it, and (until it has been turned) flip below. */
+function showRestHints() {
+  hintTop.textContent = openHint;
+  hintTop.classList.add('show');
+  if (!flippedOnce) showHint(flipHint);
 }
 /** Motion permission was asked: the open hint is now the plain one, but a hint already showing something else stays. */
 function permissionAsked() {
-  if (hint.textContent === openHint) hint.textContent = copy.open.touch;
+  if (hintTop.textContent === openHint) hintTop.textContent = copy.open.touch;
   openHint = copy.open.touch;
 }
 /** Cross-fades the hint to new text: out, swap, in. */
@@ -117,6 +128,8 @@ const closed = packLayout(n, INTERIOR_W, INTERIOR_D, GAP);
 const tiles = projects.slice(0, n).map((p, i) => {
   const t = new Well(p, i, reduced);
   t.setRect(closed[i], true);
+  t.restRect = closed[i];
+  t.setDest(closed[i]);
   const open = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP)[i];
   t.focusTall = open.d > open.w;
   scene.add(t.group);
@@ -129,6 +142,15 @@ const chipSets = projects.slice(0, n).map((p) => {
   return c;
 });
 const glassGroups = chipSets.map((c) => c.group);
+// The overview's smaller sections share one label size, set by whichever fits it least, so their
+// titles and captions line up instead of each shrinking to its own text. A tall box has no lead section.
+const matched = tiles.filter((_, k) => k > 0 || PORTRAIT);
+function matchLabels() {
+  if (matched.length < 2) return;
+  const caps = { kind: Infinity, title: Infinity, caption: Infinity };
+  for (const t of matched) for (const key of ['kind', 'title', 'caption'] as const) caps[key] = Math.min(caps[key], t.restFit[key]);
+  for (const t of matched) t.caps = caps;
+}
 const reveal = new Spring(0, 30, 1);
 
 // Layout motion: one spring per column width and row height (critically damped, ~0.45s).
@@ -152,8 +174,8 @@ function stepLayout(dt: number) {
 // Build every project's chips and warm shaders/textures while the lid is still on.
 function prewarm() {
   chipSets.forEach((c, k) => {
-    const r = expandedLayout(n, k, INTERIOR_W, INTERIOR_D, GAP)[k];
-    c.build(r.w, r.d);
+    const r = openLayout(k)[k];
+    c.build(r.w, r.d, tiles[k].focusSide());
     c.group.position.set(r.x, 0, r.z);
   });
   const vis = chipSets.map((c) => c.group.visible);
@@ -195,8 +217,9 @@ if (reopen) {
 const laser = reduced || reopen || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
 
 const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
-if (idle) idle(prewarm);
-else setTimeout(prewarm, 300);
+// After the lead screenshots have loaded: a phone shot's aspect picks how its section opens (see Well.focusSide).
+const leadsLoaded = Promise.race([Promise.all(tiles.map((t) => t.stack.leadLoaded)), new Promise((r) => setTimeout(r, 4000))]);
+void leadsLoaded.then(() => (idle ? idle(prewarm) : setTimeout(prewarm, 300)));
 const lightbox = new Lightbox();
 
 /** True from opening the viewer until its image has landed back on the card. */
@@ -209,7 +232,7 @@ function openViewer(k: number) {
     title: projects[k].title,
     urls: st.urls,
     index: st.topIndex,
-    from: () => st.topRect(camera, stage.renderer.domElement),
+    from: () => st.topQuad(camera, stage.renderer.domElement),
     onClose: (i) => st.setTop(i),
     onReturned: () => {
       st.held = false; // the image is back in place: the card takes over seamlessly
@@ -223,19 +246,36 @@ function openViewer(k: number) {
 // ---- Focus (click / tap / keyboard) -------------------------------------------------
 let focused = -1;
 
+/**
+ * Sizes with section i open. In a tall box, a section with landscape shots takes only the depth
+ * its full-width facts and full-width shots need; the strips around it share the rest.
+ */
+function openSizes(i: number) {
+  const t = tiles[i];
+  if (!PORTRAIT || !t.focusTall || t.focusSide()) return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP);
+  const base = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP)[i];
+  chipSets[i].build(base.w, base.d, false);
+  t.factsDepth = chipSets[i].factsDepth;
+  return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP, 0.5, t.stackedDepth(base.w));
+}
+const openLayout = (i: number) => rectsFrom(n, openSizes(i), INTERIOR_W, INTERIOR_D, GAP);
+
 function layoutFor(i: number) {
-  return i < 0 ? closed : expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP);
+  return i < 0 ? closed : openLayout(i);
 }
 
 function setFocus(i: number) {
   if (i === focused) return;
   focused = i;
   const rects = layoutFor(i);
-  setSizes(i < 0 ? rest : focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP));
-  tiles.forEach((t, k) => t.setState(i >= 0 && k !== i, k === i));
+  setSizes(i < 0 ? rest : openSizes(i));
+  tiles.forEach((t, k) => {
+    t.setState(i >= 0 && k !== i, k === i);
+    t.setDest(rects[k]);
+  });
   chipSets.forEach((c, k) => {
     if (k === i) {
-      c.build(rects[k].w, rects[k].d);
+      c.build(rects[k].w, rects[k].d, tiles[k].focusSide());
       c.group.position.set(rects[k].x, 0, rects[k].z);
     }
     if (k !== i) c.setShown(false); // shown once its section has mostly opened (see frame loop)
@@ -276,15 +316,19 @@ for (const s of settings.socials) a11y.appendChild(a11yLink(`${s.label}: ${s.tex
 /** Turn the box onto its back (putting the lid on first if it is off). */
 function turnOver() {
   pendingOpen = false;
-  if (lid.state === 'closed') {
+  if (lid.state === 'gone') {
+    // Lid off: it turns over as it is.
+    if (focused >= 0) setFocus(-1);
+    orbit.setLimits(true, !canTurn());
+    orbit.flip('bottom');
+  } else if (lid.state === 'closed') {
     if (focused >= 0) {
       // A project button focused under the closed lid would keep the orbit locked; the lock is only re-read per frame.
       setFocus(-1);
       orbit.setLimits(true, !canTurn());
     }
     orbit.flip('bottom');
-  }
-  else {
+  } else {
     closeLid();
     // closeLid refuses while the viewer is up; then there is no lid on its way, so nothing to wait for.
     pendingFlip = lid.state === 'returning';
@@ -378,10 +422,26 @@ function openLink(href: string) {
  * swipe up, rolls the sealed box onto its back to show the About card, and up / swipe down rolls it
  * back. Opening the lid is a tap or click only.
  */
-function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe') {
+function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe' | 'key') {
   if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(permissionAsked);
+  if (lid.state === 'gone' && focused >= 0 && !viewerReturning) {
+    // A project is open: step through them in dashboard order. Before the first closes the lid,
+    // past the last rolls the box onto its back.
+    const next = focused + dir;
+    if (next < 0) closeLid();
+    else if (next >= n) turnOver();
+    else setFocus(next);
+    return;
+  }
+  if (lid.state === 'gone' && orbit.face === 'bottom' && dir < 0 && n > 0) {
+    orbit.flip('top'); // back from the About card to the last project
+    pendingFocus = n - 1;
+    return;
+  }
   if (dir > 0 && lid.state === 'closed') pendingOpen = false; // turning away from the top drops a tap's pending open
   if (lid.state === 'closed') orbit.flip(dir > 0 ? 'bottom' : 'top');
+  else if (lid.state === 'gone' && orbit.face === 'bottom') orbit.flip('top'); // lid off, on its back: scrolling up turns it back
+  else if (lid.state === 'gone' && dir > 0 && focused < 0) orbit.flip('bottom');
   else if (dir < 0) closeLid();
 }
 
@@ -453,19 +513,31 @@ function sectionUnderPointer() {
 }
 
 // Escape folds an open section back into the overview (unless it's closing the photo viewer).
+// Arrow down / up step like a scroll or swipe: through the projects, onto the About card and back.
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && focused >= 0 && !lightbox.isOpen && !viewerReturning) setFocus(-1);
+  if (lightbox.isOpen || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'Escape' && focused >= 0 && !viewerReturning) setFocus(-1);
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (!e.repeat) onVertical(e.key === 'ArrowDown' ? 1 : -1, 'key');
+  }
 });
 
 // ---- Loop ----------------------------------------------------------------------------
 const local = new THREE.Vector3();
 const tiltCursor = new THREE.Vector3();
+/** How far above the lid the cursor's light hangs. */
+const LIGHT_H = 4.2;
+const LIGHT_REACH = 1.15;
+const lightAim = new THREE.Vector3();
+const lightPos = new THREE.Vector3();
 // Dev convenience: /#open starts with the lid already off.
 if (import.meta.env.DEV && location.hash.startsWith('#open')) {
   lid.skip();
   reveal.snap(1);
   const k = Number(location.hash.slice(6));
-  if (location.hash.length > 5 && k >= 0 && k < n) {
+  // Once the lead shots are in, so the section opens in the layout their aspect picks.
+  if (location.hash.length > 5 && k >= 0 && k < n) void leadsLoaded.then(() => {
     setFocus(k); // e.g. #open-1 focuses project 1
     // Fast-forward every spring to rest so captures show the settled state.
     for (let i = 0; i < 3; i++) {
@@ -475,7 +547,7 @@ if (import.meta.env.DEV && location.hash.startsWith('#open')) {
       chipSets[k].setShown(true);
       chipSets[k].update(3, null, stage.pxPerUnit);
     }
-  }
+  });
 }
 
 // Dev convenience: /#about starts with the box on its back, showing the About card.
@@ -505,9 +577,8 @@ let closeHintAt = 0;
 let closeHintTill = 0;
 /** After closing: bring the open hint back once the lid has settled. */
 let openHintAt = 0;
-/** Lid on, until the box has been turned over once: the open hint takes turns with how to turn it. */
+/** Lid on, until the box has been turned over once: the flip hint shows under the open hint. */
 let flippedOnce = false;
-let cycleAt = 0;
 /** On its back: how to turn it back, once. */
 let backHintShown = false;
 let backHintTill = 0;
@@ -562,9 +633,17 @@ function frame(stamp?: number) {
   }
   // Turning: free with the lid on, above the rim with it off, not while a section is open or the
   // lid is moving.
-  orbit.setLimits(lid.state === 'closed', !canTurn());
+  orbit.setLimits(true, !canTurn());
   orbit.update(dt);
-  if (orbit.dragging) pendingOpen = pendingFlip = false; // grabbed again while coming back: the hand wins
+  if (orbit.dragging) {
+    pendingOpen = pendingFlip = false;
+    pendingFocus = -1;
+  }
+  if (pendingFocus >= 0 && orbit.atRest && orbit.face === 'top') {
+    const k = pendingFocus;
+    pendingFocus = -1;
+    if (lid.state === 'gone') setFocus(k);
+  }
   if (pendingOpen && orbit.atRest && orbit.face === 'top') {
     pendingOpen = false;
     openLid();
@@ -587,7 +666,20 @@ function frame(stamp?: number) {
   const par = reduced ? 0 : settings.motion.parallax;
   stage.setParallax(ambX * par, ambY * par);
   // Cursor shapes the steel only: the light slides above the lid, env rotates with it.
-  stage.lidLightRest.set(ambX * 6, 3.0, -ambY * 4 + 0.5);
+  // The light sits right over the point of the lid under the cursor (the box's centre when the
+  // cursor has left, the tilt's sweep on touch), eased so it glides rather than snaps.
+  if (!touch && pointer.inside && ambientIn > 0) {
+    pointer.onPlane(TOP_Y, lightAim);
+    lightAim.x = THREE.MathUtils.clamp(lightAim.x, -OUTER_W / 2, OUTER_W / 2);
+    lightAim.z = THREE.MathUtils.clamp(lightAim.z, -OUTER_D / 2, OUTER_D / 2);
+  } else lightAim.set(ambX * OUTER_W * 0.5, 0, -ambY * OUTER_D * 0.5);
+  // The glow on rough metal skews toward the middle of the lid, so aim past the cursor.
+  lightAim.x *= LIGHT_REACH;
+  lightAim.z *= LIGHT_REACH;
+  const lk = 1 - Math.exp(-dt * 12);
+  lightPos.x += (lightAim.x - lightPos.x) * lk;
+  lightPos.z += (lightAim.z - lightPos.z) * lk;
+  stage.lidLightRest.set(lightPos.x, LIGHT_H, lightPos.z);
   stage.envSway.set(-ambY * 0.15, ambX * 0.6, 0);
   stage.update(dt);
   box.shell.uSheen.value = ambX * OUTER_W * 0.45;
@@ -603,14 +695,18 @@ function frame(stamp?: number) {
   const hovered = !touch && pointer.inside && lid.state === 'gone' && !lightbox.isOpen ? sectionUnderPointer() : -1;
   tiles.forEach((t, k) => t.setHover(k === hovered && k !== focused));
   stepLayout(dt);
-  tiles.forEach((t) => t.update(dt, time, rv, stage.restEye));
+  // Turned away from above, the open wells would show through the walls and the base: they fade out first.
+  const above = THREE.MathUtils.smoothstep(topElevation(orbit.quaternion, VIEW), 0.04, 0.3);
+  const rvSeen = rv * above;
+  tiles.forEach((t) => t.update(dt, time, rvSeen, stage.restEye));
+  matchLabels(); // from this frame's fits (they change only as the photos load)
   const tu = box.top.uniforms;
   tu.uCount.value = n;
   tiles.forEach((t, k) => {
     const r = t.rect;
     tu.uRects.value[k].set(r.x, r.z, r.w, r.d);
     tu.uCol.value[k].set(t.project.glow[0]);
-    tu.uI.value[k] = t.glowIntensity * rv;
+    tu.uI.value[k] = t.glowIntensity * rvSeen;
   });
 
   // Hover cursor for the glass: the pointer on desktop; on touch, tilting the phone sweeps a
@@ -657,7 +753,7 @@ function frame(stamp?: number) {
 
   // Lid fully on: nothing inside can be seen. Hidden, so the depth-ignoring shafts and the deep
   // cards can't show through the walls or the bottom while the box is turned.
-  const sealed = lid.state === 'closed';
+  const sealed = lid.state === 'closed' || above <= 0;
   box.table.visible = !sealed;
   for (const t of tiles) t.group.visible = !sealed;
 
@@ -665,11 +761,12 @@ function frame(stamp?: number) {
   if (focused >= 0) sectionOpened = true;
   if (lid.state !== 'gone') lidOffAt = 0;
   else if (!lidOffAt) lidOffAt = time;
-  if (!sectionOpened && !sectionHintOn && lidOffAt && time - lidOffAt > 0.6) {
+  const lidOffTop = orbit.face === 'top' && orbit.atRest;
+  if (!sectionOpened && !sectionHintOn && lidOffAt && lidOffTop && time - lidOffAt > 0.6) {
     sectionHintOn = true;
     showHint(sectionHint);
   }
-  if (sectionHintOn && (focused >= 0 || lid.state !== 'gone')) {
+  if (sectionHintOn && (focused >= 0 || lid.state !== 'gone' || !lidOffTop)) {
     sectionHintOn = false;
     hideHint();
   }
@@ -707,17 +804,11 @@ function frame(stamp?: number) {
   if (orbit.engaged && hintShown && lid.state === 'closed') openHintAt = time + 1.2;
   if (openHintAt && time > openHintAt && restingTop) {
     openHintAt = 0;
-    showHint(openHint);
-    cycleAt = time + 4;
+    showRestHints();
   }
   if (!hintShown && introDone && restingTop) {
     hintShown = true;
-    showHint(openHint);
-    cycleAt = time + 4;
-  }
-  if (restingTop && !flippedOnce && cycleAt && time > cycleAt && hint.classList.contains('show')) {
-    cycleAt = time + 4;
-    swapHint(hint.textContent === openHint ? flipHint : openHint);
+    showRestHints();
   }
   if (orbit.face === 'bottom' && orbit.atRest && !backHintShown) {
     backHintShown = true;

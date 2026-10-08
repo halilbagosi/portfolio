@@ -50,8 +50,12 @@ export function restSizes(n: number, W: number, D: number, gap: number): Sizes {
   };
 }
 
-/** Focused sizes: the project's column and row take nearly everything; the rest become slim strips. */
-export function focusSizes(n: number, index: number, W: number, D: number, gap: number, strip = 0.5): Sizes {
+/**
+ * Focused sizes: the project's column and row take nearly everything; the rest become slim strips.
+ * want: the depth the focused row needs, when less than everything. The strips share what it
+ * leaves, up to maxStrip each, so a short section leaves its neighbours a little more room.
+ */
+export function focusSizes(n: number, index: number, W: number, D: number, gap: number, strip = 0.5, want?: number, maxStrip = 0.66): Sizes {
   const s = structure(n, D > W);
   if (n <= 1) return restSizes(n, W, D, gap);
   const fc = s.findIndex((col) => col.includes(index));
@@ -62,7 +66,9 @@ export function focusSizes(n: number, index: number, W: number, D: number, gap: 
       if (c !== fc) return col.map(() => split(D, gap, col.length));
       const usableD = D - gap * (col.length - 1);
       // A long single column (portrait, many projects) shares at most 45% among its strips.
-      const st = Math.min(strip, (usableD * 0.45) / Math.max(1, col.length - 1));
+      const k = Math.max(1, col.length - 1);
+      let st = Math.min(strip, (usableD * 0.45) / k);
+      if (want !== undefined && col.length > 1) st = Math.min(Math.max(st, (usableD - want) / k), maxStrip);
       return col.map((p) => (p === index ? usableD - st * (col.length - 1) : st));
     }),
   };

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { basicVert, sdRoundGLSL } from './shaders';
+import { basicVert, CORNER_K, CORNER_N, sdRoundGLSL } from './shaders';
 
 /**
  * Portrait screens (phones) get a tall, narrow box with the projects stacked as rows, seen from
@@ -33,10 +33,18 @@ export const MAX_WELLS = 12;
 /** Camera elevation, shared so deep content can be offset to look centred in its opening. */
 export const ELEVATION = THREE.MathUtils.degToRad(PORTRAIT ? 64 : 57);
 
-/** Points around a rounded rectangle (x, z), counter-clockwise seen from above. */
+/** A point on a superellipse corner of radius r about (cx, cz), at angle a (0 at +x, counter-clockwise). */
+function cornerPoint(cx: number, cz: number, r: number, a: number, out: number[]) {
+  const c = Math.cos(a);
+  const s = Math.sin(a);
+  const k = 2 / CORNER_N;
+  out.push(cx + r * Math.sign(c) * Math.abs(c) ** k, cz + r * Math.sign(s) * Math.abs(s) ** k);
+}
+
+/** Points around a rounded rectangle (x, z), counter-clockwise seen from above. Corners are superellipses. */
 export function roundedRing(w: number, d: number, r: number, seg = 10, out: number[] = []) {
   out.length = 0;
-  r = Math.max(0.001, Math.min(r, w / 2, d / 2));
+  r = Math.max(0.001, Math.min(r * CORNER_K, w / 2, d / 2));
   const corners: [number, number, number][] = [
     [w / 2 - r, d / 2 - r, 0],
     [-w / 2 + r, d / 2 - r, Math.PI / 2],
@@ -45,8 +53,7 @@ export function roundedRing(w: number, d: number, r: number, seg = 10, out: numb
   ];
   for (const [cx, cz, a0] of corners) {
     for (let i = 0; i <= seg; i++) {
-      const a = a0 + (i / seg) * (Math.PI / 2);
-      out.push(cx + Math.cos(a) * r, cz + Math.sin(a) * r);
+      cornerPoint(cx, cz, r, a0 + (i / seg) * (Math.PI / 2), out);
     }
   }
   return out;
@@ -82,20 +89,25 @@ export function updateTube(g: THREE.BufferGeometry, w: number, d: number, r: num
   g.computeBoundingSphere();
 }
 
-/** Rounded-rectangle outline on a shape or path (x, y), centred. */
-export function roundedRectShape<T extends THREE.Path>(w: number, d: number, r: number, path: T): T {
+/** Rounded-rectangle outline on a shape or path (x, y), centred, with superellipse corners. */
+export function roundedRectShape<T extends THREE.Path>(w: number, d: number, r: number, path: T, seg = 16): T {
   const x = -w / 2;
   const y = -d / 2;
-  r = Math.max(0.0001, r);
-  path.moveTo(x + r, y);
-  path.lineTo(x + w - r, y);
-  path.quadraticCurveTo(x + w, y, x + w, y + r);
-  path.lineTo(x + w, y + d - r);
-  path.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
-  path.lineTo(x + r, y + d);
-  path.quadraticCurveTo(x, y + d, x, y + d - r);
-  path.lineTo(x, y + r);
-  path.quadraticCurveTo(x, y, x + r, y);
+  r = Math.min(Math.max(0.0001, r * CORNER_K), w / 2, d / 2);
+  const pts: number[] = [];
+  // Counter-clockwise from the bottom-right corner, as the path is drawn.
+  const corners: [number, number, number][] = [
+    [x + w - r, y + r, -Math.PI / 2],
+    [x + w - r, y + d - r, 0],
+    [x + r, y + d - r, Math.PI / 2],
+    [x + r, y + r, Math.PI],
+  ];
+  // A square corner (the table's outer edge) is just one point.
+  const n = r < 0.001 ? 0 : seg;
+  for (const [cx, cy, a0] of corners) for (let i = 0; i <= n; i++) cornerPoint(cx, cy, r, a0 + (i / (n || 1)) * (Math.PI / 2), pts);
+  path.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) path.lineTo(pts[i], pts[i + 1]);
+  path.lineTo(pts[0], pts[1]);
   return path;
 }
 
@@ -137,11 +149,17 @@ function createShell() {
       void main() {
         // Shade the box as it is seen: turned by the orbit, so the lit side stays put as it turns.
         // Flat-ish normal from screen derivatives: which way this bit of wall faces in plan.
-        vec3 n = uOrbit * normalize(cross(dFdx(vWorld), dFdy(vWorld)));
+        // The outline's own smooth normal (not screen derivatives: those light every corner facet flat, as strips).
+        vec2 q = abs(vWorld.xz) - vec2(${(OUTER_W / 2).toFixed(4)}, ${(OUTER_D / 2).toFixed(4)}) + ${Math.min(OUTER_R * CORNER_K, OUTER_W / 2, OUTER_D / 2).toFixed(4)};
+        vec2 g = max(q, 0.0);
+        g = g * g; // the gradient of the 3-norm
+        if (dot(g, g) < 1e-12) g = q.x > q.y ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        g = normalize(g) * sign(vWorld.xz + 1e-6);
+        vec3 n = uOrbit * vec3(g.x, 0.0, g.y);
         vec3 p = uOrbit * (vWorld - uPivot);
         vec2 nxz = normalize(n.xz + 1e-5);
         float front = smoothstep(0.0, 1.0, abs(nxz.y));    // faces toward / away from the viewer
-        float left = smoothstep(0.2, 1.0, abs(nxz.x)) * step(p.x, 0.0); // the key light is up and left
+        float left = smoothstep(0.2, 1.0, abs(nxz.x)) * (1.0 - smoothstep(-0.8, 0.8, p.x)); // the key light is up and left
         float face = 0.45 + 0.55 * front + 0.2 * left;
 
         // Falloff into black: bright just under the edge that is up, gone well before the other.
@@ -153,7 +171,7 @@ function createShell() {
         // Rims: hairlines where the wall meets the top or the bottom, like a chamfer catching
         // light, on whichever edge is up.
         float rim = (1.0 - smoothstep(0.0, 0.035, vV)) + smoothstep(0.965, 1.0, vV);
-        col += vec3(0.06) * rim * (1.0 - h) * (0.6 + 0.4 * front);
+        col += vec3(0.03) * rim * (1.0 - h) * (0.6 + 0.4 * front);
         col += (hash(gl_FragCoord.xy) - 0.5) / 255.0; // dither: no banding in the long gradient
         gl_FragColor = vec4(max(col, 0.0), 1.0);
         #include <colorspace_fragment>
@@ -212,8 +230,8 @@ function createTopPlate() {
         float lip = (clamp(e + 0.5, 0.0, 1.0) - clamp(e - lw + 0.5, 0.0, 1.0)) * min(1.0, lipPx);
         float rim = clamp(1.0 - (-outer / pxo - 0.5) / max(1.0, 0.02 / pxo), 0.0, 1.0);
         vec3 col = vec3(0.0022) + vec3(0.001) * (p.y / uSize.y); // near-black, faint front-to-back falloff
-        col += vec3(0.05) * lip;                                 // lip of each opening
-        col += vec3(0.03) * rim;                                 // outer edge catch
+        col += vec3(0.025) * lip;                                 // lip of each opening
+        col += vec3(0.012) * rim;                                 // outer edge catch
         col += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
         gl_FragColor = vec4(col, cover);
         #include <colorspace_fragment>

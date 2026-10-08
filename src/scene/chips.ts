@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Spring } from '../anim/springs';
 import type { Project } from '../config/projects';
 import { TOP_Y } from './box';
-import { TALL_SPLIT } from './well';
+import { SIDE_SPLIT, TALL_SPLIT } from './well';
 import { basicVert, sdRoundGLSL } from './shaders';
 import { FONT, labelTexture, specSheetTexture, TEXT_LOD_BIAS, type ChipStyle } from './textures';
 import { kindTint, statusTint } from './tints';
@@ -67,6 +67,11 @@ void main() {
   #include <colorspace_fragment>
 }
 `;
+
+/** Stacked in a tall section: the facts' side inset and text scale (the size they read at on a phone). */
+const STACK_INSET = 0.18;
+const STACK_TEXT = 0.92;
+const FACTS_TOP = 0.22;
 
 const pill = (size: number, weight = 500, color = '#f5f5f7'): ChipStyle => ({
   font: `${weight} ${size}px ${FONT}`,
@@ -138,6 +143,8 @@ export class ChipSet {
   private chips: Chip[] = [];
   private shown = false;
   private shownFor = 0;
+  /** Built tall: how far down the section the facts reach (from its top edge), for the photos below. */
+  factsDepth = 0;
   private built = false;
 
   constructor(private project: Project, private shared: GlassShared) {
@@ -148,14 +155,18 @@ export class ChipSet {
     return this.chips.map((c) => c.mat.uniforms.uLabel.value as THREE.Texture);
   }
 
-  build(w: number, d: number) {
+  /** side: a tall section with its photos beside the facts (see Well.focusSide). */
+  build(w: number, d: number, side = false) {
     if (this.built) return;
     this.built = true;
     const p = this.project;
-    // Tall (portrait): the facts span the width above the screenshots, set larger for a phone.
+    // Tall (portrait): the facts span the whole width above the screenshots, fields two to a line,
+    // so the block is short and the landscape shots below can take the full width too; or, beside
+    // phone screenshots, they take the left column at full height.
     const tall = d > w;
-    const maxW = tall ? w - 0.5 : w * 0.44;
-    const ts = tall ? 1.35 : 1;
+    const stacked = tall && !side;
+    const maxW = stacked ? w - STACK_INSET * 2 : tall ? w * SIDE_SPLIT - 0.33 : w * 0.44;
+    const ts = stacked ? STACK_TEXT : tall ? 1.12 : 1;
     const sh = this.shared;
     const mk = (label: LabelTex, tint: string, amt: number, radius = 1, link?: string) => new Chip(label, sh, tint, amt, radius, link);
 
@@ -176,6 +187,7 @@ export class ChipSet {
         },
         maxW,
         ts,
+        stacked,
       ),
       '#8E8E93',
       0.04,
@@ -209,10 +221,11 @@ export class ChipSet {
     const rowH = rows.map((r) => Math.max(...r.map((c) => c.d)));
     const spacing = rows.map((_, i): number => (i === rows.length - 1 ? 0 : endsGroup[i] ? 0.16 : 0.08));
     const total = rowH.reduce((a, b) => a + b, 0) + spacing.reduce((a, b) => a + b, 0);
-    const fit = Math.min(1, (tall ? d * TALL_SPLIT - 0.3 : d - 0.42) / total);
+    const fit = Math.min(1, (stacked ? d * TALL_SPLIT - 0.3 : d - 0.42) / total);
     this.group.scale.set(fit, 1, fit); // flat panels: scale in plan only, keep their height
-    let z = tall ? (-d / 2 + 0.22) / fit : -total / 2;
-    const x0 = (-w / 2 + (tall ? 0.25 : 0.28)) / fit;
+    this.factsDepth = FACTS_TOP + total * fit;
+    let z = tall ? (-d / 2 + FACTS_TOP) / fit : -total / 2;
+    const x0 = (-w / 2 + (stacked ? STACK_INSET : tall ? 0.25 : 0.28)) / fit;
     let order = 0;
     rows.forEach((row, ri) => {
       let x = x0;
