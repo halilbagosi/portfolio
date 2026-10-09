@@ -122,7 +122,7 @@ function slotPose(f: number) {
   return { rot: SLOT_ROT[i] + (SLOT_ROT[j] - SLOT_ROT[i]) * k, y: -f * 0.022, s: 1 - deep * 0.025, shade: deep * 0.16 };
 }
 
-const loader = new THREE.TextureLoader();
+const loader = new THREE.ImageLoader();
 const plane = new THREE.PlaneGeometry(1, 1);
 
 class Card {
@@ -140,6 +140,24 @@ class Card {
   private moveAt = -Infinity;
   /** When this card last swiped off the top (stack clock); it is leaving while t < OUT. */
   flipAt = -Infinity;
+
+  /** Fetches the photo (once). Only the lead card loads up front; the rest wait their turn (see CardStack.loadRest). */
+  load() {
+    if (this.started) return this.loaded;
+    this.started = true;
+    loader.load(
+      this.url,
+      (img) => {
+        this.tex.image = img;
+        this.tex.needsUpdate = true;
+        this.aspect = img.width / img.height;
+        this.done();
+      },
+      undefined,
+      () => this.done(),
+    );
+    return this.loaded;
+  }
 
   /** Head for a slot: from wherever the card is now, along the move curve. */
   goTo(slot: number, now: number, snap: boolean) {
@@ -160,19 +178,12 @@ class Card {
     return this.slotF;
   }
 
-  constructor(url: string) {
-    let done = () => {};
-    this.loaded = new Promise((r) => (done = r));
-    this.tex = loader.load(
-      url,
-      (t) => {
-        const img = t.image as HTMLImageElement;
-        this.aspect = img.width / img.height;
-        done();
-      },
-      undefined,
-      () => done(),
-    );
+  private started = false;
+  private done = () => {};
+
+  constructor(private url: string) {
+    this.loaded = new Promise((r) => (this.done = r));
+    this.tex = new THREE.Texture();
     this.tex.colorSpace = THREE.SRGBColorSpace;
     this.tex.anisotropy = 8;
     this.tex.generateMipmaps = true;
@@ -232,6 +243,12 @@ export class CardStack {
   constructor(readonly urls: string[], private reduced: boolean) {
     this.cards = urls.map((u) => new Card(u));
     this.cards.forEach((c) => this.group.add(c.pivot));
+    this.cards[0].load();
+  }
+
+  /** Starts fetching the other photos, once the first screen no longer needs the bandwidth. */
+  loadRest() {
+    return Promise.all(this.cards.slice(1).map((c) => c.load()));
   }
 
   get meshes() {

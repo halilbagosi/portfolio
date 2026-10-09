@@ -146,6 +146,8 @@ export class ChipSet {
   /** Built tall: how far down the section the facts reach (from its top edge), for the photos below. */
   factsDepth = 0;
   private built = false;
+  private builtD = 0;
+  private tallBuilt = false;
 
   constructor(private project: Project, private shared: GlassShared) {
     this.group.visible = false;
@@ -159,6 +161,8 @@ export class ChipSet {
   build(w: number, d: number, side = false) {
     if (this.built) return;
     this.built = true;
+    this.builtD = d;
+    this.tallBuilt = d > w;
     const p = this.project;
     // Tall (portrait): the facts span the whole width above the screenshots, fields two to a line,
     // so the block is short and the landscape shots below can take the full width too; or, beside
@@ -240,6 +244,14 @@ export class ChipSet {
       }
       z += rowH[ri] + spacing[ri];
     });
+  }
+
+  /**
+   * Centre the glass on a section's rect. A tall section's facts hang from its top edge, and it may
+   * have been built against a deeper rect than the one it ended up with (see openSizes in main.ts).
+   */
+  place(r: { x: number; z: number; d: number }) {
+    this.group.position.set(r.x, 0, r.z + (this.tallBuilt ? (this.builtD - r.d) / 2 : 0));
   }
 
   setShown(v: boolean) {

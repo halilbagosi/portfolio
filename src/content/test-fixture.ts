@@ -5,6 +5,7 @@ export function validContent(): SiteContent {
   return {
     settings: {
       identity: { name: 'Ada Lovelace', role: 'Engineer', title: 'Ada — Engineer', description: 'Selected projects.' },
+      icon: { text: 'AL', background: '#111111', color: '#ffffff' },
       hints: {
         open: { desktop: 'Click to open', touch: 'Tap to open' },
         begin: { touch: 'Tap to begin' },

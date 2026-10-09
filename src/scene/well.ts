@@ -87,7 +87,6 @@ const shaftMat = () =>
         float spread = 0.7 + 0.3 * exp(-pow(hit.x / (half_.x * 1.1), 2.0));
         float catchL = smoothstep(0.0, 0.8, h) * exp(-h * 1.15);
         vec3 col = gc * catchL * 0.12 * uGlow * spread * facing;
-        col += vec3(0.012) * exp(-h * 40.0) * facing;  // faint light on the upper wall, just under the lip
 
         // Light suspended in the depth, gathered along the ray (soft, no surface to it).
         vec2 c = vec2(sin(uTime * 0.17 + uSeed) * 0.18, cos(uTime * 0.13 + uSeed) * 0.14) * uSize;

@@ -6,6 +6,11 @@
       "title": "Halil Bagosi — Software Engineer",
       "description": "Halil Bagosi, software engineer. Selected projects."
     },
+    "icon": {
+      "text": "HB",
+      "background": "#0b0b0d",
+      "color": "#ffffff"
+    },
     "hints": {
       "open": {
         "desktop": "Click To Open",

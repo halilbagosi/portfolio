@@ -69,8 +69,6 @@ const orbit = new Orbit(
 let pendingOpen = false;
 /** "Turn the box over" with the lid off: it turns once the lid is back on. */
 let pendingFlip = false;
-/** Swiping back from the About card with the lid off: the project to open once the box is upright. */
-let pendingFocus = -1;
 /** The face the camera is framed for: the overview (top) or the About card straight on (bottom). */
 let shownFace: Face = 'top';
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
@@ -176,14 +174,14 @@ function prewarm() {
   chipSets.forEach((c, k) => {
     const r = openLayout(k)[k];
     c.build(r.w, r.d, tiles[k].focusSide());
-    c.group.position.set(r.x, 0, r.z);
+    c.place(r);
   });
   const vis = chipSets.map((c) => c.group.visible);
   chipSets.forEach((c) => (c.group.visible = true));
   // Sealed under the lid the wells are hidden; show them for the warm-up (the frame re-hides them).
   tiles.forEach((t) => (t.group.visible = true));
   box.table.visible = true;
-  stage.warm([...tiles.flatMap((t) => t.stack.textures), ...chipSets.flatMap((c) => c.textures), underside.texture]);
+  stage.warm([...tiles.flatMap((t) => t.stack.textures.slice(0, 1)), ...chipSets.flatMap((c) => c.textures), underside.texture]);
   chipSets.forEach((c, k) => (c.group.visible = vis[k]));
 }
 // The box's shape is fixed per load (wide on landscape screens, tall on portrait ones). When the
@@ -220,6 +218,10 @@ const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => v
 // After the lead screenshots have loaded: a phone shot's aspect picks how its section opens (see Well.focusSide).
 const leadsLoaded = Promise.race([Promise.all(tiles.map((t) => t.stack.leadLoaded)), new Promise((r) => setTimeout(r, 4000))]);
 void leadsLoaded.then(() => (idle ? idle(prewarm) : setTimeout(prewarm, 300)));
+// The first screen only needs each stack's top photo; the rest are fetched after those land, then uploaded to the GPU.
+void leadsLoaded
+  .then(() => Promise.all(tiles.map((t) => t.stack.loadRest())))
+  .then(() => stage.warm(tiles.flatMap((t) => t.stack.textures)));
 const lightbox = new Lightbox();
 
 /** True from opening the viewer until its image has landed back on the card. */
@@ -276,7 +278,7 @@ function setFocus(i: number) {
   chipSets.forEach((c, k) => {
     if (k === i) {
       c.build(rects[k].w, rects[k].d, tiles[k].focusSide());
-      c.group.position.set(rects[k].x, 0, rects[k].z);
+      c.place(rects[k]);
     }
     if (k !== i) c.setShown(false); // shown once its section has mostly opened (see frame loop)
   });
@@ -431,11 +433,6 @@ function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe' | 'key') {
     if (next < 0) closeLid();
     else if (next >= n) turnOver();
     else setFocus(next);
-    return;
-  }
-  if (lid.state === 'gone' && orbit.face === 'bottom' && dir < 0 && n > 0) {
-    orbit.flip('top'); // back from the About card to the last project
-    pendingFocus = n - 1;
     return;
   }
   if (dir > 0 && lid.state === 'closed') pendingOpen = false; // turning away from the top drops a tap's pending open
@@ -637,12 +634,6 @@ function frame(stamp?: number) {
   orbit.update(dt);
   if (orbit.dragging) {
     pendingOpen = pendingFlip = false;
-    pendingFocus = -1;
-  }
-  if (pendingFocus >= 0 && orbit.atRest && orbit.face === 'top') {
-    const k = pendingFocus;
-    pendingFocus = -1;
-    if (lid.state === 'gone') setFocus(k);
   }
   if (pendingOpen && orbit.atRest && orbit.face === 'top') {
     pendingOpen = false;
@@ -687,7 +678,8 @@ function frame(stamp?: number) {
   underside.sheen = ambX * 0.35;
 
   lid.update(dt, time);
-  laser?.update(dt, stage.pxPerUnitAtOne);
+  // The etch runs on real time: with dt capped at 1/30 a slow device would play it in slow motion (a blank lid for ages).
+  laser?.update(Math.min(raw, 0.25), stage.pxPerUnitAtOne);
 
   reveal.target = lid.openness > 0.25 ? 1 : 0;
   const rv = reveal.step(dt);

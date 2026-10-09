@@ -90,8 +90,28 @@ export interface About {
   timeline: TimelineEntry[];
 }
 
+/** The browser-tab icon: a few letters on a rounded square. */
+export interface SiteIcon {
+  text: string;
+  background: string;
+  color: string;
+}
+export const MAX_ICON_TEXT = 3;
+
+/** The icon as an SVG document (also served inline as the page's favicon). */
+export function iconSvg({ text, background, color }: SiteIcon): string {
+  const t = text.trim().toUpperCase().replace(/[&<>"']/g, '');
+  const size = t.length <= 1 ? 64 : t.length === 2 ? 46 : 34;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${background}"/>` +
+    `<text x="50" y="50" dy=".35em" text-anchor="middle" font-family="-apple-system,Helvetica,Arial,sans-serif" font-weight="700" ` +
+    `font-size="${size}" letter-spacing="-1" fill="${color}">${t}</text></svg>`
+  );
+}
+
 export interface Settings {
   identity: { name: string; role: string; title: string; description: string };
+  icon: SiteIcon;
   hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair; flip: HintPair; back: HintPair };
   motion: { photoDwell: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
   socials: Social[];
@@ -137,7 +157,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
     issues.push({ path: 'settings', message: 'Settings are missing.' });
     return;
   }
-  const { identity, hints, motion, socials, about } = s;
+  const { identity, hints, motion, socials, about, icon } = s;
   if (!isObj(identity)) issues.push({ path: 'settings.identity', message: 'Identity is missing.' });
   else
     for (const k of ['name', 'role', 'title', 'description'])
@@ -166,6 +186,14 @@ function validateSettings(s: unknown, issues: Issue[]) {
     range('parallax', 0, 2);
     for (const k of ['lidKnock', 'topDownOnOpen'])
       if (typeof motion[k] !== 'boolean') issues.push({ path: `settings.motion.${k}`, message: 'Must be on or off.' });
+  }
+
+  if (!isObj(icon)) issues.push({ path: 'settings.icon', message: 'Icon is missing.' });
+  else {
+    if (!filled(icon.text) || (icon.text as string).trim().length > MAX_ICON_TEXT)
+      issues.push({ path: 'settings.icon.text', message: `Icon text needs 1 to ${MAX_ICON_TEXT} characters.` });
+    for (const k of ['background', 'color'])
+      if (typeof icon[k] !== 'string' || !HEX.test(icon[k] as string)) issues.push({ path: `settings.icon.${k}`, message: 'Needs a #rrggbb colour.' });
   }
 
   validateSocials(socials, issues);

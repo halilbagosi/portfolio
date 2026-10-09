@@ -4,7 +4,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
 import type { Plugin } from 'vite';
 import { nextPhotoName, shotFile, unusedPhotos } from '../src/content/photo-files';
-import { formatIssue, ID_PATTERN, validate, type SiteContent } from '../src/content/schema';
+import { formatIssue, iconSvg, ID_PATTERN, validate, type SiteContent } from '../src/content/schema';
 
 /**
  * The content dashboard's backend. Dev server only (configureServer never runs in a build), and
@@ -101,12 +101,13 @@ export function adminPlugin(): Plugin {
       order: 'pre',
       async handler(html) {
         if (!html.includes('{{site.')) return html;
-        const { identity } = (await readContent()).settings;
+        const { identity, icon } = (await readContent()).settings;
         const values: Record<string, string> = {
           title: identity.title,
           description: identity.description,
           name: identity.name,
           role: identity.role,
+          icon: `data:image/svg+xml,${encodeURIComponent(iconSvg(icon))}`,
           noscript: `${identity.name}, ${identity.role.toLowerCase()}. Enable JavaScript to open the box.`,
         };
         return html.replace(/\{\{site\.(\w+)\}\}/g, (token, key: string) => (key in values ? escapeHtml(values[key]) : token));

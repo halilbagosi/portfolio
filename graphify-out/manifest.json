@@ -1,7 +1,7 @@
 {
   ".claude/launch.json": {
-    "mtime": 1791424344.0192826,
-    "ast_hash": "88968d9ff0d0ab10c8e5f2d04ceaa34c",
+    "mtime": 1791475876.823981,
+    "ast_hash": "36c492c003051a0026a7f6fc048a4b71",
     "semantic_hash": ""
   },
   "package.json": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "src/admin/views/settings.ts": {
-    "mtime": 1791404163.9860625,
-    "ast_hash": "5eafa38986146ff0fd04c9a121bbeffa",
+    "mtime": 1791562699.1616666,
+    "ast_hash": "5c7d894c67fe0e6336b904e0e371406b",
     "semantic_hash": ""
   },
   "src/anim/springs.ts": {
@@ -110,18 +110,18 @@
     "semantic_hash": ""
   },
   "src/content/schema.ts": {
-    "mtime": 1791404163.9877048,
-    "ast_hash": "a9b47e4b9e05a7418ebba24a02a23c22",
+    "mtime": 1791562699.1587808,
+    "ast_hash": "d8efd30964d163a5592e1e5023609c4b",
     "semantic_hash": ""
   },
   "src/content/site.json": {
-    "mtime": 1791423163.9273129,
-    "ast_hash": "ffc9810f29dfe0f32ee810711ae17020",
+    "mtime": 1791562699.160381,
+    "ast_hash": "21629bc8dc5cc27ba047704f6f003f11",
     "semantic_hash": ""
   },
   "src/content/test-fixture.ts": {
-    "mtime": 1791404163.9880593,
-    "ast_hash": "2ca35a56f6c80f798c05847acb7d9bc6",
+    "mtime": 1791562699.1594653,
+    "ast_hash": "0324e5f0276e590ed909ad98fea6684d",
     "semantic_hash": ""
   },
   "src/input/motion.ts": {
@@ -135,23 +135,23 @@
     "semantic_hash": ""
   },
   "src/lightbox.ts": {
-    "mtime": 1791423481.9823914,
-    "ast_hash": "eb04c61d7d8e1f5cbd85c3e85ddbcd59",
+    "mtime": 1791455666.6884267,
+    "ast_hash": "401fc56282c4b26c2395fcfe3d886153",
     "semantic_hash": ""
   },
   "src/main.ts": {
-    "mtime": 1791424344.0142603,
-    "ast_hash": "d239141467c68af815d928bbed8eaf78",
+    "mtime": 1791562874.4482832,
+    "ast_hash": "c24e48ff1de74867e016d07bb56959f4",
     "semantic_hash": ""
   },
   "src/scene/box.ts": {
-    "mtime": 1791421334.206492,
+    "mtime": 1791455666.6897917,
     "ast_hash": "2a7877843de38013c2b6b3ae32a224f6",
     "semantic_hash": ""
   },
   "src/scene/chips.ts": {
-    "mtime": 1791424269.575442,
-    "ast_hash": "4fb4a6b4cfecb7e0691684e7ef5c08b4",
+    "mtime": 1791562780.8613296,
+    "ast_hash": "b7466e12382bd7aa8c7f025247a907b1",
     "semantic_hash": ""
   },
   "src/scene/layout.test.ts": {
@@ -160,32 +160,32 @@
     "semantic_hash": ""
   },
   "src/scene/layout.ts": {
-    "mtime": 1791424302.3738508,
+    "mtime": 1791455666.690948,
     "ast_hash": "06d60f877a5f097f1f160b5fd7d5602f",
     "semantic_hash": ""
   },
   "src/scene/lid.ts": {
-    "mtime": 1791421334.2050934,
+    "mtime": 1791455666.6912556,
     "ast_hash": "e82798733cd786c1af85b2fdf0c61af5",
     "semantic_hash": ""
   },
   "src/scene/shaders.ts": {
-    "mtime": 1791421322.6539063,
+    "mtime": 1791455666.6915014,
     "ast_hash": "0072eb4ff5de138db9a9addb9880012d",
     "semantic_hash": ""
   },
   "src/scene/stack.ts": {
-    "mtime": 1791423894.2255423,
-    "ast_hash": "b0ed396464300d29e911dd7198cf42b4",
+    "mtime": 1791475915.912749,
+    "ast_hash": "3b670336e80fc3d3297123b0029e50a6",
     "semantic_hash": ""
   },
   "src/scene/stage.ts": {
-    "mtime": 1791421334.206231,
-    "ast_hash": "c6dda43371442e46d922701e2cc362e8",
+    "mtime": 1791455666.6924028,
+    "ast_hash": "ec1b6a818f5717fd0e27886b2b1a65d8",
     "semantic_hash": ""
   },
   "src/scene/textures.ts": {
-    "mtime": 1791424256.6324956,
+    "mtime": 1791455666.6928494,
     "ast_hash": "82cbdf27b96face91d1f2d0e1fc7015c",
     "semantic_hash": ""
   },
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "src/scene/well.ts": {
-    "mtime": 1791424302.374398,
-    "ast_hash": "d81f0516d0165c1a8a617ea8ca9982de",
+    "mtime": 1791562888.4900596,
+    "ast_hash": "6b837237c7b41694a29a3851234708e0",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "vite/admin-plugin.ts": {
-    "mtime": 1791404163.994036,
-    "ast_hash": "70262fd14b71741182168ced0e0ab46f",
+    "mtime": 1791562721.1764884,
+    "ast_hash": "81080bce6c3c1a873d54b6b2ed9e533d",
     "semantic_hash": ""
   },
   ".github/workflows/deploy.yml": {
@@ -305,18 +305,13 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1791420963.8697429,
-    "ast_hash": "603d1c4029dc64751d0d4796478de603",
+    "mtime": 1791562699.1614184,
+    "ast_hash": "62fcff84b51dd6d88951c1c4f6d65e42",
     "semantic_hash": ""
   },
   "src/admin/admin.html": {
     "mtime": 1791277854.34845,
     "ast_hash": "79f7e99843d3221b8a21db011935e70e",
-    "semantic_hash": ""
-  },
-  "public/favicon.svg": {
-    "mtime": 1791217840.4000826,
-    "ast_hash": "7e840862161341271697daa99a40d76b",
     "semantic_hash": ""
   },
   "public/shots/artpage-1.jpg": {
@@ -430,12 +425,12 @@
     "semantic_hash": ""
   },
   "src/input/gestures.test.ts": {
-    "mtime": 1791423378.6404445,
+    "mtime": 1791455666.6876338,
     "ast_hash": "154c75243f83ed63c566f984d9693193",
     "semantic_hash": ""
   },
   "src/input/gestures.ts": {
-    "mtime": 1791423378.6399221,
+    "mtime": 1791455666.687972,
     "ast_hash": "47e497592f0d19e27b4034a9b0113928",
     "semantic_hash": ""
   },
@@ -450,7 +445,7 @@
     "semantic_hash": ""
   },
   "src/scene/about-card.ts": {
-    "mtime": 1791421322.6549335,
+    "mtime": 1791455666.6893904,
     "ast_hash": "2dde8896e37a6efa6c875d38c20518de",
     "semantic_hash": ""
   },
@@ -535,28 +530,38 @@
     "semantic_hash": ""
   },
   "src/anim/cadence.test.ts": {
-    "mtime": 1791420023.719833,
+    "mtime": 1791455666.6865587,
     "ast_hash": "f5280799d0b07ab97938515a0316bc4a",
     "semantic_hash": ""
   },
   "src/anim/cadence.ts": {
-    "mtime": 1791419757.299051,
+    "mtime": 1791455666.686785,
     "ast_hash": "0d21d6250f08c54edf772dd599242f05",
     "semantic_hash": ""
   },
   "src/scene/glyphs.ts": {
-    "mtime": 1791421334.206893,
+    "mtime": 1791455666.6905365,
     "ast_hash": "ed7baa5d9e34bd3c79dc2e2b869e7038",
-    "semantic_hash": ""
-  },
-  ".github/workflows/pages.yml": {
-    "mtime": 1791404541.4066892,
-    "ast_hash": "cbe86ebf3401118f5c8e02f4a993228f",
     "semantic_hash": ""
   },
   ".superpowers/sdd/final-fix-brief.md": {
     "mtime": 1791402666.8614569,
     "ast_hash": "0279a2dbe9fddd8bc817f8cb154144b1",
+    "semantic_hash": ""
+  },
+  "src/anim/quad.test.ts": {
+    "mtime": 1791455666.6869948,
+    "ast_hash": "6cc5dc88315876b327131a2ac556f7de",
+    "semantic_hash": ""
+  },
+  "src/anim/quad.ts": {
+    "mtime": 1791455666.6873484,
+    "ast_hash": "20e75ad67b01192e8a14282d8f35640d",
+    "semantic_hash": ""
+  },
+  "public/shots/about-1.jpg": {
+    "mtime": 1791465953.5801518,
+    "ast_hash": "54ed67afd9921fdb0903d95db8bbddec",
     "semantic_hash": ""
   }
 }

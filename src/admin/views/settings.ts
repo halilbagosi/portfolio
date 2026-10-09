@@ -1,4 +1,5 @@
 import type { Settings } from '../../content/schema';
+import { iconSvg, MAX_ICON_TEXT } from '../../content/schema';
 import { h } from '../dom';
 import { rangeField, textField, toggleField } from '../fields';
 import type { Store } from '../state';
@@ -31,6 +32,9 @@ export function renderSettings(root: HTMLElement, store: Store) {
       hint: 'Search results and link previews.',
     }),
 
+    h('div', { class: 'section-title' }, 'Site icon'),
+    iconEditor(s, edit),
+
     h('div', { class: 'section-title' }, 'Hints'),
     hint('Open the box', 'open'),
     textField('Wake the lid (iPhone, first tap asks for motion)', 'settings.hints.begin.touch', s.hints.begin.touch, (v) =>
@@ -60,5 +64,37 @@ export function renderSettings(root: HTMLElement, store: Store) {
     toggleField('Look straight down at an open section', 'settings.motion.topDownOnOpen', s.motion.topDownOnOpen, (v) =>
       edit((x) => (x.motion.topDownOnOpen = v)),
     ),
+  );
+}
+
+/** The browser-tab icon: letters and two colours, with a live preview. Applies after a reload of the site. */
+function iconEditor(s: Settings, edit: (fn: (s: Settings) => void) => void) {
+  const preview = h('img', { class: 'icon-preview', alt: 'Icon preview', width: 64, height: 64 });
+  const draw = () => (preview.src = `data:image/svg+xml,${encodeURIComponent(iconSvg(s.icon))}`);
+  draw();
+  const color = (label: string, key: 'background' | 'color') => {
+    const input = h('input', { type: 'color', value: s.icon[key], 'aria-label': label });
+    input.addEventListener('input', () => {
+      edit((x) => (x.icon[key] = input.value));
+      draw();
+    });
+    return h('div', { class: 'field', 'data-path': `settings.icon.${key}` }, h('span', { class: 'field-label' }, label), h('div', { class: 'colors' }, input), h('small', { class: 'field-error' }));
+  };
+  return h(
+    'div',
+    { class: 'grid2' },
+    textField(
+      'Letters',
+      'settings.icon.text',
+      s.icon.text,
+      (v) => {
+        edit((x) => (x.icon.text = v));
+        draw();
+      },
+      { maxLength: MAX_ICON_TEXT, hint: 'Your initials, shown in the browser tab.' },
+    ),
+    preview,
+    color('Background', 'background'),
+    color('Letters colour', 'color'),
   );
 }
