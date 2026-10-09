@@ -7,7 +7,7 @@
   "5": "Well",
   "6": "compilerOptions",
   "7": "package.json",
-  "8": "Store",
+  "8": "ChipSet",
   "9": "box.ts",
   "10": "Lightbox",
   "11": "Stage",
@@ -52,8 +52,5 @@
   "50": "task-12-brief.md",
   "51": "setFocus",
   "52": "Task 10 report: Accessibility layer and no-WebGL fallback",
-  "53": "Task 11 report: Dashboard \"About & socials\" view",
-  "54": "well.ts",
-  "55": "Spring",
-  "56": "Laser"
+  "53": "Task 11 report: Dashboard \"About & socials\" view"
 }

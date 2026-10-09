@@ -5,7 +5,7 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1791236812.8683276,
+    "mtime": 1791583352.2196548,
     "ast_hash": "38b4547ceb5a07470f1a1166c36809ca",
     "semantic_hash": ""
   },
@@ -105,23 +105,23 @@
     "semantic_hash": ""
   },
   "src/content/schema.test.ts": {
-    "mtime": 1791404163.9874158,
-    "ast_hash": "de66faa13d5469219ada9581137fa178",
+    "mtime": 1791583549.0805702,
+    "ast_hash": "afefcf8d3635cc9d6239ef33b50364cd",
     "semantic_hash": ""
   },
   "src/content/schema.ts": {
-    "mtime": 1791562699.1587808,
-    "ast_hash": "d8efd30964d163a5592e1e5023609c4b",
+    "mtime": 1791583549.0793142,
+    "ast_hash": "dbfc1fdc7828f2e0a92e4e339593e8e8",
     "semantic_hash": ""
   },
   "src/content/site.json": {
-    "mtime": 1791562699.160381,
-    "ast_hash": "21629bc8dc5cc27ba047704f6f003f11",
+    "mtime": 1791583549.0814927,
+    "ast_hash": "90ad1f96cac3cfa85bb09a09398f937e",
     "semantic_hash": ""
   },
   "src/content/test-fixture.ts": {
-    "mtime": 1791562699.1594653,
-    "ast_hash": "0324e5f0276e590ed909ad98fea6684d",
+    "mtime": 1791583549.0799074,
+    "ast_hash": "98e81ca29643da1fef8e4c495fc03009",
     "semantic_hash": ""
   },
   "src/input/motion.ts": {
@@ -145,7 +145,7 @@
     "semantic_hash": ""
   },
   "src/scene/box.ts": {
-    "mtime": 1791455666.6897917,
+    "mtime": 1791563441.7735398,
     "ast_hash": "2a7877843de38013c2b6b3ae32a224f6",
     "semantic_hash": ""
   },
@@ -195,8 +195,8 @@
     "semantic_hash": ""
   },
   "src/scene/well.ts": {
-    "mtime": 1791562888.4900596,
-    "ast_hash": "6b837237c7b41694a29a3851234708e0",
+    "mtime": 1791563436.753535,
+    "ast_hash": "4796eaa12fbaadf6c8fc1c169dabbaae",
     "semantic_hash": ""
   },
   "tsconfig.json": {
@@ -440,13 +440,13 @@
     "semantic_hash": ""
   },
   "src/scene/about-card.test.ts": {
-    "mtime": 1791404163.9901183,
-    "ast_hash": "654cf51a6654d9ca3030615bcfa3af33",
+    "mtime": 1791583816.2643254,
+    "ast_hash": "d097b22ef5a47f5ee1f7923462fde7a1",
     "semantic_hash": ""
   },
   "src/scene/about-card.ts": {
-    "mtime": 1791455666.6893904,
-    "ast_hash": "2dde8896e37a6efa6c875d38c20518de",
+    "mtime": 1791583693.4992988,
+    "ast_hash": "7fff1c8a0c0a23ec9fc458b59168c9c4",
     "semantic_hash": ""
   },
   "src/scene/etch.test.ts": {
@@ -485,8 +485,8 @@
     "semantic_hash": ""
   },
   "src/admin/views/about.ts": {
-    "mtime": 1791404163.9857104,
-    "ast_hash": "035642e614fa4c4e6eae6a9f4ce31a81",
+    "mtime": 1791583558.4618084,
+    "ast_hash": "794da38aa25ea62b6a64b10f8343e858",
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-10-brief.md": {

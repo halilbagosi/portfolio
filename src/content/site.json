@@ -95,6 +95,18 @@
           "org": "Prime Solutions SH.P.K",
           "period": "2025–2026"
         }
+      ],
+      "achievements": [
+        {
+          "title": "Apple Swift Student Challenge Finalist",
+          "detail": "Designed iOS App Playground for Palettes",
+          "year": "2025"
+        },
+        {
+          "title": "Hackathon Winner",
+          "detail": "Designed a system for water flow issues in Tirana",
+          "year": "2025"
+        }
       ]
     }
   },

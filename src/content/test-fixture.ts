@@ -31,6 +31,7 @@ export function validContent(): SiteContent {
         email: 'ada@example.com',
         resume: '',
         timeline: [{ role: 'Engineer', org: 'Engines Ltd', period: '2020–now' }],
+        achievements: [{ title: 'Difference Engine', detail: 'First working model.', year: '1822' }],
       },
     },
     projects: [

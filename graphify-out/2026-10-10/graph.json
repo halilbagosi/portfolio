@@ -1170,7 +1170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_anim_springs",
-      "community": 1,
+      "community": 8,
       "norm_label": "springs.ts"
     },
     {
@@ -1180,7 +1180,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_anim_springs_spring",
-      "community": 1,
+      "community": 8,
       "norm_label": "spring"
     },
     {
@@ -1190,7 +1190,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_anim_springs_spring_constructor",
-      "community": 1,
+      "community": 8,
       "norm_label": ".constructor()"
     },
     {
@@ -1210,7 +1210,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_anim_springs_spring_snap",
-      "community": 1,
+      "community": 8,
       "norm_label": ".snap()"
     },
     {
@@ -1390,7 +1390,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_content_schema_project",
-      "community": 1,
+      "community": 54,
       "norm_label": "project"
     },
     {
@@ -2930,7 +2930,7 @@
       "source_location": "L255",
       "_origin": "ast",
       "id": "src_main_opensizes",
-      "community": 46,
+      "community": 51,
       "norm_label": "opensizes()"
     },
     {
@@ -3407,7 +3407,7 @@
       "label": "f()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L18",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "src_scene_about_card_f",
       "community": 3,
@@ -3417,7 +3417,7 @@
       "label": "BIO",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L19",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "src_scene_about_card_bio",
       "community": 33,
@@ -3427,7 +3427,7 @@
       "label": "SPEC_LABEL",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L20",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "src_scene_about_card_spec_label",
       "community": 33,
@@ -3437,7 +3437,7 @@
       "label": "SPEC_VALUE",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L21",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "src_scene_about_card_spec_value",
       "community": 33,
@@ -3447,7 +3447,7 @@
       "label": "SPEC_NOTE",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L22",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "src_scene_about_card_spec_note",
       "community": 33,
@@ -3457,7 +3457,7 @@
       "label": "FINE",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L23",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "src_scene_about_card_fine",
       "community": 33,
@@ -3467,17 +3467,27 @@
       "label": "Op",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L30",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "src_scene_about_card_op",
       "community": 33,
       "norm_label": "op"
     },
     {
+      "label": "Glyph",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "src_scene_about_card_glyph",
+      "community": 33,
+      "norm_label": "glyph"
+    },
+    {
       "label": "CardLink",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L43",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "src_scene_about_card_cardlink",
       "community": 33,
@@ -3487,7 +3497,7 @@
       "label": "CardInput",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L51",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "src_scene_about_card_cardinput",
       "community": 33,
@@ -3497,7 +3507,7 @@
       "label": "cardPad()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L59",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "src_scene_about_card_cardpad",
       "community": 33,
@@ -3507,7 +3517,7 @@
       "label": "linkAtUv()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L62",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "src_scene_about_card_linkatuv",
       "community": 33,
@@ -3517,7 +3527,7 @@
       "label": "Measure",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L68",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "src_scene_about_card_measure",
       "community": 33,
@@ -3527,7 +3537,7 @@
       "label": "initialsOf()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L70",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "src_scene_about_card_initialsof",
       "community": 33,
@@ -3537,7 +3547,7 @@
       "label": "contactLinks()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L80",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "src_scene_about_card_contactlinks",
       "community": 33,
@@ -3547,7 +3557,7 @@
       "label": "aboutLines()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L90",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "src_scene_about_card_aboutlines",
       "community": 33,
@@ -3557,7 +3567,7 @@
       "label": "fit()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L102",
+      "source_location": "L96",
       "_origin": "ast",
       "id": "src_scene_about_card_fit",
       "community": 33,
@@ -3567,67 +3577,47 @@
       "label": "wrap()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L114",
+      "source_location": "L108",
       "_origin": "ast",
       "id": "src_scene_about_card_wrap",
       "community": 33,
       "norm_label": "wrap()"
     },
     {
-      "label": "hash()",
+      "label": "contactGlyph()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L132",
+      "source_location": "L126",
       "_origin": "ast",
-      "id": "src_scene_about_card_hash",
+      "id": "src_scene_about_card_contactglyph",
       "community": 33,
-      "norm_label": "hash()"
-    },
-    {
-      "label": "rng()",
-      "file_type": "code",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L139",
-      "_origin": "ast",
-      "id": "src_scene_about_card_rng",
-      "community": 33,
-      "norm_label": "rng()"
-    },
-    {
-      "label": "barcode()",
-      "file_type": "code",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L145",
-      "_origin": "ast",
-      "id": "src_scene_about_card_barcode",
-      "community": 33,
-      "norm_label": "barcode()"
+      "norm_label": "contactglyph()"
     },
     {
       "label": "cityOf()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L155",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "src_scene_about_card_cityof",
       "community": 33,
       "norm_label": "cityof()"
     },
     {
-      "label": "ST",
+      "label": "CFONT",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L158",
+      "source_location": "L143",
       "_origin": "ast",
-      "id": "src_scene_about_card_st",
+      "id": "src_scene_about_card_cfont",
       "community": 33,
-      "norm_label": "st"
+      "norm_label": "cfont"
     },
     {
       "label": "layoutAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L173",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "src_scene_about_card_layoutabout",
       "community": 33,
@@ -3637,7 +3627,7 @@
       "label": "cutCount()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L356",
+      "source_location": "L314",
       "_origin": "ast",
       "id": "src_scene_about_card_cutcount",
       "community": 33,
@@ -3647,7 +3637,7 @@
       "label": "FittedAbout",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L359",
+      "source_location": "L317",
       "_origin": "ast",
       "id": "src_scene_about_card_fittedabout",
       "community": 33,
@@ -3657,7 +3647,7 @@
       "label": "fitAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L374",
+      "source_location": "L332",
       "_origin": "ast",
       "id": "src_scene_about_card_fitabout",
       "community": 33,
@@ -3667,7 +3657,7 @@
       "label": "rrect()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L388",
+      "source_location": "L346",
       "_origin": "ast",
       "id": "src_scene_about_card_rrect",
       "community": 33,
@@ -3677,7 +3667,7 @@
       "label": "portrait()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L411",
+      "source_location": "L369",
       "_origin": "ast",
       "id": "src_scene_about_card_portrait",
       "community": 33,
@@ -3687,7 +3677,7 @@
       "label": "mark()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L447",
+      "source_location": "L405",
       "_origin": "ast",
       "id": "src_scene_about_card_mark",
       "community": 33,
@@ -3697,7 +3687,7 @@
       "label": "drawAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L484",
+      "source_location": "L464",
       "_origin": "ast",
       "id": "src_scene_about_card_drawabout",
       "community": 33,
@@ -3920,7 +3910,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "src_scene_chips_chipset",
-      "community": 51,
+      "community": 1,
       "norm_label": "chipset"
     },
     {
@@ -3930,7 +3920,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_constructor",
-      "community": 51,
+      "community": 54,
       "norm_label": ".constructor()"
     },
     {
@@ -3940,7 +3930,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_textures",
-      "community": 51,
+      "community": 1,
       "norm_label": ".textures()"
     },
     {
@@ -3970,7 +3960,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_setshown",
-      "community": 51,
+      "community": 1,
       "norm_label": ".setshown()"
     },
     {
@@ -3980,7 +3970,7 @@
       "source_location": "L267",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_update",
-      "community": 51,
+      "community": 1,
       "norm_label": ".update()"
     },
     {
@@ -4190,7 +4180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_glyphs",
-      "community": 1,
+      "community": 57,
       "norm_label": "glyphs.ts"
     },
     {
@@ -4200,7 +4190,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_scene_glyphs_glyphkind",
-      "community": 1,
+      "community": 57,
       "norm_label": "glyphkind"
     },
     {
@@ -4210,7 +4200,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_scene_glyphs_glyphfor",
-      "community": 1,
+      "community": 15,
       "norm_label": "glyphfor()"
     },
     {
@@ -4220,7 +4210,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_scene_glyphs_rrect",
-      "community": 1,
+      "community": 57,
       "norm_label": "rrect()"
     },
     {
@@ -4230,7 +4220,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_scene_glyphs_squircle",
-      "community": 1,
+      "community": 57,
       "norm_label": "squircle()"
     },
     {
@@ -4240,7 +4230,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_scene_glyphs_drawglyph",
-      "community": 1,
+      "community": 57,
       "norm_label": "drawglyph()"
     },
     {
@@ -4500,7 +4490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_lid",
-      "community": 1,
+      "community": 8,
       "norm_label": "lid.ts"
     },
     {
@@ -4510,7 +4500,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_scene_lid_raw",
-      "community": 1,
+      "community": 8,
       "norm_label": "raw"
     },
     {
@@ -4520,7 +4510,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_scene_lid_opened_normals",
-      "community": 1,
+      "community": 8,
       "norm_label": "opened_normals"
     },
     {
@@ -4530,7 +4520,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_scene_lid_revealtexture",
-      "community": 34,
+      "community": 8,
       "norm_label": "revealtexture()"
     },
     {
@@ -4540,7 +4530,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_scene_lid_engrave",
-      "community": 1,
+      "community": 8,
       "norm_label": "engrave()"
     },
     {
@@ -4550,7 +4540,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_scene_lid_lidstate",
-      "community": 1,
+      "community": 8,
       "norm_label": "lidstate"
     },
     {
@@ -4560,7 +4550,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_scene_lid_lidshape",
-      "community": 1,
+      "community": 8,
       "norm_label": "lidshape()"
     },
     {
@@ -4570,7 +4560,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_scene_lid_lid",
-      "community": 1,
+      "community": 55,
       "norm_label": "lid"
     },
     {
@@ -4580,7 +4570,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "src_scene_lid_lid_constructor",
-      "community": 1,
+      "community": 8,
       "norm_label": ".constructor()"
     },
     {
@@ -4590,7 +4580,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "src_scene_lid_lid_open",
-      "community": 1,
+      "community": 55,
       "norm_label": ".open()"
     },
     {
@@ -4600,7 +4590,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "src_scene_lid_lid_close",
-      "community": 1,
+      "community": 55,
       "norm_label": ".close()"
     },
     {
@@ -4610,7 +4600,7 @@
       "source_location": "L198",
       "_origin": "ast",
       "id": "src_scene_lid_lid_skip",
-      "community": 1,
+      "community": 55,
       "norm_label": ".skip()"
     },
     {
@@ -4620,7 +4610,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_scene_lid_lid_openness",
-      "community": 1,
+      "community": 55,
       "norm_label": ".openness()"
     },
     {
@@ -4630,7 +4620,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "src_scene_lid_lid_linkat",
-      "community": 1,
+      "community": 55,
       "norm_label": ".linkat()"
     },
     {
@@ -4640,7 +4630,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "src_scene_lid_lid_setetchtime",
-      "community": 1,
+      "community": 55,
       "norm_label": ".setetchtime()"
     },
     {
@@ -4650,7 +4640,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_scene_lid_lid_surfacepoint",
-      "community": 1,
+      "community": 55,
       "norm_label": ".surfacepoint()"
     },
     {
@@ -4660,7 +4650,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_scene_lid_lid_update",
-      "community": 1,
+      "community": 55,
       "norm_label": ".update()"
     },
     {
@@ -4670,7 +4660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_shaders",
-      "community": 1,
+      "community": 44,
       "norm_label": "shaders.ts"
     },
     {
@@ -5170,7 +5160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_textures",
-      "community": 1,
+      "community": 15,
       "norm_label": "textures.ts"
     },
     {
@@ -5180,7 +5170,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_scene_textures_canvas",
-      "community": 1,
+      "community": 15,
       "norm_label": "canvas()"
     },
     {
@@ -5190,7 +5180,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_scene_textures_drawtracked",
-      "community": 33,
+      "community": 15,
       "norm_label": "drawtracked()"
     },
     {
@@ -5200,7 +5190,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_scene_textures_beadblastroughness",
-      "community": 1,
+      "community": 8,
       "norm_label": "beadblastroughness()"
     },
     {
@@ -5210,7 +5200,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_scene_textures_heighttonormal",
-      "community": 1,
+      "community": 8,
       "norm_label": "heighttonormal()"
     },
     {
@@ -5220,7 +5210,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_scene_textures_pxbox",
-      "community": 1,
+      "community": 55,
       "norm_label": "pxbox"
     },
     {
@@ -5230,7 +5220,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_scene_textures_engraving",
-      "community": 1,
+      "community": 15,
       "norm_label": "engraving"
     },
     {
@@ -5240,7 +5230,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_scene_textures_trackedwidth",
-      "community": 1,
+      "community": 15,
       "norm_label": "trackedwidth()"
     },
     {
@@ -5250,7 +5240,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "src_scene_textures_engravingmaps",
-      "community": 1,
+      "community": 15,
       "norm_label": "engravingmaps()"
     },
     {
@@ -5270,7 +5260,7 @@
       "source_location": "L221",
       "_origin": "ast",
       "id": "src_scene_textures_sharpmap",
-      "community": 1,
+      "community": 15,
       "norm_label": "sharpmap"
     },
     {
@@ -5280,7 +5270,7 @@
       "source_location": "L222",
       "_origin": "ast",
       "id": "src_scene_textures_sharpentext",
-      "community": 1,
+      "community": 54,
       "norm_label": "sharpentext()"
     },
     {
@@ -5290,7 +5280,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "src_scene_textures_textcanvas",
-      "community": 1,
+      "community": 15,
       "norm_label": "textcanvas()"
     },
     {
@@ -5300,7 +5290,7 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "src_scene_textures_labeltexture",
-      "community": 1,
+      "community": 15,
       "norm_label": "labeltexture()"
     },
     {
@@ -5310,7 +5300,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "src_scene_textures_tokentexture",
-      "community": 1,
+      "community": 15,
       "norm_label": "tokentexture()"
     },
     {
@@ -5320,7 +5310,7 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "src_scene_textures_specsheet",
-      "community": 1,
+      "community": 15,
       "norm_label": "specsheet"
     },
     {
@@ -5330,7 +5320,7 @@
       "source_location": "L304",
       "_origin": "ast",
       "id": "src_scene_textures_wraptext",
-      "community": 1,
+      "community": 15,
       "norm_label": "wraptext()"
     },
     {
@@ -5340,7 +5330,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "src_scene_textures_specsheettexture",
-      "community": 1,
+      "community": 15,
       "norm_label": "specsheettexture()"
     },
     {
@@ -5490,7 +5480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_well",
-      "community": 1,
+      "community": 54,
       "norm_label": "well.ts"
     },
     {
@@ -5500,7 +5490,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_scene_well_shaftmat",
-      "community": 1,
+      "community": 54,
       "norm_label": "shaftmat()"
     },
     {
@@ -5510,7 +5500,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_scene_well_uniforms",
-      "community": 1,
+      "community": 54,
       "norm_label": "uniforms()"
     },
     {
@@ -5520,7 +5510,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "src_scene_well_unitplane",
-      "community": 1,
+      "community": 54,
       "norm_label": "unitplane"
     },
     {
@@ -5530,7 +5520,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "src_scene_well_label",
-      "community": 1,
+      "community": 54,
       "norm_label": "label"
     },
     {
@@ -5540,7 +5530,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_scene_well_labelscales",
-      "community": 1,
+      "community": 54,
       "norm_label": "labelscales"
     },
     {
@@ -5550,7 +5540,7 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_scene_well_no_caps",
-      "community": 1,
+      "community": 54,
       "norm_label": "no_caps"
     },
     {
@@ -5570,7 +5560,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "src_scene_well_well_constructor",
-      "community": 1,
+      "community": 54,
       "norm_label": ".constructor()"
     },
     {
@@ -5580,7 +5570,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "src_scene_well_well_text",
-      "community": 1,
+      "community": 54,
       "norm_label": ".text()"
     },
     {
@@ -5610,7 +5600,7 @@
       "source_location": "L258",
       "_origin": "ast",
       "id": "src_scene_well_well_stackeddepth",
-      "community": 46,
+      "community": 51,
       "norm_label": ".stackeddepth()"
     },
     {
@@ -5620,7 +5610,7 @@
       "source_location": "L266",
       "_origin": "ast",
       "id": "src_scene_well_well_focusside",
-      "community": 46,
+      "community": 51,
       "norm_label": ".focusside()"
     },
     {
@@ -12725,7 +12715,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L55",
+      "source_location": "L49",
       "weight": 1.0,
       "source": "src_scene_about_card_cardinput",
       "target": "src_content_schema_social",
@@ -12758,7 +12748,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L54",
+      "source_location": "L48",
       "weight": 1.0,
       "source": "src_scene_about_card_cardinput",
       "target": "src_content_schema_about",
@@ -14888,7 +14878,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L216",
+      "source_location": "L200",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_lightbox_lightbox_label"
@@ -16689,17 +16679,6 @@
       "source_location": "L3",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
-      "target": "src_scene_about_card_barcode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_cardinput",
       "confidence_score": 1.0
     },
@@ -16712,6 +16691,17 @@
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_cardpad",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.test.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "src_scene_about_card_test",
+      "target": "src_scene_about_card_contactglyph",
       "confidence_score": 1.0
     },
     {
@@ -17025,7 +17015,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L90",
+      "source_location": "L84",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_aboutlines",
@@ -17035,17 +17025,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L145",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_barcode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L19",
+      "source_location": "L17",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_bio",
@@ -17055,7 +17035,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L51",
+      "source_location": "L45",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardinput",
@@ -17065,7 +17045,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L43",
+      "source_location": "L37",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardlink",
@@ -17075,7 +17055,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L59",
+      "source_location": "L53",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardpad",
@@ -17085,7 +17065,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L155",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_cfont",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L136",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cityof",
@@ -17095,7 +17085,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L80",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_contactglyph",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L74",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_contactlinks",
@@ -17105,7 +17105,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L356",
+      "source_location": "L314",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cutcount",
@@ -17115,7 +17115,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L484",
+      "source_location": "L464",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_drawabout",
@@ -17125,7 +17125,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L18",
+      "source_location": "L16",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_f",
@@ -17135,7 +17135,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L23",
+      "source_location": "L21",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_fine",
@@ -17145,7 +17145,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L102",
+      "source_location": "L96",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_fit",
@@ -17155,7 +17155,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L374",
+      "source_location": "L332",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_fitabout",
@@ -17165,7 +17165,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L359",
+      "source_location": "L317",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_fittedabout",
@@ -17175,17 +17175,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L132",
+      "source_location": "L34",
       "weight": 1.0,
       "source": "src_scene_about_card",
-      "target": "src_scene_about_card_hash",
+      "target": "src_scene_about_card_glyph",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L70",
+      "source_location": "L64",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_initialsof",
@@ -17195,7 +17195,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L173",
+      "source_location": "L157",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_layoutabout",
@@ -17205,7 +17205,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L62",
+      "source_location": "L56",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_linkatuv",
@@ -17215,7 +17215,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L447",
+      "source_location": "L405",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_mark",
@@ -17225,7 +17225,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L68",
+      "source_location": "L62",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_measure",
@@ -17235,7 +17235,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L30",
+      "source_location": "L25",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_op",
@@ -17245,7 +17245,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L411",
+      "source_location": "L369",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_portrait",
@@ -17255,17 +17255,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L139",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_rng",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L388",
+      "source_location": "L346",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_rrect",
@@ -17275,7 +17265,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L20",
+      "source_location": "L18",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_spec_label",
@@ -17285,7 +17275,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L22",
+      "source_location": "L20",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_spec_note",
@@ -17295,7 +17285,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L21",
+      "source_location": "L19",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_spec_value",
@@ -17305,17 +17295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L158",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_st",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L114",
+      "source_location": "L108",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_wrap",
@@ -17370,7 +17350,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L197",
+      "source_location": "L181",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_f",
@@ -17381,7 +17361,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L434",
+      "source_location": "L451",
+      "weight": 1.0,
+      "source": "src_scene_about_card_mark",
+      "target": "src_scene_about_card_f",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L392",
       "weight": 1.0,
       "source": "src_scene_about_card_portrait",
       "target": "src_scene_about_card_f",
@@ -17447,7 +17438,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L382",
+      "source_location": "L340",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_cardpad",
@@ -17458,7 +17449,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L183",
+      "source_location": "L167",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_cardpad",
@@ -17502,7 +17493,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L184",
+      "source_location": "L168",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_initialsof",
@@ -17535,7 +17526,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L243",
+      "source_location": "L240",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_contactlinks",
@@ -17546,7 +17537,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L197",
+      "source_location": "L181",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_fit",
@@ -17557,7 +17548,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L117",
+      "source_location": "L111",
       "weight": 1.0,
       "source": "src_scene_about_card_wrap",
       "target": "src_scene_about_card_fit",
@@ -17568,7 +17559,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L203",
+      "source_location": "L187",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_wrap",
@@ -17579,21 +17570,10 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L146",
-      "weight": 1.0,
-      "source": "src_scene_about_card_barcode",
-      "target": "src_scene_about_card_rng",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L283",
+      "source_location": "L242",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
-      "target": "src_scene_about_card_rng",
+      "target": "src_scene_about_card_contactglyph",
       "confidence_score": 1.0
     },
     {
@@ -17601,18 +17581,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L300",
-      "weight": 1.0,
-      "source": "src_scene_about_card_layoutabout",
-      "target": "src_scene_about_card_barcode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L267",
+      "source_location": "L224",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_cityof",
@@ -17623,18 +17592,29 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L375",
+      "source_location": "L333",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_layoutabout",
       "confidence_score": 1.0
     },
     {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L276",
+      "weight": 1.0,
+      "source": "src_scene_about_card_layoutabout",
+      "target": "src_scene_well_well_plan"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L376",
+      "source_location": "L334",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_cutcount",
@@ -17667,9 +17647,9 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L507",
+      "source_location": "L419",
       "weight": 1.0,
-      "source": "src_scene_about_card_drawabout",
+      "source": "src_scene_about_card_mark",
       "target": "src_scene_about_card_rrect",
       "confidence_score": 1.0
     },
@@ -17678,7 +17658,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L417",
+      "source_location": "L375",
       "weight": 1.0,
       "source": "src_scene_about_card_portrait",
       "target": "src_scene_about_card_rrect",
@@ -17689,7 +17669,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L518",
+      "source_location": "L484",
       "weight": 1.0,
       "source": "src_scene_about_card_drawabout",
       "target": "src_scene_about_card_portrait",
@@ -17700,7 +17680,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L517",
+      "source_location": "L483",
       "weight": 1.0,
       "source": "src_scene_about_card_drawabout",
       "target": "src_scene_about_card_mark",
@@ -17712,7 +17692,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L526",
+      "source_location": "L492",
       "weight": 1.0,
       "source": "src_scene_about_card_drawabout",
       "target": "src_scene_textures_drawtracked"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatIssue, MAX_BIO, MAX_PROJECTS, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, siteOrder, validate, type SiteContent } from './schema';
+import { formatIssue, MAX_BIO, MAX_PROJECTS, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, MAX_ACHIEVEMENTS, siteOrder, validate, type SiteContent } from './schema';
 import site from './site.json';
 import { validContent } from './test-fixture';
 
@@ -206,5 +206,12 @@ describe('socials and about', () => {
     const entry = { role: 'R', org: 'O', period: 'P' };
     expectIssue((c) => (c.settings.about.timeline = Array.from({ length: MAX_TIMELINE + 1 }, () => ({ ...entry }))), 'settings.about.timeline', `At most ${MAX_TIMELINE}`);
     expectIssue((c) => (c.settings.about.timeline[0].org = ''), 'settings.about.timeline.0.org', 'required');
+  });
+
+  it('limits and checks achievements, whose detail and year may be empty', () => {
+    const entry = { title: 'T', detail: '', year: '' };
+    expectIssue((c) => (c.settings.about.achievements = Array.from({ length: MAX_ACHIEVEMENTS + 1 }, () => ({ ...entry }))), 'settings.about.achievements', `At most ${MAX_ACHIEVEMENTS}`);
+    expectIssue((c) => (c.settings.about.achievements[0].title = ''), 'settings.about.achievements.0.title', 'required');
+    expectIssue((c) => ((c.settings.about as unknown as Record<string, unknown>).achievements = undefined), 'settings.about.achievements', 'must be a list');
   });
 });

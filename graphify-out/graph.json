@@ -1020,7 +1020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_anim_cadence_test",
-      "community": 9,
+      "community": 44,
       "norm_label": "cadence.test.ts"
     },
     {
@@ -1030,7 +1030,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_anim_cadence_test_run",
-      "community": 9,
+      "community": 44,
       "norm_label": "run()"
     },
     {
@@ -1040,7 +1040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_anim_cadence",
-      "community": 9,
+      "community": 44,
       "norm_label": "cadence.ts"
     },
     {
@@ -1050,7 +1050,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_anim_cadence_cadence",
-      "community": 9,
+      "community": 44,
       "norm_label": "cadence"
     },
     {
@@ -1060,7 +1060,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_anim_cadence_cadence_push",
-      "community": 9,
+      "community": 44,
       "norm_label": ".push()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_anim_springs",
-      "community": 55,
+      "community": 5,
       "norm_label": "springs.ts"
     },
     {
@@ -1180,7 +1180,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_anim_springs_spring",
-      "community": 55,
+      "community": 5,
       "norm_label": "spring"
     },
     {
@@ -1190,7 +1190,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_anim_springs_spring_constructor",
-      "community": 55,
+      "community": 5,
       "norm_label": ".constructor()"
     },
     {
@@ -1200,7 +1200,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_anim_springs_spring_step",
-      "community": 55,
+      "community": 5,
       "norm_label": ".step()"
     },
     {
@@ -1210,7 +1210,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_anim_springs_spring_snap",
-      "community": 55,
+      "community": 5,
       "norm_label": ".snap()"
     },
     {
@@ -1360,7 +1360,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_content_schema_projectkind",
-      "community": 15,
+      "community": 3,
       "norm_label": "projectkind"
     },
     {
@@ -1370,14 +1370,14 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_content_schema_statuses",
-      "community": 4,
+      "community": 3,
       "norm_label": "statuses"
     },
     {
       "label": "ProjectLink",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "src_content_schema_projectlink",
       "community": 3,
@@ -1387,17 +1387,17 @@
       "label": "Project",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_content_schema_project",
-      "community": 54,
+      "community": 1,
       "norm_label": "project"
     },
     {
       "label": "HintPair",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_content_schema_hintpair",
       "community": 3,
@@ -1407,7 +1407,7 @@
       "label": "Social",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "src_content_schema_social",
       "community": 33,
@@ -1417,17 +1417,27 @@
       "label": "TimelineEntry",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "src_content_schema_timelineentry",
       "community": 3,
       "norm_label": "timelineentry"
     },
     {
+      "label": "Achievement",
+      "file_type": "code",
+      "source_file": "src/content/schema.ts",
+      "source_location": "L75",
+      "_origin": "ast",
+      "id": "src_content_schema_achievement",
+      "community": 3,
+      "norm_label": "achievement"
+    },
+    {
       "label": "About",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L74",
+      "source_location": "L84",
       "_origin": "ast",
       "id": "src_content_schema_about",
       "community": 33,
@@ -1437,7 +1447,7 @@
       "label": "SiteIcon",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L94",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "src_content_schema_siteicon",
       "community": 3,
@@ -1447,7 +1457,7 @@
       "label": "iconSvg()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L102",
+      "source_location": "L113",
       "_origin": "ast",
       "id": "src_content_schema_iconsvg",
       "community": 4,
@@ -1457,7 +1467,7 @@
       "label": "Settings",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L112",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "src_content_schema_settings",
       "community": 4,
@@ -1467,7 +1477,7 @@
       "label": "SiteContent",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L121",
+      "source_location": "L132",
       "_origin": "ast",
       "id": "src_content_schema_sitecontent",
       "community": 4,
@@ -1477,17 +1487,17 @@
       "label": "Issue",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L127",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "src_content_schema_issue",
-      "community": 4,
+      "community": 3,
       "norm_label": "issue"
     },
     {
       "label": "siteOrder()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L134",
+      "source_location": "L145",
       "_origin": "ast",
       "id": "src_content_schema_siteorder",
       "community": 3,
@@ -1497,7 +1507,7 @@
       "label": "formatIssue()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L141",
+      "source_location": "L152",
       "_origin": "ast",
       "id": "src_content_schema_formatissue",
       "community": 3,
@@ -1507,7 +1517,7 @@
       "label": "isObj()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L143",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "src_content_schema_isobj",
       "community": 3,
@@ -1517,7 +1527,7 @@
       "label": "filled()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L144",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "src_content_schema_filled",
       "community": 3,
@@ -1527,7 +1537,7 @@
       "label": "validate()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L147",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "src_content_schema_validate",
       "community": 3,
@@ -1537,7 +1547,7 @@
       "label": "validateSettings()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L155",
+      "source_location": "L166",
       "_origin": "ast",
       "id": "src_content_schema_validatesettings",
       "community": 3,
@@ -1547,7 +1557,7 @@
       "label": "validateSocials()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L203",
+      "source_location": "L214",
       "_origin": "ast",
       "id": "src_content_schema_validatesocials",
       "community": 3,
@@ -1557,7 +1567,7 @@
       "label": "validateAbout()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L218",
+      "source_location": "L229",
       "_origin": "ast",
       "id": "src_content_schema_validateabout",
       "community": 3,
@@ -1567,7 +1577,7 @@
       "label": "validateProjects()",
       "file_type": "code",
       "source_file": "src/content/schema.ts",
-      "source_location": "L247",
+      "source_location": "L269",
       "_origin": "ast",
       "id": "src_content_schema_validateprojects",
       "community": 3,
@@ -2290,7 +2300,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_lightbox_card_radius",
-      "community": 44,
+      "community": 43,
       "norm_label": "card_radius"
     },
     {
@@ -3277,7 +3287,7 @@
       "label": "socials",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "src_scene_about_card_test_socials",
       "community": 33,
@@ -3287,7 +3297,7 @@
       "label": "input()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "src_scene_about_card_test_input",
       "community": 33,
@@ -3297,7 +3307,7 @@
       "label": "SIZES",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "src_scene_about_card_test_sizes",
       "community": 33,
@@ -3307,7 +3317,7 @@
       "label": "TextOp",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "src_scene_about_card_test_textop",
       "community": 33,
@@ -3317,7 +3327,7 @@
       "label": "textOps()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L60",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "src_scene_about_card_test_textops",
       "community": 33,
@@ -3327,7 +3337,7 @@
       "label": "sizeOf()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L61",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "src_scene_about_card_test_sizeof",
       "community": 33,
@@ -3337,7 +3347,7 @@
       "label": "box()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "src_scene_about_card_test_box",
       "community": 33,
@@ -3347,7 +3357,7 @@
       "label": "long()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L65",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "src_scene_about_card_test_long",
       "community": 33,
@@ -3357,7 +3367,7 @@
       "label": "maxAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L67",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "src_scene_about_card_test_maxabout",
       "community": 33,
@@ -3367,7 +3377,7 @@
       "label": "maxInput()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L81",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "src_scene_about_card_test_maxinput",
       "community": 33,
@@ -3377,7 +3387,7 @@
       "label": "minInput()",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L92",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "src_scene_about_card_test_mininput",
       "community": 33,
@@ -3387,11 +3397,21 @@
       "label": "CASES",
       "file_type": "code",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L98",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "src_scene_about_card_test_cases",
       "community": 33,
       "norm_label": "cases"
+    },
+    {
+      "label": "ALL_SIZES",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.test.ts",
+      "source_location": "L111",
+      "_origin": "ast",
+      "id": "src_scene_about_card_test_all_sizes",
+      "community": 33,
+      "norm_label": "all_sizes"
     },
     {
       "label": "about-card.ts",
@@ -3407,27 +3427,77 @@
       "label": "f()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "src_scene_about_card_f",
       "community": 3,
       "norm_label": "f()"
     },
     {
-      "label": "LABEL",
+      "label": "HEAD",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L16",
+      "source_location": "L17",
       "_origin": "ast",
-      "id": "src_scene_about_card_label",
+      "id": "src_scene_about_card_head",
       "community": 33,
-      "norm_label": "label"
+      "norm_label": "head"
+    },
+    {
+      "label": "ITEM",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "src_scene_about_card_item",
+      "community": 33,
+      "norm_label": "item"
+    },
+    {
+      "label": "NOTE",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L19",
+      "_origin": "ast",
+      "id": "src_scene_about_card_note",
+      "community": 33,
+      "norm_label": "note"
+    },
+    {
+      "label": "META",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "src_scene_about_card_meta",
+      "community": 33,
+      "norm_label": "meta"
+    },
+    {
+      "label": "BODY",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "src_scene_about_card_body",
+      "community": 33,
+      "norm_label": "body"
+    },
+    {
+      "label": "FINE",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "src_scene_about_card_fine",
+      "community": 33,
+      "norm_label": "fine"
     },
     {
       "label": "Op",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L24",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_scene_about_card_op",
       "community": 33,
@@ -3437,7 +3507,7 @@
       "label": "CardLink",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L32",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "src_scene_about_card_cardlink",
       "community": 33,
@@ -3447,7 +3517,7 @@
       "label": "CardInput",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L40",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "src_scene_about_card_cardinput",
       "community": 33,
@@ -3457,7 +3527,7 @@
       "label": "cardPad()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L48",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "src_scene_about_card_cardpad",
       "community": 33,
@@ -3467,7 +3537,7 @@
       "label": "linkAtUv()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L51",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "src_scene_about_card_linkatuv",
       "community": 33,
@@ -3477,7 +3547,7 @@
       "label": "Measure",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L57",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "src_scene_about_card_measure",
       "community": 33,
@@ -3487,7 +3557,7 @@
       "label": "initialsOf()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "src_scene_about_card_initialsof",
       "community": 33,
@@ -3497,7 +3567,7 @@
       "label": "contactLinks()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L69",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "src_scene_about_card_contactlinks",
       "community": 33,
@@ -3507,7 +3577,7 @@
       "label": "aboutLines()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L79",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "src_scene_about_card_aboutlines",
       "community": 33,
@@ -3517,7 +3587,7 @@
       "label": "fit()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L91",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "src_scene_about_card_fit",
       "community": 33,
@@ -3527,37 +3597,67 @@
       "label": "wrap()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L103",
+      "source_location": "L113",
       "_origin": "ast",
       "id": "src_scene_about_card_wrap",
       "community": 33,
       "norm_label": "wrap()"
     },
     {
+      "label": "cityOf()",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L131",
+      "_origin": "ast",
+      "id": "src_scene_about_card_cityof",
+      "community": 33,
+      "norm_label": "cityof()"
+    },
+    {
+      "label": "Pen",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L134",
+      "_origin": "ast",
+      "id": "src_scene_about_card_pen",
+      "community": 33,
+      "norm_label": "pen"
+    },
+    {
+      "label": "Entry",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L140",
+      "_origin": "ast",
+      "id": "src_scene_about_card_entry",
+      "community": 33,
+      "norm_label": "entry"
+    },
+    {
+      "label": "Run",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L147",
+      "_origin": "ast",
+      "id": "src_scene_about_card_run",
+      "community": 33,
+      "norm_label": "run"
+    },
+    {
       "label": "layoutAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L127",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "src_scene_about_card_layoutabout",
       "community": 33,
       "norm_label": "layoutabout()"
     },
     {
-      "label": "contentBottom()",
-      "file_type": "code",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L295",
-      "_origin": "ast",
-      "id": "src_scene_about_card_contentbottom",
-      "community": 33,
-      "norm_label": "contentbottom()"
-    },
-    {
       "label": "cutCount()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L312",
+      "source_location": "L338",
       "_origin": "ast",
       "id": "src_scene_about_card_cutcount",
       "community": 33,
@@ -3567,7 +3667,7 @@
       "label": "FittedAbout",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L315",
+      "source_location": "L341",
       "_origin": "ast",
       "id": "src_scene_about_card_fittedabout",
       "community": 33,
@@ -3577,7 +3677,7 @@
       "label": "fitAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L330",
+      "source_location": "L360",
       "_origin": "ast",
       "id": "src_scene_about_card_fitabout",
       "community": 33,
@@ -3587,7 +3687,7 @@
       "label": "rrect()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L344",
+      "source_location": "L379",
       "_origin": "ast",
       "id": "src_scene_about_card_rrect",
       "community": 33,
@@ -3597,17 +3697,27 @@
       "label": "portrait()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L366",
+      "source_location": "L402",
       "_origin": "ast",
       "id": "src_scene_about_card_portrait",
       "community": 33,
       "norm_label": "portrait()"
     },
     {
+      "label": "mark()",
+      "file_type": "code",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L438",
+      "_origin": "ast",
+      "id": "src_scene_about_card_mark",
+      "community": 33,
+      "norm_label": "mark()"
+    },
+    {
       "label": "drawAbout()",
       "file_type": "code",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L402",
+      "source_location": "L470",
       "_origin": "ast",
       "id": "src_scene_about_card_drawabout",
       "community": 33,
@@ -3620,7 +3730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_box",
-      "community": 9,
+      "community": 8,
       "norm_label": "box.ts"
     },
     {
@@ -3630,7 +3740,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_scene_box_isportraitviewport",
-      "community": 9,
+      "community": 8,
       "norm_label": "isportraitviewport()"
     },
     {
@@ -3640,7 +3750,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_scene_box_portrait",
-      "community": 9,
+      "community": 8,
       "norm_label": "portrait"
     },
     {
@@ -3650,7 +3760,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_scene_box_pivot",
-      "community": 9,
+      "community": 8,
       "norm_label": "pivot"
     },
     {
@@ -3660,7 +3770,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_scene_box_elevation",
-      "community": 9,
+      "community": 5,
       "norm_label": "elevation"
     },
     {
@@ -3670,7 +3780,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_scene_box_cornerpoint",
-      "community": 9,
+      "community": 8,
       "norm_label": "cornerpoint()"
     },
     {
@@ -3680,7 +3790,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_scene_box_roundedring",
-      "community": 9,
+      "community": 8,
       "norm_label": "roundedring()"
     },
     {
@@ -3690,7 +3800,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_scene_box_tubegeometry",
-      "community": 9,
+      "community": 8,
       "norm_label": "tubegeometry()"
     },
     {
@@ -3700,7 +3810,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_scene_box_ringtmp",
-      "community": 9,
+      "community": 8,
       "norm_label": "ringtmp"
     },
     {
@@ -3710,7 +3820,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_scene_box_updatetube",
-      "community": 9,
+      "community": 8,
       "norm_label": "updatetube()"
     },
     {
@@ -3720,7 +3830,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_scene_box_roundedrectshape",
-      "community": 55,
+      "community": 8,
       "norm_label": "roundedrectshape()"
     },
     {
@@ -3730,7 +3840,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "src_scene_box_createshell",
-      "community": 9,
+      "community": 8,
       "norm_label": "createshell()"
     },
     {
@@ -3740,7 +3850,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "src_scene_box_createtopplate",
-      "community": 9,
+      "community": 8,
       "norm_label": "createtopplate()"
     },
     {
@@ -3750,7 +3860,7 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "src_scene_box_topplate",
-      "community": 9,
+      "community": 8,
       "norm_label": "topplate"
     },
     {
@@ -3760,7 +3870,7 @@
       "source_location": "L251",
       "_origin": "ast",
       "id": "src_scene_box_createbox",
-      "community": 9,
+      "community": 8,
       "norm_label": "createbox()"
     },
     {
@@ -3770,7 +3880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_chips",
-      "community": 15,
+      "community": 1,
       "norm_label": "chips.ts"
     },
     {
@@ -3780,7 +3890,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_scene_chips_pill",
-      "community": 15,
+      "community": 1,
       "norm_label": "pill()"
     },
     {
@@ -3790,7 +3900,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_scene_chips_glassshared",
-      "community": 15,
+      "community": 1,
       "norm_label": "glassshared"
     },
     {
@@ -3800,7 +3910,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "src_scene_chips_labeltex",
-      "community": 15,
+      "community": 1,
       "norm_label": "labeltex"
     },
     {
@@ -3810,7 +3920,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_scene_chips_chip",
-      "community": 15,
+      "community": 1,
       "norm_label": "chip"
     },
     {
@@ -3820,7 +3930,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_scene_chips_chip_constructor",
-      "community": 15,
+      "community": 1,
       "norm_label": ".constructor()"
     },
     {
@@ -3830,7 +3940,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "src_scene_chips_chipset",
-      "community": 15,
+      "community": 1,
       "norm_label": "chipset"
     },
     {
@@ -3840,7 +3950,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_constructor",
-      "community": 54,
+      "community": 1,
       "norm_label": ".constructor()"
     },
     {
@@ -3850,7 +3960,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_textures",
-      "community": 15,
+      "community": 1,
       "norm_label": ".textures()"
     },
     {
@@ -3860,7 +3970,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_build",
-      "community": 15,
+      "community": 1,
       "norm_label": ".build()"
     },
     {
@@ -3880,7 +3990,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_setshown",
-      "community": 15,
+      "community": 1,
       "norm_label": ".setshown()"
     },
     {
@@ -3890,7 +4000,7 @@
       "source_location": "L267",
       "_origin": "ast",
       "id": "src_scene_chips_chipset_update",
-      "community": 15,
+      "community": 1,
       "norm_label": ".update()"
     },
     {
@@ -4100,7 +4210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_glyphs",
-      "community": 1,
+      "community": 15,
       "norm_label": "glyphs.ts"
     },
     {
@@ -4110,7 +4220,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_scene_glyphs_glyphkind",
-      "community": 1,
+      "community": 15,
       "norm_label": "glyphkind"
     },
     {
@@ -4120,7 +4230,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_scene_glyphs_glyphfor",
-      "community": 1,
+      "community": 15,
       "norm_label": "glyphfor()"
     },
     {
@@ -4130,7 +4240,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_scene_glyphs_rrect",
-      "community": 1,
+      "community": 15,
       "norm_label": "rrect()"
     },
     {
@@ -4140,7 +4250,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_scene_glyphs_squircle",
-      "community": 1,
+      "community": 15,
       "norm_label": "squircle()"
     },
     {
@@ -4150,7 +4260,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_scene_glyphs_drawglyph",
-      "community": 1,
+      "community": 15,
       "norm_label": "drawglyph()"
     },
     {
@@ -4160,7 +4270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_laser",
-      "community": 8,
+      "community": 34,
       "norm_label": "laser.ts"
     },
     {
@@ -4170,7 +4280,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_scene_laser_glowtexture",
-      "community": 8,
+      "community": 34,
       "norm_label": "glowtexture()"
     },
     {
@@ -4180,7 +4290,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_scene_laser_glowmat",
-      "community": 8,
+      "community": 34,
       "norm_label": "glowmat()"
     },
     {
@@ -4190,7 +4300,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_scene_laser_laser",
-      "community": 56,
+      "community": 34,
       "norm_label": "laser"
     },
     {
@@ -4200,7 +4310,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "src_scene_laser_laser_constructor",
-      "community": 8,
+      "community": 34,
       "norm_label": ".constructor()"
     },
     {
@@ -4210,7 +4320,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_scene_laser_laser_cutdone",
-      "community": 56,
+      "community": 34,
       "norm_label": ".cutdone()"
     },
     {
@@ -4220,7 +4330,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_scene_laser_laser_update",
-      "community": 56,
+      "community": 34,
       "norm_label": ".update()"
     },
     {
@@ -4230,7 +4340,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "src_scene_laser_laser_finish",
-      "community": 56,
+      "community": 34,
       "norm_label": ".finish()"
     },
     {
@@ -4240,7 +4350,7 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "src_scene_laser_laser_emit",
-      "community": 56,
+      "community": 34,
       "norm_label": ".emit()"
     },
     {
@@ -4250,7 +4360,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "src_scene_laser_laser_stepsparks",
-      "community": 56,
+      "community": 34,
       "norm_label": ".stepsparks()"
     },
     {
@@ -4260,7 +4370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_layout_test",
-      "community": 5,
+      "community": 46,
       "norm_label": "layout.test.ts"
     },
     {
@@ -4270,7 +4380,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_scene_layout_test_overlaps",
-      "community": 5,
+      "community": 46,
       "norm_label": "overlaps()"
     },
     {
@@ -4280,7 +4390,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_scene_layout_test_violations",
-      "community": 5,
+      "community": 46,
       "norm_label": "violations()"
     },
     {
@@ -4290,7 +4400,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_scene_layout_test_check",
-      "community": 5,
+      "community": 46,
       "norm_label": "check()"
     },
     {
@@ -4300,7 +4410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_layout",
-      "community": 5,
+      "community": 46,
       "norm_label": "layout.ts"
     },
     {
@@ -4320,7 +4430,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_scene_layout_sizes",
-      "community": 5,
+      "community": 46,
       "norm_label": "sizes"
     },
     {
@@ -4330,7 +4440,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_scene_layout_structure",
-      "community": 5,
+      "community": 46,
       "norm_label": "structure()"
     },
     {
@@ -4340,7 +4450,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_scene_layout_split",
-      "community": 5,
+      "community": 46,
       "norm_label": "split()"
     },
     {
@@ -4350,7 +4460,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_scene_layout_restsizes",
-      "community": 5,
+      "community": 46,
       "norm_label": "restsizes()"
     },
     {
@@ -4360,7 +4470,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_scene_layout_focussizes",
-      "community": 5,
+      "community": 46,
       "norm_label": "focussizes()"
     },
     {
@@ -4370,7 +4480,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_scene_layout_rectsfrom",
-      "community": 5,
+      "community": 46,
       "norm_label": "rectsfrom()"
     },
     {
@@ -4380,7 +4490,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_scene_layout_lerpsizes",
-      "community": 5,
+      "community": 46,
       "norm_label": "lerpsizes()"
     },
     {
@@ -4390,7 +4500,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "src_scene_layout_packlayout",
-      "community": 5,
+      "community": 46,
       "norm_label": "packlayout()"
     },
     {
@@ -4400,7 +4510,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_scene_layout_expandedlayout",
-      "community": 5,
+      "community": 46,
       "norm_label": "expandedlayout()"
     },
     {
@@ -4410,7 +4520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_lid",
-      "community": 55,
+      "community": 8,
       "norm_label": "lid.ts"
     },
     {
@@ -4420,7 +4530,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_scene_lid_raw",
-      "community": 55,
+      "community": 8,
       "norm_label": "raw"
     },
     {
@@ -4430,7 +4540,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_scene_lid_opened_normals",
-      "community": 55,
+      "community": 8,
       "norm_label": "opened_normals"
     },
     {
@@ -4450,7 +4560,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_scene_lid_engrave",
-      "community": 55,
+      "community": 15,
       "norm_label": "engrave()"
     },
     {
@@ -4460,7 +4570,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_scene_lid_lidstate",
-      "community": 55,
+      "community": 8,
       "norm_label": "lidstate"
     },
     {
@@ -4470,7 +4580,7 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_scene_lid_lidshape",
-      "community": 55,
+      "community": 8,
       "norm_label": "lidshape()"
     },
     {
@@ -4480,7 +4590,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_scene_lid_lid",
-      "community": 8,
+      "community": 34,
       "norm_label": "lid"
     },
     {
@@ -4490,7 +4600,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "src_scene_lid_lid_constructor",
-      "community": 55,
+      "community": 15,
       "norm_label": ".constructor()"
     },
     {
@@ -4500,7 +4610,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "src_scene_lid_lid_open",
-      "community": 8,
+      "community": 34,
       "norm_label": ".open()"
     },
     {
@@ -4510,7 +4620,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "src_scene_lid_lid_close",
-      "community": 8,
+      "community": 34,
       "norm_label": ".close()"
     },
     {
@@ -4520,7 +4630,7 @@
       "source_location": "L198",
       "_origin": "ast",
       "id": "src_scene_lid_lid_skip",
-      "community": 8,
+      "community": 34,
       "norm_label": ".skip()"
     },
     {
@@ -4530,7 +4640,7 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_scene_lid_lid_openness",
-      "community": 8,
+      "community": 34,
       "norm_label": ".openness()"
     },
     {
@@ -4540,7 +4650,7 @@
       "source_location": "L209",
       "_origin": "ast",
       "id": "src_scene_lid_lid_linkat",
-      "community": 8,
+      "community": 34,
       "norm_label": ".linkat()"
     },
     {
@@ -4550,7 +4660,7 @@
       "source_location": "L219",
       "_origin": "ast",
       "id": "src_scene_lid_lid_setetchtime",
-      "community": 8,
+      "community": 34,
       "norm_label": ".setetchtime()"
     },
     {
@@ -4560,7 +4670,7 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_scene_lid_lid_surfacepoint",
-      "community": 8,
+      "community": 34,
       "norm_label": ".surfacepoint()"
     },
     {
@@ -4570,7 +4680,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_scene_lid_lid_update",
-      "community": 8,
+      "community": 34,
       "norm_label": ".update()"
     },
     {
@@ -4580,7 +4690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_shaders",
-      "community": 44,
+      "community": 1,
       "norm_label": "shaders.ts"
     },
     {
@@ -4590,7 +4700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_stack",
-      "community": 44,
+      "community": 43,
       "norm_label": "stack.ts"
     },
     {
@@ -4600,7 +4710,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "src_scene_stack_shownheight",
-      "community": 44,
+      "community": 46,
       "norm_label": "shownheight()"
     },
     {
@@ -4610,7 +4720,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_scene_stack_slot_rot",
-      "community": 44,
+      "community": 43,
       "norm_label": "slot_rot"
     },
     {
@@ -4620,7 +4730,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_scene_stack_bezier",
-      "community": 44,
+      "community": 43,
       "norm_label": "bezier()"
     },
     {
@@ -4630,7 +4740,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "src_scene_stack_easeleave",
-      "community": 44,
+      "community": 43,
       "norm_label": "easeleave"
     },
     {
@@ -4640,7 +4750,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "src_scene_stack_easemove",
-      "community": 44,
+      "community": 43,
       "norm_label": "easemove"
     },
     {
@@ -4650,7 +4760,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_scene_stack_slotpose",
-      "community": 44,
+      "community": 43,
       "norm_label": "slotpose()"
     },
     {
@@ -4660,7 +4770,7 @@
       "source_location": "L125",
       "_origin": "ast",
       "id": "src_scene_stack_loader",
-      "community": 44,
+      "community": 43,
       "norm_label": "loader"
     },
     {
@@ -4670,7 +4780,7 @@
       "source_location": "L126",
       "_origin": "ast",
       "id": "src_scene_stack_plane",
-      "community": 44,
+      "community": 43,
       "norm_label": "plane"
     },
     {
@@ -4680,7 +4790,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "src_scene_stack_card",
-      "community": 44,
+      "community": 43,
       "norm_label": "card"
     },
     {
@@ -4690,7 +4800,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "src_scene_stack_card_load",
-      "community": 44,
+      "community": 43,
       "norm_label": ".load()"
     },
     {
@@ -4700,7 +4810,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "src_scene_stack_card_goto",
-      "community": 44,
+      "community": 43,
       "norm_label": ".goto()"
     },
     {
@@ -4710,7 +4820,7 @@
       "source_location": "L175",
       "_origin": "ast",
       "id": "src_scene_stack_card_stepslot",
-      "community": 44,
+      "community": 43,
       "norm_label": ".stepslot()"
     },
     {
@@ -4720,7 +4830,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "src_scene_stack_card_done",
-      "community": 44,
+      "community": 43,
       "norm_label": ".done()"
     },
     {
@@ -4730,7 +4840,7 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "src_scene_stack_card_constructor",
-      "community": 44,
+      "community": 43,
       "norm_label": ".constructor()"
     },
     {
@@ -4740,7 +4850,7 @@
       "source_location": "L220",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack",
-      "community": 44,
+      "community": 43,
       "norm_label": "cardstack"
     },
     {
@@ -4750,7 +4860,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_held",
-      "community": 44,
+      "community": 43,
       "norm_label": ".held()"
     },
     {
@@ -4760,7 +4870,7 @@
       "source_location": "L243",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_constructor",
-      "community": 44,
+      "community": 43,
       "norm_label": ".constructor()"
     },
     {
@@ -4770,7 +4880,7 @@
       "source_location": "L250",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_loadrest",
-      "community": 44,
+      "community": 43,
       "norm_label": ".loadrest()"
     },
     {
@@ -4780,7 +4890,7 @@
       "source_location": "L254",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_meshes",
-      "community": 44,
+      "community": 43,
       "norm_label": ".meshes()"
     },
     {
@@ -4790,7 +4900,7 @@
       "source_location": "L258",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_textures",
-      "community": 44,
+      "community": 43,
       "norm_label": ".textures()"
     },
     {
@@ -4800,7 +4910,7 @@
       "source_location": "L263",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_leadloaded",
-      "community": 44,
+      "community": 43,
       "norm_label": ".leadloaded()"
     },
     {
@@ -4810,7 +4920,7 @@
       "source_location": "L268",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_leadaspect",
-      "community": 44,
+      "community": 43,
       "norm_label": ".leadaspect()"
     },
     {
@@ -4820,7 +4930,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_topindex",
-      "community": 44,
+      "community": 43,
       "norm_label": ".topindex()"
     },
     {
@@ -4830,7 +4940,7 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_settop",
-      "community": 44,
+      "community": 43,
       "norm_label": ".settop()"
     },
     {
@@ -4840,7 +4950,7 @@
       "source_location": "L288",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_topquad",
-      "community": 44,
+      "community": 43,
       "norm_label": ".topquad()"
     },
     {
@@ -4850,7 +4960,7 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_sethovered",
-      "community": 44,
+      "community": 43,
       "norm_label": ".sethovered()"
     },
     {
@@ -4860,7 +4970,7 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_next",
-      "community": 44,
+      "community": 43,
       "norm_label": ".next()"
     },
     {
@@ -4870,7 +4980,7 @@
       "source_location": "L315",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_setclip",
-      "community": 44,
+      "community": 43,
       "norm_label": ".setclip()"
     },
     {
@@ -4880,7 +4990,7 @@
       "source_location": "L323",
       "_origin": "ast",
       "id": "src_scene_stack_cardstack_update",
-      "community": 44,
+      "community": 43,
       "norm_label": ".update()"
     },
     {
@@ -4890,7 +5000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_stage",
-      "community": 9,
+      "community": 5,
       "norm_label": "stage.ts"
     },
     {
@@ -4900,7 +5010,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_scene_stage_top_down",
-      "community": 9,
+      "community": 5,
       "norm_label": "top_down"
     },
     {
@@ -4910,7 +5020,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_scene_stage_tmpq",
-      "community": 9,
+      "community": 5,
       "norm_label": "tmpq"
     },
     {
@@ -4930,7 +5040,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_scene_stage_viewrect",
-      "community": 9,
+      "community": 5,
       "norm_label": "viewrect"
     },
     {
@@ -5080,7 +5190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_textures",
-      "community": 1,
+      "community": 15,
       "norm_label": "textures.ts"
     },
     {
@@ -5090,7 +5200,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_scene_textures_canvas",
-      "community": 1,
+      "community": 15,
       "norm_label": "canvas()"
     },
     {
@@ -5100,7 +5210,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_scene_textures_drawtracked",
-      "community": 33,
+      "community": 15,
       "norm_label": "drawtracked()"
     },
     {
@@ -5110,7 +5220,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_scene_textures_beadblastroughness",
-      "community": 1,
+      "community": 15,
       "norm_label": "beadblastroughness()"
     },
     {
@@ -5120,7 +5230,7 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_scene_textures_heighttonormal",
-      "community": 55,
+      "community": 15,
       "norm_label": "heighttonormal()"
     },
     {
@@ -5130,7 +5240,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_scene_textures_pxbox",
-      "community": 55,
+      "community": 34,
       "norm_label": "pxbox"
     },
     {
@@ -5140,7 +5250,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_scene_textures_engraving",
-      "community": 1,
+      "community": 15,
       "norm_label": "engraving"
     },
     {
@@ -5150,7 +5260,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_scene_textures_trackedwidth",
-      "community": 1,
+      "community": 15,
       "norm_label": "trackedwidth()"
     },
     {
@@ -5160,7 +5270,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "src_scene_textures_engravingmaps",
-      "community": 1,
+      "community": 15,
       "norm_label": "engravingmaps()"
     },
     {
@@ -5170,7 +5280,7 @@
       "source_location": "L198",
       "_origin": "ast",
       "id": "src_scene_textures_chipstyle",
-      "community": 1,
+      "community": 15,
       "norm_label": "chipstyle"
     },
     {
@@ -5180,7 +5290,7 @@
       "source_location": "L221",
       "_origin": "ast",
       "id": "src_scene_textures_sharpmap",
-      "community": 1,
+      "community": 15,
       "norm_label": "sharpmap"
     },
     {
@@ -5190,7 +5300,7 @@
       "source_location": "L222",
       "_origin": "ast",
       "id": "src_scene_textures_sharpentext",
-      "community": 54,
+      "community": 15,
       "norm_label": "sharpentext()"
     },
     {
@@ -5200,7 +5310,7 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "src_scene_textures_textcanvas",
-      "community": 1,
+      "community": 15,
       "norm_label": "textcanvas()"
     },
     {
@@ -5220,7 +5330,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "src_scene_textures_tokentexture",
-      "community": 1,
+      "community": 15,
       "norm_label": "tokentexture()"
     },
     {
@@ -5230,7 +5340,7 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "src_scene_textures_specsheet",
-      "community": 1,
+      "community": 15,
       "norm_label": "specsheet"
     },
     {
@@ -5240,7 +5350,7 @@
       "source_location": "L304",
       "_origin": "ast",
       "id": "src_scene_textures_wraptext",
-      "community": 1,
+      "community": 15,
       "norm_label": "wraptext()"
     },
     {
@@ -5250,7 +5360,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "src_scene_textures_specsheettexture",
-      "community": 1,
+      "community": 15,
       "norm_label": "specsheettexture()"
     },
     {
@@ -5260,7 +5370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_tints",
-      "community": 15,
+      "community": 3,
       "norm_label": "tints.ts"
     },
     {
@@ -5270,7 +5380,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_scene_tints_status",
-      "community": 15,
+      "community": 3,
       "norm_label": "status"
     },
     {
@@ -5280,7 +5390,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_scene_tints_kind",
-      "community": 15,
+      "community": 3,
       "norm_label": "kind"
     },
     {
@@ -5290,7 +5400,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_scene_tints_statustint",
-      "community": 15,
+      "community": 1,
       "norm_label": "statustint()"
     },
     {
@@ -5300,7 +5410,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_scene_tints_kindtint",
-      "community": 15,
+      "community": 1,
       "norm_label": "kindtint()"
     },
     {
@@ -5340,7 +5450,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_scene_underside_underside_constructor",
-      "community": 55,
+      "community": 33,
       "norm_label": ".constructor()"
     },
     {
@@ -5400,7 +5510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_scene_well",
-      "community": 54,
+      "community": 1,
       "norm_label": "well.ts"
     },
     {
@@ -5410,64 +5520,64 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_scene_well_shaftmat",
-      "community": 54,
+      "community": 1,
       "norm_label": "shaftmat()"
     },
     {
       "label": "uniforms()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L108",
+      "source_location": "L114",
       "_origin": "ast",
       "id": "src_scene_well_uniforms",
-      "community": 54,
+      "community": 1,
       "norm_label": "uniforms()"
     },
     {
       "label": "unitPlane",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L120",
+      "source_location": "L126",
       "_origin": "ast",
       "id": "src_scene_well_unitplane",
-      "community": 54,
+      "community": 1,
       "norm_label": "unitplane"
     },
     {
       "label": "Label",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L132",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "src_scene_well_label",
-      "community": 54,
+      "community": 1,
       "norm_label": "label"
     },
     {
       "label": "LabelScales",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L138",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "src_scene_well_labelscales",
-      "community": 54,
+      "community": 1,
       "norm_label": "labelscales"
     },
     {
       "label": "NO_CAPS",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L144",
+      "source_location": "L150",
       "_origin": "ast",
       "id": "src_scene_well_no_caps",
-      "community": 54,
+      "community": 1,
       "norm_label": "no_caps"
     },
     {
       "label": "Well",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L148",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "src_scene_well_well",
       "community": 46,
@@ -5477,27 +5587,27 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L174",
+      "source_location": "L180",
       "_origin": "ast",
       "id": "src_scene_well_well_constructor",
-      "community": 54,
+      "community": 15,
       "norm_label": ".constructor()"
     },
     {
       "label": ".text()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L210",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "src_scene_well_well_text",
-      "community": 54,
+      "community": 15,
       "norm_label": ".text()"
     },
     {
       "label": ".setRect()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L221",
+      "source_location": "L227",
       "_origin": "ast",
       "id": "src_scene_well_well_setrect",
       "community": 46,
@@ -5507,7 +5617,7 @@
       "label": ".setDest()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L237",
+      "source_location": "L243",
       "_origin": "ast",
       "id": "src_scene_well_well_setdest",
       "community": 46,
@@ -5517,7 +5627,7 @@
       "label": ".stackedDepth()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L252",
+      "source_location": "L258",
       "_origin": "ast",
       "id": "src_scene_well_well_stackeddepth",
       "community": 46,
@@ -5527,7 +5637,7 @@
       "label": ".focusSide()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L260",
+      "source_location": "L266",
       "_origin": "ast",
       "id": "src_scene_well_well_focusside",
       "community": 46,
@@ -5537,7 +5647,7 @@
       "label": ".setState()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L268",
+      "source_location": "L274",
       "_origin": "ast",
       "id": "src_scene_well_well_setstate",
       "community": 46,
@@ -5547,7 +5657,7 @@
       "label": ".setHover()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L276",
+      "source_location": "L282",
       "_origin": "ast",
       "id": "src_scene_well_well_sethover",
       "community": 46,
@@ -5557,7 +5667,7 @@
       "label": ".updateGlow()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L282",
+      "source_location": "L288",
       "_origin": "ast",
       "id": "src_scene_well_well_updateglow",
       "community": 46,
@@ -5567,7 +5677,7 @@
       "label": ".rect()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L286",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "src_scene_well_well_rect",
       "community": 46,
@@ -5577,7 +5687,7 @@
       "label": ".focusProgress()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L291",
+      "source_location": "L297",
       "_origin": "ast",
       "id": "src_scene_well_well_focusprogress",
       "community": 46,
@@ -5587,7 +5697,7 @@
       "label": ".glowIntensity()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L295",
+      "source_location": "L301",
       "_origin": "ast",
       "id": "src_scene_well_well_glowintensity",
       "community": 46,
@@ -5597,7 +5707,7 @@
       "label": ".place()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L299",
+      "source_location": "L305",
       "_origin": "ast",
       "id": "src_scene_well_well_place",
       "community": 46,
@@ -5607,17 +5717,17 @@
       "label": ".plan()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L310",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "src_scene_well_well_plan",
-      "community": 44,
+      "community": 46,
       "norm_label": ".plan()"
     },
     {
       "label": ".update()",
       "file_type": "code",
       "source_file": "src/scene/well.ts",
-      "source_location": "L350",
+      "source_location": "L356",
       "_origin": "ast",
       "id": "src_scene_well_well_update",
       "community": 46,
@@ -8915,7 +9025,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/content/schema.ts",
-      "source_location": "L262",
+      "source_location": "L284",
       "weight": 1.0,
       "source": "src_content_schema_validateprojects",
       "target": "src_admin_fields_field"
@@ -9036,7 +9146,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/admin/views/about.ts",
-      "source_location": "L141",
+      "source_location": "L158",
       "weight": 1.0,
       "source": "src_admin_views_about_renderabout",
       "target": "src_admin_fields_rangefield"
@@ -9080,7 +9190,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/admin/views/about.ts",
-      "source_location": "L153",
+      "source_location": "L170",
       "weight": 1.0,
       "source": "src_admin_views_about_renderabout",
       "target": "src_admin_fields_togglefield"
@@ -9168,7 +9278,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/admin/views/about.ts",
-      "source_location": "L158",
+      "source_location": "L175",
       "weight": 1.0,
       "source": "src_admin_views_about_renderabout",
       "target": "src_admin_fields_tagsfield"
@@ -10735,7 +10845,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/admin/views/about.ts",
-      "source_location": "L129",
+      "source_location": "L146",
       "weight": 1.0,
       "source": "src_admin_views_about_renderabout",
       "target": "src_admin_views_about_listfield",
@@ -10757,7 +10867,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/admin/views/about.ts",
-      "source_location": "L130",
+      "source_location": "L147",
       "weight": 1.0,
       "source": "src_admin_views_about_renderabout",
       "target": "src_admin_views_about_addbutton",
@@ -11675,7 +11785,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L158",
+      "source_location": "L164",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_anim_springs_spring",
@@ -12283,7 +12393,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L74",
+      "source_location": "L84",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_about",
@@ -12293,7 +12403,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L144",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "src_content_schema",
+      "target": "src_content_schema_achievement",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/content/schema.ts",
+      "source_location": "L155",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_filled",
@@ -12303,7 +12423,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L141",
+      "source_location": "L152",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_formatissue",
@@ -12313,7 +12433,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_hintpair",
@@ -12323,7 +12443,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L102",
+      "source_location": "L113",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_iconsvg",
@@ -12333,7 +12453,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L143",
+      "source_location": "L154",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_isobj",
@@ -12343,7 +12463,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L127",
+      "source_location": "L138",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_issue",
@@ -12363,7 +12483,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_project",
@@ -12383,7 +12503,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_projectlink",
@@ -12393,7 +12513,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L112",
+      "source_location": "L123",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_settings",
@@ -12403,7 +12523,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L121",
+      "source_location": "L132",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_sitecontent",
@@ -12413,7 +12533,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L94",
+      "source_location": "L105",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_siteicon",
@@ -12423,7 +12543,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L134",
+      "source_location": "L145",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_siteorder",
@@ -12433,7 +12553,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L60",
+      "source_location": "L61",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_social",
@@ -12453,7 +12573,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_timelineentry",
@@ -12463,7 +12583,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L147",
+      "source_location": "L158",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_validate",
@@ -12473,7 +12593,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L218",
+      "source_location": "L229",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_validateabout",
@@ -12483,7 +12603,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L247",
+      "source_location": "L269",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_validateprojects",
@@ -12493,7 +12613,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L155",
+      "source_location": "L166",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_validatesettings",
@@ -12503,7 +12623,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L203",
+      "source_location": "L214",
       "weight": 1.0,
       "source": "src_content_schema",
       "target": "src_content_schema_validatesocials",
@@ -12559,7 +12679,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/content/schema.ts",
-      "source_location": "L274",
+      "source_location": "L296",
       "weight": 1.0,
       "source": "src_content_schema_validateprojects",
       "target": "src_content_schema_kinds"
@@ -12613,7 +12733,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L174",
+      "source_location": "L180",
       "weight": 1.0,
       "source": "src_scene_well_well_constructor",
       "target": "src_content_schema_project",
@@ -12635,7 +12755,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L44",
+      "source_location": "L53",
       "weight": 1.0,
       "source": "src_scene_about_card_cardinput",
       "target": "src_content_schema_social",
@@ -12668,7 +12788,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L43",
+      "source_location": "L52",
       "weight": 1.0,
       "source": "src_scene_about_card_cardinput",
       "target": "src_content_schema_about",
@@ -12734,7 +12854,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L149",
+      "source_location": "L160",
       "weight": 1.0,
       "source": "src_content_schema_validate",
       "target": "src_content_schema_isobj",
@@ -12745,7 +12865,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L220",
+      "source_location": "L231",
       "weight": 1.0,
       "source": "src_content_schema_validateabout",
       "target": "src_content_schema_isobj",
@@ -12756,7 +12876,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L257",
+      "source_location": "L279",
       "weight": 1.0,
       "source": "src_content_schema_validateprojects",
       "target": "src_content_schema_isobj",
@@ -12767,7 +12887,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L156",
+      "source_location": "L167",
       "weight": 1.0,
       "source": "src_content_schema_validatesettings",
       "target": "src_content_schema_isobj",
@@ -12778,7 +12898,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L211",
+      "source_location": "L222",
       "weight": 1.0,
       "source": "src_content_schema_validatesocials",
       "target": "src_content_schema_isobj",
@@ -12789,7 +12909,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L224",
+      "source_location": "L235",
       "weight": 1.0,
       "source": "src_content_schema_validateabout",
       "target": "src_content_schema_filled",
@@ -12800,7 +12920,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L261",
+      "source_location": "L283",
       "weight": 1.0,
       "source": "src_content_schema_validateprojects",
       "target": "src_content_schema_filled",
@@ -12811,7 +12931,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L164",
+      "source_location": "L175",
       "weight": 1.0,
       "source": "src_content_schema_validatesettings",
       "target": "src_content_schema_filled",
@@ -12822,7 +12942,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L211",
+      "source_location": "L222",
       "weight": 1.0,
       "source": "src_content_schema_validatesocials",
       "target": "src_content_schema_filled",
@@ -12833,7 +12953,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L151",
+      "source_location": "L162",
       "weight": 1.0,
       "source": "src_content_schema_validate",
       "target": "src_content_schema_validateprojects",
@@ -12844,7 +12964,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L150",
+      "source_location": "L161",
       "weight": 1.0,
       "source": "src_content_schema_validate",
       "target": "src_content_schema_validatesettings",
@@ -12866,7 +12986,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L200",
+      "source_location": "L211",
       "weight": 1.0,
       "source": "src_content_schema_validatesettings",
       "target": "src_content_schema_validateabout",
@@ -12877,7 +12997,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/content/schema.ts",
-      "source_location": "L199",
+      "source_location": "L210",
       "weight": 1.0,
       "source": "src_content_schema_validatesettings",
       "target": "src_content_schema_validatesocials",
@@ -12889,7 +13009,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/content/schema.ts",
-      "source_location": "L262",
+      "source_location": "L284",
       "weight": 1.0,
       "source": "src_content_schema_validateprojects",
       "target": "src_input_orbit_project"
@@ -14969,17 +15089,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "indirect_call",
-      "context": "argument",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L259",
-      "weight": 1.0,
-      "source": "src_scene_about_card_layoutabout",
-      "target": "src_lightbox_lightbox_size"
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/main.ts",
@@ -16715,30 +16824,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L63",
+      "source_location": "L111",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
-      "target": "src_scene_about_card_test_box",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L98",
-      "weight": 1.0,
-      "source": "src_scene_about_card_test",
-      "target": "src_scene_about_card_test_cases",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L27",
-      "weight": 1.0,
-      "source": "src_scene_about_card_test",
-      "target": "src_scene_about_card_test_input",
+      "target": "src_scene_about_card_test_all_sizes",
       "confidence_score": 1.0
     },
     {
@@ -16748,7 +16837,27 @@
       "source_location": "L65",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
-      "target": "src_scene_about_card_test_long",
+      "target": "src_scene_about_card_test_box",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.test.ts",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "src_scene_about_card_test",
+      "target": "src_scene_about_card_test_cases",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.test.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "src_scene_about_card_test",
+      "target": "src_scene_about_card_test_input",
       "confidence_score": 1.0
     },
     {
@@ -16758,6 +16867,16 @@
       "source_location": "L67",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
+      "target": "src_scene_about_card_test_long",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.test.ts",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_maxabout",
       "confidence_score": 1.0
     },
@@ -16765,7 +16884,7 @@
       "relation": "indirect_call",
       "confidence": "INFERRED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L100",
+      "source_location": "L107",
       "weight": 1.0,
       "context": "collection",
       "source": "src_scene_about_card_test",
@@ -16786,7 +16905,7 @@
       "relation": "indirect_call",
       "confidence": "INFERRED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L101",
+      "source_location": "L108",
       "weight": 1.0,
       "context": "collection",
       "source": "src_scene_about_card_test",
@@ -16797,7 +16916,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L61",
+      "source_location": "L63",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_sizeof",
@@ -16807,7 +16926,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L28",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_sizes",
@@ -16817,7 +16936,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_socials",
@@ -16827,7 +16946,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L59",
+      "source_location": "L61",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_textop",
@@ -16837,7 +16956,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L60",
+      "source_location": "L62",
       "weight": 1.0,
       "source": "src_scene_about_card_test",
       "target": "src_scene_about_card_test_textops",
@@ -16848,7 +16967,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "weight": 1.0,
       "source": "src_scene_about_card_test_box",
       "target": "src_scene_about_card_test_measure",
@@ -16859,7 +16978,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L27",
+      "source_location": "L28",
       "weight": 1.0,
       "source": "src_scene_about_card_test_input",
       "target": "src_scene_about_card_test_about",
@@ -16870,7 +16989,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L84",
+      "source_location": "L91",
       "weight": 1.0,
       "source": "src_scene_about_card_test_maxinput",
       "target": "src_scene_about_card_test_about",
@@ -16881,7 +17000,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L95",
+      "source_location": "L102",
       "weight": 1.0,
       "source": "src_scene_about_card_test_mininput",
       "target": "src_scene_about_card_test_about",
@@ -16892,7 +17011,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L63",
+      "source_location": "L65",
       "weight": 1.0,
       "source": "src_scene_about_card_test_box",
       "target": "src_scene_about_card_test_sizeof",
@@ -16903,7 +17022,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L68",
+      "source_location": "L70",
       "weight": 1.0,
       "source": "src_scene_about_card_test_maxabout",
       "target": "src_scene_about_card_test_long",
@@ -16914,7 +17033,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.test.ts",
-      "source_location": "L84",
+      "source_location": "L91",
       "weight": 1.0,
       "source": "src_scene_about_card_test_maxinput",
       "target": "src_scene_about_card_test_maxabout",
@@ -16924,7 +17043,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L79",
+      "source_location": "L88",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_aboutlines",
@@ -16934,7 +17053,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L40",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_body",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L49",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardinput",
@@ -16944,7 +17073,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L32",
+      "source_location": "L41",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardlink",
@@ -16954,7 +17083,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L48",
+      "source_location": "L57",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cardpad",
@@ -16964,7 +17093,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L69",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_cityof",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L78",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_contactlinks",
@@ -16974,17 +17113,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L295",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_contentbottom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L312",
+      "source_location": "L338",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_cutcount",
@@ -16994,7 +17123,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L402",
+      "source_location": "L470",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_drawabout",
@@ -17004,50 +17133,10 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L15",
+      "source_location": "L140",
       "weight": 1.0,
       "source": "src_scene_about_card",
-      "target": "src_scene_about_card_f",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L91",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_fit",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L330",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_fitabout",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L315",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_fittedabout",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L59",
-      "weight": 1.0,
-      "source": "src_scene_about_card",
-      "target": "src_scene_about_card_initialsof",
+      "target": "src_scene_about_card_entry",
       "confidence_score": 1.0
     },
     {
@@ -17057,14 +17146,84 @@
       "source_location": "L16",
       "weight": 1.0,
       "source": "src_scene_about_card",
-      "target": "src_scene_about_card_label",
+      "target": "src_scene_about_card_f",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L127",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_fine",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_fit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L360",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_fitabout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L341",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_fittedabout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_head",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_initialsof",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_item",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L169",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_layoutabout",
@@ -17074,7 +17233,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L51",
+      "source_location": "L60",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_linkatuv",
@@ -17084,7 +17243,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L57",
+      "source_location": "L438",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_mark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L66",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_measure",
@@ -17094,7 +17263,27 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L24",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_meta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_note",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L32",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_op",
@@ -17104,7 +17293,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L366",
+      "source_location": "L134",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_pen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L402",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_portrait",
@@ -17114,7 +17313,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L344",
+      "source_location": "L379",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_rrect",
@@ -17124,7 +17323,17 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L103",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "src_scene_about_card",
+      "target": "src_scene_about_card_run",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L113",
       "weight": 1.0,
       "source": "src_scene_about_card",
       "target": "src_scene_about_card_wrap",
@@ -17179,7 +17388,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L151",
+      "source_location": "L223",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_f",
@@ -17190,7 +17399,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L384",
+      "source_location": "L425",
       "weight": 1.0,
       "source": "src_scene_about_card_portrait",
       "target": "src_scene_about_card_f",
@@ -17256,7 +17465,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L338",
+      "source_location": "L370",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_cardpad",
@@ -17267,7 +17476,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L137",
+      "source_location": "L179",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_cardpad",
@@ -17307,6 +17516,17 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L295",
+      "weight": 1.0,
+      "source": "src_scene_about_card_layoutabout",
+      "target": "src_scene_about_card_initialsof",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -17333,7 +17553,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L215",
+      "source_location": "L268",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_contactlinks",
@@ -17344,7 +17564,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L165",
+      "source_location": "L195",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_fit",
@@ -17355,7 +17575,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L106",
+      "source_location": "L116",
       "weight": 1.0,
       "source": "src_scene_about_card_wrap",
       "target": "src_scene_about_card_fit",
@@ -17366,7 +17586,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L151",
+      "source_location": "L242",
       "weight": 1.0,
       "source": "src_scene_about_card_layoutabout",
       "target": "src_scene_about_card_wrap",
@@ -17377,7 +17597,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L331",
+      "source_location": "L301",
+      "weight": 1.0,
+      "source": "src_scene_about_card_layoutabout",
+      "target": "src_scene_about_card_cityof",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L361",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_layoutabout",
@@ -17388,18 +17619,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L288",
-      "weight": 1.0,
-      "source": "src_scene_about_card_layoutabout",
-      "target": "src_scene_about_card_contentbottom",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/scene/about-card.ts",
-      "source_location": "L332",
+      "source_location": "L361",
       "weight": 1.0,
       "source": "src_scene_about_card_fitabout",
       "target": "src_scene_about_card_cutcount",
@@ -17432,9 +17652,9 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L421",
+      "source_location": "L408",
       "weight": 1.0,
-      "source": "src_scene_about_card_drawabout",
+      "source": "src_scene_about_card_portrait",
       "target": "src_scene_about_card_rrect",
       "confidence_score": 1.0
     },
@@ -17443,7 +17663,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L447",
+      "source_location": "L490",
       "weight": 1.0,
       "source": "src_scene_about_card_drawabout",
       "target": "src_scene_about_card_portrait",
@@ -17453,9 +17673,20 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "source_file": "src/scene/about-card.ts",
+      "source_location": "L489",
+      "weight": 1.0,
+      "source": "src_scene_about_card_drawabout",
+      "target": "src_scene_about_card_mark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/about-card.ts",
-      "source_location": "L429",
+      "source_location": "L498",
       "weight": 1.0,
       "source": "src_scene_about_card_drawabout",
       "target": "src_scene_textures_drawtracked"
@@ -19088,7 +19319,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L234",
+      "source_location": "L240",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_layout_rect",
@@ -19099,7 +19330,7 @@
       "context": "return_type",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L286",
+      "source_location": "L292",
       "weight": 1.0,
       "source": "src_scene_well_well_rect",
       "target": "src_scene_layout_rect",
@@ -19110,7 +19341,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L237",
+      "source_location": "L243",
       "weight": 1.0,
       "source": "src_scene_well_well_setdest",
       "target": "src_scene_layout_rect",
@@ -19121,7 +19352,7 @@
       "context": "parameter_type",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L221",
+      "source_location": "L227",
       "weight": 1.0,
       "source": "src_scene_well_well_setrect",
       "target": "src_scene_layout_rect",
@@ -19690,7 +19921,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/well.ts",
-      "source_location": "L327",
+      "source_location": "L333",
       "weight": 1.0,
       "source": "src_scene_well_well_plan",
       "target": "src_scene_stack_shownheight"
@@ -19989,7 +20220,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L150",
+      "source_location": "L156",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_stack_cardstack",
@@ -20538,7 +20769,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/well.ts",
-      "source_location": "L192",
+      "source_location": "L198",
       "weight": 1.0,
       "source": "src_scene_well_well_constructor",
       "target": "src_scene_textures_sharpentext"
@@ -20549,7 +20780,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/well.ts",
-      "source_location": "L213",
+      "source_location": "L219",
       "weight": 1.0,
       "source": "src_scene_well_well_text",
       "target": "src_scene_textures_sharpentext"
@@ -20593,7 +20824,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/well.ts",
-      "source_location": "L212",
+      "source_location": "L218",
       "weight": 1.0,
       "source": "src_scene_well_well_text",
       "target": "src_scene_textures_labeltexture"
@@ -20677,7 +20908,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/scene/well.ts",
-      "source_location": "L189",
+      "source_location": "L195",
       "weight": 1.0,
       "source": "src_scene_well_well_constructor",
       "target": "src_scene_tints_kindtint"
@@ -20777,7 +21008,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L132",
+      "source_location": "L138",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_label",
@@ -20787,7 +21018,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L138",
+      "source_location": "L144",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_labelscales",
@@ -20797,7 +21028,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L144",
+      "source_location": "L150",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_no_caps",
@@ -20817,7 +21048,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L108",
+      "source_location": "L114",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_uniforms",
@@ -20827,7 +21058,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L120",
+      "source_location": "L126",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_unitplane",
@@ -20837,7 +21068,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L148",
+      "source_location": "L154",
       "weight": 1.0,
       "source": "src_scene_well",
       "target": "src_scene_well_well",
@@ -20859,7 +21090,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L175",
+      "source_location": "L181",
       "weight": 1.0,
       "source": "src_scene_well_well_constructor",
       "target": "src_scene_well_shaftmat",
@@ -20869,7 +21100,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L174",
+      "source_location": "L180",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_constructor",
@@ -20879,7 +21110,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L291",
+      "source_location": "L297",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_focusprogress",
@@ -20889,7 +21120,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L260",
+      "source_location": "L266",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_focusside",
@@ -20899,7 +21130,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L295",
+      "source_location": "L301",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_glowintensity",
@@ -20909,7 +21140,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L299",
+      "source_location": "L305",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_place",
@@ -20919,7 +21150,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L310",
+      "source_location": "L316",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_plan",
@@ -20929,7 +21160,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L286",
+      "source_location": "L292",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_rect",
@@ -20939,7 +21170,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L237",
+      "source_location": "L243",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_setdest",
@@ -20949,7 +21180,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L276",
+      "source_location": "L282",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_sethover",
@@ -20959,7 +21190,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L221",
+      "source_location": "L227",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_setrect",
@@ -20969,7 +21200,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L268",
+      "source_location": "L274",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_setstate",
@@ -20979,7 +21210,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L252",
+      "source_location": "L258",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_stackeddepth",
@@ -20989,7 +21220,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L210",
+      "source_location": "L216",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_text",
@@ -20999,7 +21230,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L350",
+      "source_location": "L356",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_update",
@@ -21009,7 +21240,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L282",
+      "source_location": "L288",
       "weight": 1.0,
       "source": "src_scene_well_well",
       "target": "src_scene_well_well_updateglow",
@@ -21020,7 +21251,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L189",
+      "source_location": "L195",
       "weight": 1.0,
       "source": "src_scene_well_well_constructor",
       "target": "src_scene_well_well_text",
@@ -21031,7 +21262,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L272",
+      "source_location": "L278",
       "weight": 1.0,
       "source": "src_scene_well_well_setstate",
       "target": "src_scene_well_well_updateglow",
@@ -21042,7 +21273,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L279",
+      "source_location": "L285",
       "weight": 1.0,
       "source": "src_scene_well_well_sethover",
       "target": "src_scene_well_well_updateglow",
@@ -21053,7 +21284,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L442",
+      "source_location": "L448",
       "weight": 1.0,
       "source": "src_scene_well_well_update",
       "target": "src_scene_well_well_place",
@@ -21064,7 +21295,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/scene/well.ts",
-      "source_location": "L377",
+      "source_location": "L383",
       "weight": 1.0,
       "source": "src_scene_well_well_update",
       "target": "src_scene_well_well_plan",
@@ -22974,5 +23205,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b685cb4d0c35551cafc2cb1a5ec6273c90d677ea"
+  "built_at_commit": "7f33a3646009df285eb8240c4fcfe998f9ddc781"
 }

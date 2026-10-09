@@ -12,7 +12,8 @@ export const MAX_PROJECTS = 12;
 /** The lid has room for this many engraved socials. */
 export const MAX_SOCIALS = 4;
 export const MAX_SKILLS = 12;
-export const MAX_TIMELINE = 4;
+export const MAX_TIMELINE = 8;
+export const MAX_ACHIEVEMENTS = 8;
 export const MAX_BIO = 360;
 export const MAX_YEARS = 60;
 export const ID_PATTERN = /^[a-z0-9-]+$/;
@@ -70,6 +71,15 @@ export interface TimelineEntry {
   period: string;
 }
 
+/** Something to be proud of: a title, and optionally a line of detail and when. */
+export interface Achievement {
+  title: string;
+  /** '' to leave out. */
+  detail: string;
+  /** e.g. "2025" ('' to leave out). */
+  year: string;
+}
+
 /** The About card on the box's underside: what a recruiter wants to know. */
 export interface About {
   /** '' (initials are shown) or a /shots/<file> path. */
@@ -88,6 +98,7 @@ export interface About {
   /** '' or an http(s):// link to a résumé. */
   resume: string;
   timeline: TimelineEntry[];
+  achievements: Achievement[];
 }
 
 /** The browser-tab icon: a few letters on a rounded square. */
@@ -240,6 +251,17 @@ function validateAbout(a: unknown, issues: Issue[]) {
     a.timeline.forEach((t: unknown, i) => {
       for (const k of ['role', 'org', 'period'])
         if (!isObj(t) || !filled(t[k])) issues.push({ path: at(`timeline.${i}.${k}`), message: `Timeline ${i + 1}: ${k} is required.` });
+    });
+  }
+  if (!Array.isArray(a.achievements)) issues.push({ path: at('achievements'), message: 'Achievements must be a list.' });
+  else {
+    if (a.achievements.length > MAX_ACHIEVEMENTS)
+      issues.push({ path: at('achievements'), message: `At most ${MAX_ACHIEVEMENTS} achievements.` });
+    a.achievements.forEach((t: unknown, i) => {
+      if (!isObj(t) || !filled(t.title)) issues.push({ path: at(`achievements.${i}.title`), message: `Achievement ${i + 1}: title is required.` });
+      for (const k of ['detail', 'year'])
+        if (isObj(t) && typeof t[k] !== 'string')
+          issues.push({ path: at(`achievements.${i}.${k}`), message: `Achievement ${i + 1}: ${k} must be text (it may be empty).` });
     });
   }
 }

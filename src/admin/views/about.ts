@@ -1,4 +1,4 @@
-import { MAX_BIO, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, MAX_YEARS, type About, type Settings } from '../../content/schema';
+import { MAX_ACHIEVEMENTS, MAX_BIO, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, MAX_YEARS, type About, type Settings } from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
 import { rangeField, tagsField, textField, toggleField } from '../fields';
@@ -119,7 +119,24 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     );
   });
 
+  const achievements = a.achievements.map((t, i) => {
+    const at = `settings.about.achievements.${i}`;
+    const set = (k: keyof typeof t) => (v: string) => ed((x) => (x.achievements[i][k] = v));
+    return listRow(
+      [
+        textField('Title', `${at}.title`, t.title, set('title'), { hint: 'e.g. Apple Design Award finalist.' }),
+        textField('Detail', `${at}.detail`, t.detail, set('detail'), { hint: 'One short line (optional).' }),
+        textField('Year', `${at}.year`, t.year, set('year'), { hint: 'e.g. 2025 (optional).' }),
+      ],
+      i,
+      a.achievements.length,
+      (from, to) => restructure((x) => moveItem(x.about.achievements, from, to)),
+      () => restructure((x) => x.about.achievements.splice(i, 1)),
+    );
+  });
+
   const socialsFull = s.socials.length >= MAX_SOCIALS;
+  const achievementsFull = a.achievements.length >= MAX_ACHIEVEMENTS;
   const timelineFull = a.timeline.length >= MAX_TIMELINE;
 
   root.replaceChildren(
@@ -150,12 +167,12 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     h(
       'div',
       { class: 'grid2' },
-      toggleField('Available', 'settings.about.available', a.available, (v) => ed((x) => (x.available = v)), 'Green dot when on, grey when off.'),
+      toggleField('Available', 'settings.about.available', a.available, (v) => ed((x) => (x.available = v)), 'Shown in green when on, grey when off.'),
       textField('Availability', 'settings.about.availability', a.availability, (v) => ed((x) => (x.availability = v)), {
         hint: 'e.g. Open to new roles.',
       }),
     ),
-    tagsField('Skills', 'settings.about.skills', a.skills, (v) => ed((x) => (x.skills = v)), `Up to ${MAX_SKILLS}, shown as chips.`, MAX_SKILLS),
+    tagsField('Skills', 'settings.about.skills', a.skills, (v) => ed((x) => (x.skills = v)), `Up to ${MAX_SKILLS}, listed in order.`, MAX_SKILLS),
     h(
       'div',
       { class: 'grid2' },
@@ -163,10 +180,16 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
       textField('Résumé link', 'settings.about.resume', a.resume, (v) => ed((x) => (x.resume = v)), { hint: 'https://… (optional).' }),
     ),
 
-    h('div', { class: 'section-title' }, 'Experience'),
+    h('div', { class: 'section-title' }, 'Experience — newest first'),
     listField('settings.about.timeline', ...timeline),
     addButton(timelineFull, `Up to ${MAX_TIMELINE} entries`, 'Add an entry', () =>
       restructure((x) => x.about.timeline.push({ role: '', org: '', period: '' })),
+    ),
+
+    h('div', { class: 'section-title' }, 'Achievements — most notable first'),
+    listField('settings.about.achievements', ...achievements),
+    addButton(achievementsFull, `Up to ${MAX_ACHIEVEMENTS} achievements`, 'Add an achievement', () =>
+      restructure((x) => x.about.achievements.push({ title: '', detail: '', year: '' })),
     ),
   );
 }

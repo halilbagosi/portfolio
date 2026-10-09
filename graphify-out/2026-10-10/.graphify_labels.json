@@ -7,12 +7,14 @@
   "5": "Well",
   "6": "compilerOptions",
   "7": "package.json",
+  "8": "ChipSet",
   "9": "box.ts",
   "10": "Lightbox",
   "11": "Stage",
   "12": "Admin dashboard — design",
   "13": "File map",
   "14": "Motion",
+  "15": "Preview",
   "16": "Task 2 report: site reads site.json and settings",
   "17": "progress-dashboard.md",
   "18": "Task 1 report: content schema, validation and site.json",
@@ -51,5 +53,8 @@
   "51": "setFocus",
   "52": "Task 10 report: Accessibility layer and no-WebGL fallback",
   "53": "Task 11 report: Dashboard \"About & socials\" view",
-  "56": "Laser"
+  "54": "well.ts",
+  "55": "Lid",
+  "56": "Laser",
+  "57": "glyphs.ts"
 }
