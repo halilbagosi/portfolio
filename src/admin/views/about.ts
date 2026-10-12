@@ -1,4 +1,17 @@
-import { MAX_ACHIEVEMENTS, MAX_BIO, MAX_SKILLS, MAX_SOCIALS, MAX_TIMELINE, MAX_YEARS, type About, type Settings } from '../../content/schema';
+import {
+  CARD_HEADINGS,
+  MAX_ACHIEVEMENTS,
+  MAX_BIO,
+  MAX_FINE_PRINT,
+  MAX_RING_TEXT,
+  MAX_SKILLS,
+  MAX_SOCIALS,
+  MAX_TIMELINE,
+  MAX_YEARS,
+  type About,
+  type FinePrint,
+  type Settings,
+} from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
 import { rangeField, tagsField, textField, toggleField } from '../fields';
@@ -34,7 +47,7 @@ const addButton = (full: boolean, fullLabel: string, label: string, add: () => v
   h('button', { class: 'btn', type: 'button', disabled: full, onclick: add }, full ? fullLabel : label);
 
 /**
- * The About card on the box's underside (portrait, bio, experience, contact) and the socials
+ * The About card on the box's underside (portrait, bio, experience, contact, its headings and fine print) and the socials
  * engraved on its lid. Field edits change the store in place; adding, removing or moving rows
  * re-renders the view.
  */
@@ -135,6 +148,18 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     );
   });
 
+  // The card's own words: headings, the years label, and the fine print along its bottom.
+  const card = s.card;
+  const fp = (fn: (f: FinePrint) => void) => edit((x) => fn(x.card.finePrint));
+  const headings = h(
+    'div',
+    { class: 'grid3' },
+    ...CARD_HEADINGS.map((k) =>
+      textField(`“${k[0].toUpperCase()}${k.slice(1)}” heading`, `settings.card.headings.${k}`, card.headings[k], (v) => edit((x) => (x.card.headings[k] = v))),
+    ),
+    textField('Years label', 'settings.card.yearsLabel', card.yearsLabel, (v) => edit((x) => (x.card.yearsLabel = v)), { hint: `Shown as “${a.years}+ …”.` }),
+  );
+
   const socialsFull = s.socials.length >= MAX_SOCIALS;
   const achievementsFull = a.achievements.length >= MAX_ACHIEVEMENTS;
   const timelineFull = a.timeline.length >= MAX_TIMELINE;
@@ -191,5 +216,25 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     addButton(achievementsFull, `Up to ${MAX_ACHIEVEMENTS} achievements`, 'Add an achievement', () =>
       restructure((x) => x.about.achievements.push({ title: '', detail: '', year: '' })),
     ),
+
+    h('div', { class: 'section-title' }, 'Card headings'),
+    headings,
+
+    h('div', { class: 'section-title' }, 'Fine print — along the bottom of the card'),
+    toggleField('Show the fine print', 'settings.card.finePrint.show', card.finePrint.show, (v) => fp((f) => (f.show = v))),
+    textField('Text', 'settings.card.finePrint.text', card.finePrint.text, (v) => fp((f) => (f.text = v)), {
+      maxLength: MAX_FINE_PRINT,
+      hint: '{name}, {role}, {city} and {location} are filled in. Leave empty for just the marks.',
+    }),
+    h(
+      'div',
+      { class: 'grid2' },
+      toggleField('Bin mark', 'settings.card.finePrint.bin', card.finePrint.bin, (v) => fp((f) => (f.bin = v)), 'The crossed-out bin.'),
+      toggleField('Ring mark', 'settings.card.finePrint.ring', card.finePrint.ring, (v) => fp((f) => (f.ring = v)), 'A ring with letters inside.'),
+    ),
+    textField('Ring letters', 'settings.card.finePrint.ringText', card.finePrint.ringText, (v) => fp((f) => (f.ringText = v)), {
+      maxLength: MAX_RING_TEXT,
+      hint: 'Leave empty for your initials.',
+    }),
   );
 }

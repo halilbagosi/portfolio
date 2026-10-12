@@ -113,8 +113,8 @@ scene.add(box.group);
 const underside = new Underside();
 box.group.add(underside.mesh);
 try {
-  const { identity, about, socials } = settings;
-  underside.showAbout({ name: identity.name, role: identity.role, about, socials }, about.photo);
+  const { identity, about, socials, card } = settings;
+  underside.showAbout({ name: identity.name, role: identity.role, about, socials, card }, about.photo);
 } catch (err) {
   console.warn('About card failed to draw; the back of the box stays blank.', err); // never take the scene down
 }
@@ -122,13 +122,16 @@ const lid = new Lid(reduced);
 scene.add(lid.group);
 
 const n = Math.min(projects.length, MAX_WELLS);
-const closed = packLayout(n, INTERIOR_W, INTERIOR_D, GAP);
+// Section sizes from the dashboard (percent of the box).
+const leadShare = settings.layout.leadWidth / 100;
+const openShare = { w: settings.layout.openWidth / 100, d: settings.layout.openDepth / 100 };
+const closed = packLayout(n, INTERIOR_W, INTERIOR_D, GAP, leadShare);
 const tiles = projects.slice(0, n).map((p, i) => {
   const t = new Well(p, i, reduced);
   t.setRect(closed[i], true);
   t.restRect = closed[i];
   t.setDest(closed[i]);
-  const open = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP)[i];
+  const open = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP, openShare)[i];
   t.focusTall = open.d > open.w;
   scene.add(t.group);
   return t;
@@ -153,7 +156,7 @@ const reveal = new Spring(0, 30, 1);
 
 // Layout motion: one spring per column width and row height (critically damped, ~0.45s).
 // Every in-between frame is a valid grid, so sections never slide through each other.
-const rest = restSizes(n, INTERIOR_W, INTERIOR_D, GAP);
+const rest = restSizes(n, INTERIOR_W, INTERIOR_D, GAP, leadShare);
 const mkSpring = (v: number) => new Spring(v, 200, 1);
 const colSprings = rest.cols.map(mkSpring);
 const rowSprings = rest.rows.map((col) => col.map(mkSpring));
@@ -254,11 +257,11 @@ let focused = -1;
  */
 function openSizes(i: number) {
   const t = tiles[i];
-  if (!PORTRAIT || !t.focusTall || t.focusSide()) return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP);
-  const base = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP)[i];
+  if (!PORTRAIT || !t.focusTall || t.focusSide()) return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP, undefined, undefined, undefined, openShare);
+  const base = expandedLayout(n, i, INTERIOR_W, INTERIOR_D, GAP, openShare)[i];
   chipSets[i].build(base.w, base.d, false);
   t.factsDepth = chipSets[i].factsDepth;
-  return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP, 0.5, t.stackedDepth(base.w));
+  return focusSizes(n, i, INTERIOR_W, INTERIOR_D, GAP, undefined, t.stackedDepth(base.w), undefined, openShare);
 }
 const openLayout = (i: number) => rectsFrom(n, openSizes(i), INTERIOR_W, INTERIOR_D, GAP);
 
@@ -421,8 +424,8 @@ function openLink(href: string) {
 
 /**
  * One scroll or swipe, along a single axis. Up / swipe down puts the lid on; the opposite, down /
- * swipe up, rolls the sealed box onto its back to show the About card, and up / swipe down rolls it
- * back. Opening the lid is a tap or click only.
+ * swipe up, rolls the sealed box onto its back to show the About card, and once more rolls it on
+ * round to its top (a loop); up / swipe down rolls it back. Opening the lid is a tap or click only.
  */
 function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe' | 'key') {
   if (source === 'swipe' && motion.needsPermission) void motion.enable().finally(permissionAsked);
@@ -436,9 +439,13 @@ function onVertical(dir: 1 | -1, source: 'wheel' | 'swipe' | 'key') {
     return;
   }
   if (dir > 0 && lid.state === 'closed') pendingOpen = false; // turning away from the top drops a tap's pending open
-  if (lid.state === 'closed') orbit.flip(dir > 0 ? 'bottom' : 'top');
-  else if (lid.state === 'gone' && orbit.face === 'bottom') orbit.flip('top'); // lid off, on its back: scrolling up turns it back
-  else if (lid.state === 'gone' && dir > 0 && focused < 0) orbit.flip('bottom');
+  const settled = lid.state === 'closed' || lid.state === 'gone';
+  // On its back (lid on or off): it turns the way the swipe goes. Up / scroll down carries the roll on
+  // round to the top, a loop; down / scroll up rolls it back the way it came.
+  if (settled && orbit.face === 'bottom') orbit.flip('top', dir > 0 ? 'away' : 'toward');
+  else if (lid.state === 'closed') {
+    if (dir > 0) orbit.flip('bottom');
+  } else if (lid.state === 'gone' && dir > 0 && focused < 0) orbit.flip('bottom');
   else if (dir < 0) closeLid();
 }
 

@@ -5,7 +5,7 @@ export function validContent(): SiteContent {
   return {
     settings: {
       identity: { name: 'Ada Lovelace', role: 'Engineer', title: 'Ada — Engineer', description: 'Selected projects.' },
-      icon: { text: 'AL', background: '#111111', color: '#ffffff' },
+      icon: { text: 'AL', background: '#111111', color: '#ffffff', radius: 22, image: '' },
       hints: {
         open: { desktop: 'Click to open', touch: 'Tap to open' },
         begin: { touch: 'Tap to begin' },
@@ -15,6 +15,12 @@ export function validContent(): SiteContent {
         back: { desktop: 'Scroll up to turn it back', touch: 'Swipe down to turn it back' },
       },
       motion: { photoDwell: 2, gyroDegrees: 18, parallax: 1, lidKnock: true, topDownOnOpen: true },
+      layout: { leadWidth: 46, openWidth: 90, openDepth: 75 },
+      card: {
+        headings: { about: 'About', experience: 'Experience', achievements: 'Achievements', skills: 'Skills', contact: 'Contact' },
+        yearsLabel: 'years experience',
+        finePrint: { show: true, text: 'Designed by {name} in {city}. Assembled in the browser.', bin: true, ring: true, ringText: '' },
+      },
       socials: [
         { label: 'GitHub', text: 'github.com/ada', href: 'https://github.com/ada' },
         { label: 'Email', text: 'ada@example.com', href: 'mailto:ada@example.com' },

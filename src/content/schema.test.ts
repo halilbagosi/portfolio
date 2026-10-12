@@ -214,4 +214,21 @@ describe('socials and about', () => {
     expectIssue((c) => (c.settings.about.achievements[0].title = ''), 'settings.about.achievements.0.title', 'required');
     expectIssue((c) => ((c.settings.about as unknown as Record<string, unknown>).achievements = undefined), 'settings.about.achievements', 'must be a list');
   });
+
+  it('keeps section sizes in range', () => {
+    expectIssue((c) => (c.settings.layout.leadWidth = 80), 'settings.layout.leadWidth', 'between 30 and 70');
+    expectIssue((c) => (c.settings.layout.openDepth = 20), 'settings.layout.openDepth', 'between 50 and 95');
+  });
+
+  it('checks the icon radius and image', () => {
+    expectIssue((c) => (c.settings.icon.radius = 60), 'settings.icon.radius', 'between 0 and 50');
+    expectIssue((c) => (c.settings.icon.image = 'https://x.com/a.png'), 'settings.icon.image', '/shots/');
+    expect(issuesAfter((c) => (c.settings.icon.image = '/shots/icon-1.jpg'))).toEqual([]);
+  });
+
+  it('checks the About card wording, allowing empty fine print', () => {
+    expectIssue((c) => (c.settings.card.headings.skills = ' '), 'settings.card.headings.skills', 'required');
+    expectIssue((c) => (c.settings.card.finePrint.ringText = 'ABCD'), 'settings.card.finePrint.ringText', 'Up to 3');
+    expect(issuesAfter((c) => (c.settings.card.finePrint.text = ''))).toEqual([]);
+  });
 });

@@ -1,10 +1,12 @@
-import type { Settings } from '../../content/schema';
-import { iconSvg, MAX_ICON_TEXT } from '../../content/schema';
+import type { LayoutSettings, Settings } from '../../content/schema';
+import { iconSvg, LAYOUT_RANGES, MAX_ICON_RADIUS, MAX_ICON_TEXT } from '../../content/schema';
+import { api } from '../api';
 import { h } from '../dom';
 import { rangeField, textField, toggleField } from '../fields';
+import { processPhoto } from '../photos';
 import type { Store } from '../state';
 
-/** Identity, hint copy and motion tuning. Edits change the store in place; no re-render needed. */
+/** Identity, icon, hint copy, section sizes and motion tuning. Edits change the store in place; no re-render needed. */
 export function renderSettings(root: HTMLElement, store: Store) {
   const s = store.content.settings;
   const edit = (fn: (s: Settings) => void) => store.change((c) => fn(c.settings));
@@ -45,6 +47,11 @@ export function renderSettings(root: HTMLElement, store: Store) {
     hint('Turn it over (About)', 'flip'),
     hint('Turn it back', 'back'),
 
+    h('div', { class: 'section-title' }, 'Section sizes'),
+    layoutField('Featured section width (overview)', 'leadWidth', s, edit, 'Share of the box the big tile takes before anything is opened. Wide screens.'),
+    layoutField('Open section width', 'openWidth', s, edit, 'Share of the box an open section takes across; the others shrink to strips. Wide screens.'),
+    layoutField('Open section length', 'openDepth', s, edit, 'Share of the box an open section takes front to back, when it shares its column (every section on a phone).'),
+
     h('div', { class: 'section-title' }, 'Motion'),
     rangeField('Time on each photo', 'settings.motion.photoDwell', s.motion.photoDwell, { min: 0.5, max: 10, step: 0.5, unit: 's' }, (v) =>
       edit((x) => (x.motion.photoDwell = v)),
@@ -67,11 +74,51 @@ export function renderSettings(root: HTMLElement, store: Store) {
   );
 }
 
-/** The browser-tab icon: letters and two colours, with a live preview. Applies after a reload of the site. */
+/** One section size, as a percentage of the box. */
+function layoutField(label: string, key: keyof LayoutSettings, s: Settings, edit: (fn: (s: Settings) => void) => void, hint: string) {
+  const [min, max] = LAYOUT_RANGES[key];
+  return rangeField(label, `settings.layout.${key}`, s.layout[key], { min, max, step: 1, unit: '%' }, (v) => edit((x) => (x.layout[key] = v)), hint);
+}
+
+/**
+ * The browser-tab icon: letters, two colours and the corner radius, with a live preview; or an
+ * uploaded image, used as it is. Applies after a reload of the site.
+ */
 function iconEditor(s: Settings, edit: (fn: (s: Settings) => void) => void) {
   const preview = h('img', { class: 'icon-preview', alt: 'Icon preview', width: 64, height: 64 });
-  const draw = () => (preview.src = `data:image/svg+xml,${encodeURIComponent(iconSvg(s.icon))}`);
-  draw();
+  const draw = () => {
+    preview.src = s.icon.image || `data:image/svg+xml,${encodeURIComponent(iconSvg(s.icon))}`;
+    status.textContent = s.icon.image ? `Using ${s.icon.image}. Remove it to use the letters again.` : 'Or upload an image (square works best).';
+    remove.hidden = !s.icon.image;
+  };
+  const status = h('small', { class: 'field-hint' });
+  const file = h('input', { type: 'file', accept: 'image/*', 'aria-label': 'Upload an icon image' });
+  file.addEventListener('change', async () => {
+    const f = file.files?.[0];
+    file.value = ''; // so choosing the same file again still fires `change`
+    if (!f) return;
+    status.textContent = 'Uploading…';
+    file.disabled = true;
+    try {
+      const { blob } = await processPhoto(f);
+      const { path } = await api.uploadPhoto('icon', blob);
+      edit((x) => (x.icon.image = path));
+      draw();
+    } catch (e) {
+      status.textContent = e instanceof Error ? e.message : String(e);
+    } finally {
+      file.disabled = false;
+    }
+  });
+  const remove = h('button', { class: 'btn', type: 'button', onclick: () => (edit((x) => (x.icon.image = '')), draw()) }, 'Remove image');
+  const image = h(
+    'div',
+    { class: 'field', 'data-path': 'settings.icon.image' },
+    h('span', { class: 'field-label' }, 'Image'),
+    h('div', { class: 'portrait-row' }, file, remove),
+    status,
+    h('small', { class: 'field-error' }),
+  );
   const color = (label: string, key: 'background' | 'color') => {
     const input = h('input', { type: 'color', value: s.icon[key], 'aria-label': label });
     input.addEventListener('input', () => {
@@ -80,6 +127,7 @@ function iconEditor(s: Settings, edit: (fn: (s: Settings) => void) => void) {
     });
     return h('div', { class: 'field', 'data-path': `settings.icon.${key}` }, h('span', { class: 'field-label' }, label), h('div', { class: 'colors' }, input), h('small', { class: 'field-error' }));
   };
+  draw();
   return h(
     'div',
     { class: 'grid2' },
@@ -96,5 +144,10 @@ function iconEditor(s: Settings, edit: (fn: (s: Settings) => void) => void) {
     preview,
     color('Background', 'background'),
     color('Letters colour', 'color'),
+    rangeField('Corner radius', 'settings.icon.radius', s.icon.radius, { min: 0, max: MAX_ICON_RADIUS, step: 1 }, (v) => {
+      edit((x) => (x.icon.radius = v));
+      draw();
+    }, '0 is square, 50 a circle.'),
+    image,
   );
 }

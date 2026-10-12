@@ -75,6 +75,8 @@ export const shownHeight = (aspect: number, crop: number) => (aspect < TALL ? 1 
 
 /** Rest pose per slot behind the top card: a gentle fan, as in a Messages photo stack. */
 const SLOT_ROT = [0, 0.045, -0.04, 0.07];
+/** Cards shown at once (top included); the rest wait, hidden, deeper in the stack. */
+const VISIBLE = SLOT_ROT.length;
 
 /** How long each photo stays on top before the next flip, once it has arrived (s); set in the dashboard. */
 const DWELL = settings.motion.photoDwell;
@@ -224,7 +226,8 @@ export class CardStack {
   private hovered = false;
   private nextAt = 0;
   private clock = 0;
-  private snapNext = false;
+  /** Set at first, so the cards start in their slots rather than all fanning out from the top. */
+  private snapNext = true;
   /** The top card is out in the full-screen viewer; hide it here so there is only one of it. */
   get held() {
     return this._held;
@@ -374,11 +377,16 @@ export class CardStack {
       u.uFade.value = (1 - shown) * 2;
       u.uDim.value = dim;
       u.uShade.value = shade;
-      // Only the top few cards show; deeper ones fade rather than pop.
-      u.uOpacity.value = (slot <= 3 || out ? 1 : 0) * flipFade * presence * (slot === 0 ? this.heldK : 1);
-      c.mesh.visible = presence > 0.01 && cw > 0.05 && cd > 0.05;
-      // Explicit draw order (after the shaft at -1, before labels and glass at 1+): back to front.
-      c.mesh.renderOrder = out ? -0.4 : -0.9 + (n - slot) * 0.05;
+      // Only the top VISIBLE cards show. A deeper card fades in as it moves up into the last visible
+      // slot (by its eased position, so it never pops in), and the one leaving fades out on its own.
+      const depthFade = out ? 1 : 1 - THREE.MathUtils.smoothstep(c.slotF, VISIBLE - 1, VISIBLE);
+      const opacity = depthFade * flipFade * presence * (slot === 0 ? this.heldK : 1);
+      u.uOpacity.value = opacity;
+      c.mesh.visible = opacity > 0.002 && cw > 0.05 && cd > 0.05;
+      // Explicit draw order (after the shaft at -1, before labels and glass at 1+): back to front, the
+      // leaving card over all of them. Counted over the visible slots only, so a long stack can't push
+      // its top card past the leaving one (or past the labels).
+      c.mesh.renderOrder = out ? -0.4 : -0.9 + (VISIBLE - Math.min(slot, VISIBLE)) * 0.05;
     });
     this.snapNext = false;
   }

@@ -37,12 +37,15 @@ export function structure(n: number, tall = false): number[][] {
 
 const split = (total: number, gap: number, k: number) => (total - gap * (k - 1)) / k;
 
-/** Resting sizes: lead column ~46% wide, the others share the rest; rows split evenly (one column: just rows). */
-export function restSizes(n: number, W: number, D: number, gap: number): Sizes {
+/**
+ * Resting sizes: the lead column takes `leadShare` of the width (~46% unless set), the others share
+ * the rest; rows split evenly (one column: just rows).
+ */
+export function restSizes(n: number, W: number, D: number, gap: number, leadShare?: number): Sizes {
   const s = structure(n, D > W);
   if (s.length === 1) return { cols: [W], rows: [s[0].map(() => split(D, gap, s[0].length))] };
   const usable = W - gap * (s.length - 1);
-  const lead = usable * (n === 2 ? 0.5 : 0.46);
+  const lead = usable * (leadShare ?? (n === 2 ? 0.5 : 0.46));
   const other = (usable - lead) / (s.length - 1);
   return {
     cols: s.map((_, c) => (c === 0 ? lead : other)),
@@ -50,24 +53,43 @@ export function restSizes(n: number, W: number, D: number, gap: number): Sizes {
   };
 }
 
+/** How much of the box an open section takes (0..1): its column's share of the width, its row's of the depth. */
+export interface OpenShare {
+  w: number;
+  d: number;
+}
+
 /**
- * Focused sizes: the project's column and row take nearly everything; the rest become slim strips.
+ * Focused sizes: the project's column and row take nearly everything; the rest become slim strips,
+ * `strip` deep each, or, given `share`, whatever the open section leaves.
  * want: the depth the focused row needs, when less than everything. The strips share what it
  * leaves, up to maxStrip each, so a short section leaves its neighbours a little more room.
  */
-export function focusSizes(n: number, index: number, W: number, D: number, gap: number, strip = 0.5, want?: number, maxStrip = 0.66): Sizes {
+export function focusSizes(
+  n: number,
+  index: number,
+  W: number,
+  D: number,
+  gap: number,
+  strip = 0.5,
+  want?: number,
+  maxStrip = 0.66,
+  share?: OpenShare,
+): Sizes {
   const s = structure(n, D > W);
   if (n <= 1) return restSizes(n, W, D, gap);
   const fc = s.findIndex((col) => col.includes(index));
   const usable = W - gap * (s.length - 1);
+  const colStrip = share && s.length > 1 ? (usable * (1 - share.w)) / (s.length - 1) : strip;
   return {
-    cols: s.map((_, c) => (c === fc ? usable - strip * (s.length - 1) : strip)),
+    cols: s.map((_, c) => (c === fc ? usable - colStrip * (s.length - 1) : colStrip)),
     rows: s.map((col, c) => {
       if (c !== fc) return col.map(() => split(D, gap, col.length));
       const usableD = D - gap * (col.length - 1);
-      // A long single column (portrait, many projects) shares at most 45% among its strips.
       const k = Math.max(1, col.length - 1);
-      let st = Math.min(strip, (usableD * 0.45) / k);
+      // A long single column (portrait, many projects) shares at most 45% among its strips (unless set).
+      let st = share ? (usableD * (1 - share.d)) / k : Math.min(strip, (usableD * 0.45) / k);
+      maxStrip = Math.max(maxStrip, st);
       if (want !== undefined && col.length > 1) st = Math.min(Math.max(st, (usableD - want) / k), maxStrip);
       return col.map((p) => (p === index ? usableD - st * (col.length - 1) : st));
     }),
@@ -97,6 +119,7 @@ export const lerpSizes = (a: Sizes, b: Sizes, t: number): Sizes => ({
   rows: a.rows.map((col, c) => col.map((v, r) => v + (b.rows[c][r] - v) * t)),
 });
 
-export const packLayout = (n: number, W: number, D: number, gap: number) => rectsFrom(n, restSizes(n, W, D, gap), W, D, gap);
-export const expandedLayout = (n: number, i: number, W: number, D: number, gap: number) =>
-  rectsFrom(n, focusSizes(n, i, W, D, gap), W, D, gap);
+export const packLayout = (n: number, W: number, D: number, gap: number, leadShare?: number) =>
+  rectsFrom(n, restSizes(n, W, D, gap, leadShare), W, D, gap);
+export const expandedLayout = (n: number, i: number, W: number, D: number, gap: number, share?: OpenShare) =>
+  rectsFrom(n, focusSizes(n, i, W, D, gap, undefined, undefined, undefined, share), W, D, gap);

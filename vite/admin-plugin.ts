@@ -15,6 +15,8 @@ import { formatIssue, iconSvg, ID_PATTERN, validate, type SiteContent } from '..
  */
 export function adminPlugin(): Plugin {
   let root = process.cwd();
+  /** Where the site is published (photo paths are stored from the root, /shots/…). */
+  let base = '/';
   const contentFile = () => path.join(root, 'src/content/site.json');
   const shotsDir = () => path.join(root, 'public/shots');
   const readContent = async () => JSON.parse(await readFile(contentFile(), 'utf8')) as SiteContent;
@@ -45,6 +47,8 @@ export function adminPlugin(): Plugin {
         for (const img of p.images) if (!files.has(shotFile(img) ?? '')) errors.push(`${p.title}: photo ${img} is not in public/shots.`);
       const portrait = (body as SiteContent).settings.about.photo;
       if (portrait && !files.has(shotFile(portrait) ?? '')) errors.push(`About: portrait ${portrait} is not in public/shots.`);
+      const icon = (body as SiteContent).settings.icon.image;
+      if (icon && !files.has(shotFile(icon) ?? '')) errors.push(`Settings: icon image ${icon} is not in public/shots.`);
     }
     if (errors.length) return send(res, 422, { errors });
     // Write next to the target and rename: a crash mid-write can't leave a half-written file.
@@ -96,6 +100,7 @@ export function adminPlugin(): Plugin {
     name: 'portfolio-admin',
     configResolved(config) {
       root = config.root;
+      base = config.base;
     },
     transformIndexHtml: {
       order: 'pre',
@@ -107,7 +112,8 @@ export function adminPlugin(): Plugin {
           description: identity.description,
           name: identity.name,
           role: identity.role,
-          icon: `data:image/svg+xml,${encodeURIComponent(iconSvg(icon))}`,
+          // An uploaded image is used as it is; otherwise the letters are drawn as an SVG.
+          icon: icon.image ? base + icon.image.slice(1) : `data:image/svg+xml,${encodeURIComponent(iconSvg(icon))}`,
           noscript: `${identity.name}, ${identity.role.toLowerCase()}. Enable JavaScript to open the box.`,
         };
         return html.replace(/\{\{site\.(\w+)\}\}/g, (token, key: string) => (key in values ? escapeHtml(values[key]) : token));

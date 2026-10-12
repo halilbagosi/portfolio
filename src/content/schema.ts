@@ -101,23 +101,66 @@ export interface About {
   achievements: Achievement[];
 }
 
-/** The browser-tab icon: a few letters on a rounded square. */
+/** The browser-tab icon: a few letters on a rounded square, or an uploaded image instead. */
 export interface SiteIcon {
   text: string;
   background: string;
   color: string;
+  /** Corner radius of the square, 0 (square) to 50 (a circle). */
+  radius: number;
+  /** '' (the letters are drawn) or a /shots/<file> image used as the icon as it is. */
+  image: string;
 }
 export const MAX_ICON_TEXT = 3;
+export const MAX_ICON_RADIUS = 50;
 
 /** The icon as an SVG document (also served inline as the page's favicon). */
-export function iconSvg({ text, background, color }: SiteIcon): string {
+export function iconSvg({ text, background, color, radius }: SiteIcon): string {
   const t = text.trim().toUpperCase().replace(/[&<>"']/g, '');
   const size = t.length <= 1 ? 64 : t.length === 2 ? 46 : 34;
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${background}"/>` +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="${radius}" fill="${background}"/>` +
     `<text x="50" y="50" dy=".35em" text-anchor="middle" font-family="-apple-system,Helvetica,Arial,sans-serif" font-weight="700" ` +
     `font-size="${size}" letter-spacing="-1" fill="${color}">${t}</text></svg>`
   );
+}
+
+/** Section sizes, each a share of the box in percent. */
+export interface LayoutSettings {
+  /** Overview, wide box: the lead (featured) section's share of the width. */
+  leadWidth: number;
+  /** A section open, wide box: its column's share of the width (the others close to strips). */
+  openWidth: number;
+  /** A section open: its share of the depth when it shares a column (every section, in a tall box). */
+  openDepth: number;
+}
+/** Allowed range per layout value (percent). */
+export const LAYOUT_RANGES: Record<keyof LayoutSettings, [number, number]> = { leadWidth: [30, 70], openWidth: [50, 95], openDepth: [50, 95] };
+
+/** The line along the bottom of the About card: two printed marks and a sentence. */
+export interface FinePrint {
+  show: boolean;
+  /** {name}, {role}, {city} and {location} are filled in. '' leaves only the marks. */
+  text: string;
+  /** The crossed-out bin mark. */
+  bin: boolean;
+  /** The ring mark, with letters inside it. */
+  ring: boolean;
+  /** The ring's letters: '' for your initials. */
+  ringText: string;
+}
+export const MAX_RING_TEXT = 3;
+export const MAX_FINE_PRINT = 160;
+
+export const CARD_HEADINGS = ['about', 'experience', 'achievements', 'skills', 'contact'] as const;
+export type CardHeading = (typeof CARD_HEADINGS)[number];
+
+/** The About card's own words: its section headings, the experience fact and the fine print. */
+export interface CardSettings {
+  headings: Record<CardHeading, string>;
+  /** After "N+" in the facts, e.g. "years experience". */
+  yearsLabel: string;
+  finePrint: FinePrint;
 }
 
 export interface Settings {
@@ -125,6 +168,8 @@ export interface Settings {
   icon: SiteIcon;
   hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair; flip: HintPair; back: HintPair };
   motion: { photoDwell: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
+  layout: LayoutSettings;
+  card: CardSettings;
   socials: Social[];
   about: About;
 }
@@ -168,7 +213,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
     issues.push({ path: 'settings', message: 'Settings are missing.' });
     return;
   }
-  const { identity, hints, motion, socials, about, icon } = s;
+  const { identity, hints, motion, socials, about, icon, layout, card } = s;
   if (!isObj(identity)) issues.push({ path: 'settings.identity', message: 'Identity is missing.' });
   else
     for (const k of ['name', 'role', 'title', 'description'])
@@ -205,10 +250,44 @@ function validateSettings(s: unknown, issues: Issue[]) {
       issues.push({ path: 'settings.icon.text', message: `Icon text needs 1 to ${MAX_ICON_TEXT} characters.` });
     for (const k of ['background', 'color'])
       if (typeof icon[k] !== 'string' || !HEX.test(icon[k] as string)) issues.push({ path: `settings.icon.${k}`, message: 'Needs a #rrggbb colour.' });
+    if (typeof icon.radius !== 'number' || !Number.isFinite(icon.radius) || icon.radius < 0 || icon.radius > MAX_ICON_RADIUS)
+      issues.push({ path: 'settings.icon.radius', message: `Must be between 0 and ${MAX_ICON_RADIUS}.` });
+    if (icon.image !== '' && (typeof icon.image !== 'string' || !SHOT_PATH.test(icon.image)))
+      issues.push({ path: 'settings.icon.image', message: 'The icon image must be a /shots/<file> path, or empty.' });
   }
+
+  if (!isObj(layout)) issues.push({ path: 'settings.layout', message: 'Layout settings are missing.' });
+  else
+    for (const [k, [lo, hi]] of Object.entries(LAYOUT_RANGES)) {
+      const v = layout[k];
+      if (typeof v !== 'number' || !Number.isFinite(v) || v < lo || v > hi) issues.push({ path: `settings.layout.${k}`, message: `Must be between ${lo} and ${hi}%.` });
+    }
+
+  validateCard(card, issues);
 
   validateSocials(socials, issues);
   validateAbout(about, issues);
+}
+
+function validateCard(card: unknown, issues: Issue[]) {
+  const at = (k: string) => `settings.card.${k}`;
+  if (!isObj(card)) {
+    issues.push({ path: 'settings.card', message: 'About card settings are missing.' });
+    return;
+  }
+  const { headings, finePrint: fp } = card;
+  for (const k of CARD_HEADINGS)
+    if (!isObj(headings) || !filled(headings[k])) issues.push({ path: at(`headings.${k}`), message: 'This heading is required.' });
+  if (!filled(card.yearsLabel)) issues.push({ path: at('yearsLabel'), message: 'This label is required.' });
+  if (!isObj(fp)) {
+    issues.push({ path: at('finePrint'), message: 'Fine print settings are missing.' });
+    return;
+  }
+  for (const k of ['show', 'bin', 'ring']) if (typeof fp[k] !== 'boolean') issues.push({ path: at(`finePrint.${k}`), message: 'Must be on or off.' });
+  if (typeof fp.text !== 'string' || fp.text.length > MAX_FINE_PRINT)
+    issues.push({ path: at('finePrint.text'), message: `Fine print is text of up to ${MAX_FINE_PRINT} characters (it may be empty).` });
+  if (typeof fp.ringText !== 'string' || fp.ringText.trim().length > MAX_RING_TEXT)
+    issues.push({ path: at('finePrint.ringText'), message: `Up to ${MAX_RING_TEXT} letters, or empty for your initials.` });
 }
 
 function validateSocials(list: unknown, issues: Issue[]) {

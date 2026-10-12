@@ -1,16 +1,16 @@
-# Graph Report - portfolio  (2026-10-10)
+# Graph Report - portfolio  (2026-10-12)
 
 ## Corpus Check
-- 92 files · ~176,512 words
+- 92 files · ~338,541 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 797 nodes · 1448 edges · 54 communities (34 shown, 20 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 28 edges (avg confidence: 0.67)
+- 809 nodes · 1480 edges · 53 communities (35 shown, 18 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.68)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7f33a364`
+- Built from commit: `43a3e5e3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -58,7 +58,6 @@
 - chips.ts
 - Motion
 - Lightbox
-- well.ts
 - Task 8 report: Etch schedule
 - Well
 - final-fix-brief.md
@@ -82,45 +81,45 @@
 10. `Lid` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `validateProjects()` --indirect_call--> `field()`  [INFERRED]
-  src/content/schema.ts → src/admin/fields.ts
-- `refresh()` --indirect_call--> `formatIssue()`  [INFERRED]
-  src/admin/main.ts → src/content/schema.ts
 - `renderAbout()` --indirect_call--> `f()`  [INFERRED]
   src/admin/views/about.ts → src/scene/about-card.ts
+- `iconEditor()` --indirect_call--> `f()`  [INFERRED]
+  src/admin/views/settings.ts → src/scene/about-card.ts
 - `iconEditor()` --indirect_call--> `input()`  [INFERRED]
   src/admin/views/settings.ts → src/scene/about-card.test.ts
 - `validateProjects()` --indirect_call--> `project()`  [INFERRED]
   src/content/schema.ts → src/input/orbit.ts
+- `engravingMaps()` --indirect_call--> `f()`  [INFERRED]
+  src/scene/textures.ts → src/scene/about-card.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (54 total, 20 thin omitted)
+## Communities (53 total, 18 thin omitted)
 
 ### Community 0 - "main.ts"
 Cohesion: 0.05
-Nodes (36): a11yButtons, aboutBtn, aboutSection, backBtn, box, chipSets, clock, closed (+28 more)
+Nodes (37): a11yButtons, aboutBtn, aboutSection, backBtn, box, chipSets, clock, closed (+29 more)
 
 ### Community 1 - "stack.ts"
-Cohesion: 0.12
-Nodes (14): Project, Chip, ChipSet, GlassShared, LabelTex, pill(), kindTint(), statusTint() (+6 more)
+Cohesion: 0.29
+Nodes (3): openLayout(), prewarm(), ChipSet
 
 ### Community 2 - "Architecture"
 Cohesion: 0.10
 Nodes (20): 1. Orbit controller (`src/input/orbit.ts`), 2. Gestures (`src/input/gestures.ts`), 3. Camera, lights and the box's body (`stage.ts`, `box.ts`), 4. Lid: Space Gray anodised aluminium + laser etching, 5. Underside: About (`underside.ts`, `about-card.ts`), 6. Content (`schema.ts`, `site.json`), 7. Dashboard (`src/admin/views/about.ts`), 8. Accessibility and fallback (+12 more)
 
 ### Community 3 - "schema.ts"
-Cohesion: 0.09
-Nodes (31): loadContent(), { projects, settings }, nextPhotoName(), shotFile(), unusedPhotos(), Achievement, filled(), formatIssue() (+23 more)
+Cohesion: 0.22
+Nodes (6): nextPhotoName(), shotFile(), unusedPhotos(), f(), adminPlugin(), HttpError
 
 ### Community 4 - "h"
-Cohesion: 0.07
-Nodes (56): api, ApiError, Child, h(), Props, colorsField(), field(), nextId() (+48 more)
+Cohesion: 0.05
+Nodes (85): api, ApiError, Child, h(), Props, colorsField(), field(), nextId() (+77 more)
 
 ### Community 5 - "Well"
-Cohesion: 0.22
-Nodes (5): Spring, ELEVATION, tmpQ, TOP_DOWN, ViewRect
+Cohesion: 0.09
+Nodes (8): Card, CardStack, easeLeave, easeMove, loader, plane, SLOT_ROT, slotPose()
 
 ### Community 6 - "compilerOptions"
 Cohesion: 0.11
@@ -131,8 +130,12 @@ Cohesion: 0.11
 Nodes (17): dependencies, three, devDependencies, @types/three, typescript, vite, @vitejs/plugin-basic-ssl, vitest (+9 more)
 
 ### Community 8 - "ChipSet"
-Cohesion: 0.18
-Nodes (17): cornerPoint(), createBox(), createShell(), createTopPlate(), isPortraitViewport(), PIVOT, PORTRAIT, ringTmp (+9 more)
+Cohesion: 0.21
+Nodes (4): openSizes(), stepLayout(), Rect, Well
+
+### Community 9 - "box.ts"
+Cohesion: 0.08
+Nodes (21): Cadence, run(), cornerPoint(), createBox(), createShell(), createTopPlate(), ELEVATION, isPortraitViewport() (+13 more)
 
 ### Community 10 - "Lightbox"
 Cohesion: 0.09
@@ -155,8 +158,8 @@ Cohesion: 0.12
 Nodes (15): File Structure, Global Constraints, Tangible Box Implementation Plan, Task 10: Accessibility layer and no-WebGL fallback, Task 11: Dashboard "About & socials" view, Task 12: Final verification, Task 1: Content model: socials, About, flip/back hints, Task 2: Orbit controller (trackball with momentum and faces) (+7 more)
 
 ### Community 15 - "Preview"
-Cohesion: 0.14
-Nodes (22): drawGlyph(), glyphFor(), GlyphKind, rrect(), squircle(), engrave(), beadBlastRoughness(), canvas() (+14 more)
+Cohesion: 0.06
+Nodes (45): Spring, Project, ProjectKind, Chip, GlassShared, LabelTex, pill(), drawGlyph() (+37 more)
 
 ### Community 16 - "Task 2 report: site reads site.json and settings"
 Cohesion: 0.22
@@ -188,11 +191,11 @@ Nodes (8): Adaptations, Concerns, Files changed, Fixes (review round), Self-revi
 
 ### Community 33 - "Store"
 Cohesion: 0.06
-Nodes (47): About, Social, showFallback(), aboutLines(), BODY, CardInput, CardLink, cardPad() (+39 more)
+Nodes (50): About, CardSettings, Social, showFallback(), aboutLines(), BODY, CardInput, CardLink (+42 more)
 
 ### Community 34 - "textures.ts"
-Cohesion: 0.07
-Nodes (14): Box, EtchLine, EtchSchedule, Ink, Row, ink(), lines, make() (+6 more)
+Cohesion: 0.08
+Nodes (12): Box, EtchLine, EtchSchedule, Ink, Row, ink(), lines, make() (+4 more)
 
 ### Community 35 - "setFocus"
 Cohesion: 0.29
@@ -203,24 +206,24 @@ Cohesion: 0.25
 Nodes (7): Adaptations, Files changed, Fixes (after review), Self-review / concerns, Task 7 report: Space Gray anodised lid with engraved, clickable socials, Test evidence, What was done
 
 ### Community 41 - "chips.ts"
-Cohesion: 0.39
-Nodes (8): frame(), hideHint(), matchLabels(), openLid(), showHint(), showRestHints(), swapHint(), syncFaceControls()
+Cohesion: 0.23
+Nodes (9): frame(), hideHint(), matchLabels(), openLid(), showHint(), showRestHints(), swapHint(), syncFaceControls() (+1 more)
 
 ### Community 43 - "Lightbox"
-Cohesion: 0.06
-Nodes (21): cubicBezier(), homography(), lerpQuad(), matrix3d(), Pt, Quad, rectQuad(), CARD_RADIUS (+13 more)
+Cohesion: 0.13
+Nodes (13): cubicBezier(), homography(), lerpQuad(), matrix3d(), Pt, Quad, rectQuad(), CARD_RADIUS (+5 more)
 
 ### Community 45 - "Task 8 report: Etch schedule"
 Cohesion: 0.33
 Nodes (5): Concerns (minor, none blocking), Fixes (review findings I1, M1-M6), Self-review, Task 8 report: Etch schedule, TDD evidence
 
 ### Community 46 - "Well"
-Cohesion: 0.12
-Nodes (17): openSizes(), stepLayout(), expandedLayout(), focusSizes(), lerpSizes(), packLayout(), Rect, rectsFrom() (+9 more)
+Cohesion: 0.30
+Nodes (13): expandedLayout(), focusSizes(), lerpSizes(), OpenShare, packLayout(), rectsFrom(), restSizes(), Sizes (+5 more)
 
 ### Community 51 - "setFocus"
-Cohesion: 0.16
-Nodes (16): canTurn(), cellAt(), closeLid(), layoutFor(), linkUnderPointer(), onTap(), onVertical(), openLayout() (+8 more)
+Cohesion: 0.20
+Nodes (14): canTurn(), cellAt(), closeLid(), layoutFor(), linkUnderPointer(), onTap(), onVertical(), openLink() (+6 more)
 
 ### Community 52 - "Task 10 report: Accessibility layer and no-WebGL fallback"
 Cohesion: 0.22
@@ -231,24 +234,24 @@ Cohesion: 0.18
 Nodes (10): Adaptations from the brief, Concerns, Files changed (all committed except none left), Fix round (review), Self-review, Task 11 report: Dashboard "About & socials" view, TDD evidence, Upload verification (vite/admin-plugin.ts): no plugin change needed (+2 more)
 
 ## Knowledge Gaps
-- **279 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+274 more)
+- **282 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+277 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **20 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Lightbox` connect `Lightbox` to `main.ts`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `Well` connect `Well` to `main.ts`, `stack.ts`, `Well`, `Lightbox`, `Preview`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `CardStack` connect `Lightbox` to `stack.ts`, `Well`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `Well` connect `ChipSet` to `main.ts`, `chips.ts`, `Well`, `Preview`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `CardStack` connect `Well` to `ChipSet`, `Preview`?**
   _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
-  _279 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _282 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `main.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected._
-- **Should `stack.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.11857707509881422 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Architecture` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+- **Should `h` be split into smaller, more focused modules?**
+  _Cohesion score 0.050140056022408966 - nodes in this community are weakly interconnected._

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_ACHIEVEMENTS, MAX_TIMELINE, type About, type Social } from '../content/schema';
-import { aboutLines, cardPad, contactLinks, cutCount, FIT_MAX, FIT_MIN, fitAbout, initialsOf, layoutAbout, LINK, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
+import { aboutLines, cardPad, DEFAULT_CARD, contactLinks, cutCount, FIT_MAX, FIT_MIN, fitAbout, initialsOf, layoutAbout, LINK, linkAtUv, type CardInput, type Measure, type Op } from './about-card';
 
 /** Fake text widths: 0.55 em per character, plus tracking between characters. */
 const measure: Measure = (t, font, tracking = 0) => [...t].length * parseFloat(font.split(' ')[1]) * 0.55 + tracking * Math.max(0, [...t].length - 1);
@@ -212,6 +212,28 @@ describe('layoutAbout', () => {
   it('signs the fine print with the name and the city', () => {
     const t = textOps(layoutAbout(input(), ...SIZES.tall, measure).ops);
     expect(t.some((o) => o.text.startsWith('Designed by Halil Bagosi in City.'))).toBe(true);
+  });
+
+  it('uses the fine print, marks and headings set in the dashboard', () => {
+    const card = {
+      headings: { about: 'Bio', experience: 'Work', achievements: 'Wins', skills: 'Tools', contact: 'Reach me' },
+      yearsLabel: 'yrs',
+      finePrint: { show: true, text: 'Made by {name}, {role}.', bin: false, ring: true, ringText: 'xy' },
+    };
+    const { ops } = layoutAbout({ ...input(), card }, ...SIZES.tall, measure);
+    const t = textOps(ops).map((o) => o.text);
+    expect(t).toContain('Made by Halil Bagosi, Software Engineer.');
+    expect(t).toContain('XY');
+    expect(t).toEqual(expect.arrayContaining(['Bio', 'Work', 'Wins', 'Tools', 'Reach me']));
+    expect(t.some((x) => x.endsWith('+ yrs'))).toBe(true);
+    expect(ops.filter((o) => o.kind === 'mark').map((o) => (o as Extract<Op, { kind: 'mark' }>).glyph)).toEqual(['ring']);
+  });
+
+  it('leaves the fine print out when it is off', () => {
+    const card = { ...DEFAULT_CARD, finePrint: { ...DEFAULT_CARD.finePrint, show: false } };
+    const { ops } = layoutAbout({ ...input(), card }, ...SIZES.tall, measure);
+    expect(ops.some((o) => o.kind === 'mark')).toBe(false);
+    expect(textOps(ops).some((o) => o.text.startsWith('Designed by'))).toBe(false);
   });
 
   it("balances the wide card's sections over two columns", () => {

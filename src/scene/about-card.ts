@@ -1,4 +1,4 @@
-import type { About, Social } from '../content/schema';
+import type { About, CardSettings, Social } from '../content/schema';
 import { CORNER_K, CORNER_N } from './shaders';
 import { drawTracked, FONT } from './textures';
 
@@ -51,6 +51,21 @@ export interface CardInput {
   role: string;
   about: About;
   socials: Social[];
+  /** Headings and fine print from the dashboard (the defaults below when left out). */
+  card?: CardSettings;
+}
+
+/** The card's own words when none are given. */
+export const DEFAULT_CARD: CardSettings = {
+  headings: { about: 'About', experience: 'Experience', achievements: 'Achievements', skills: 'Skills', contact: 'Contact' },
+  yearsLabel: 'years experience',
+  finePrint: { show: true, text: 'Designed by {name} in {city}. Assembled in the browser.', bin: true, ring: true, ringText: '' },
+};
+
+/** The fine print's sentence with {name}, {role}, {city} and {location} filled in. */
+export function finePrintText(template: string, v: { name: string; role: string; location: string }) {
+  const values: Record<string, string> = { name: v.name, role: v.role, city: cityOf(v.location), location: v.location };
+  return template.replace(/\{(\w+)\}/g, (token, key: string) => values[key] ?? token).trim();
 }
 
 /** The margin kept clear on every side of the card; the layout never draws into it. */
@@ -175,6 +190,8 @@ export function layoutAbout(
 ): { ops: Op[]; links: CardLink[]; bottom: number; hidden: number } {
   const card: Pen = { ops: [], links: [] };
   const a = input.about;
+  const words = input.card ?? DEFAULT_CARD;
+  const fine = words.finePrint;
   const wide = w > h;
   const pad = cardPad(w, h);
   let hidden = 0;
@@ -225,7 +242,7 @@ export function layoutAbout(
     const fact = f(400, 17);
     const facts: Run[] = [
       { t: a.availability, font: f(500, 17), color: a.available ? GREEN : GREY },
-      { t: `${a.years}+ years experience`, font: fact, color: GREY },
+      { t: `${a.years}+ ${words.yearsLabel}`, font: fact, color: GREY },
       { t: a.location, font: fact, color: GREY },
       ...(a.workPreference ? [{ t: a.workPreference, font: fact, color: GREY }] : []),
     ];
@@ -266,17 +283,18 @@ export function layoutAbout(
 
   type Body = (p: Pen, x: number, y: number, colW: number) => number;
   const contacts = contactLinks(a, input.socials);
+  const hd = words.headings;
   const sections: [string, Body][] = [
-    ['About', (p, x, y, cw) => paragraph(p, x, y, cw, a.bio, 8)],
+    [hd.about, (p, x, y, cw) => paragraph(p, x, y, cw, a.bio, 8)],
     ...(a.timeline.length
-      ? [['Experience', (p, x, y, cw) => list(p, x, y, cw, a.timeline.map((t) => ({ title: t.role, sub: t.org, meta: t.period })))] as [string, Body]]
+      ? [[hd.experience, (p, x, y, cw) => list(p, x, y, cw, a.timeline.map((t) => ({ title: t.role, sub: t.org, meta: t.period })))] as [string, Body]]
       : []),
     ...(a.achievements.length
-      ? [['Achievements', (p, x, y, cw) => list(p, x, y, cw, a.achievements.map((t) => ({ title: t.title, sub: t.detail, meta: t.year })))] as [string, Body]]
+      ? [[hd.achievements, (p, x, y, cw) => list(p, x, y, cw, a.achievements.map((t) => ({ title: t.title, sub: t.detail, meta: t.year })))] as [string, Body]]
       : []),
-    ['Skills', (p, x, y, cw) => paragraph(p, x, y, cw, a.skills.join(', '), 5)],
+    [hd.skills, (p, x, y, cw) => paragraph(p, x, y, cw, a.skills.join(', '), 5)],
     [
-      'Contact',
+      hd.contact,
       (p, x, y, cw) =>
         flow(p, x, y, cw, contacts.map((l) => ({ t: `${l.label} ›`, font: f(500, 18), color: LINK, href: l.href })), 18, TAP_H, '', 32),
     ],
@@ -290,16 +308,25 @@ export function layoutAbout(
     return Math.max(y + IN + 22, body(p, x + hc, y + IN, colW - hc)) + IN;
   };
 
-  /** The fine print: the marks, then "Designed by … in …" beside them, on one line. */
+  /** The fine print: the marks that are on, then its sentence ("Designed by … in …") beside them, on one line. */
   const footer = (p: Pen, x: number, y: number, colW: number) => {
-    const initials = initialsOf(input.name);
-    p.ops.push({ kind: 'mark', x, y, s: FOOT_H, glyph: 'bin' });
-    p.ops.push({ kind: 'mark', x: x + FOOT_H + 10, y, s: FOOT_H, glyph: 'ring' });
-    const mf = f(600, 8);
-    text(p, x + FOOT_H + 10 + (FOOT_H - measure(initials, mf)) / 2, y + FOOT_H / 2 + 3, initials, mf, FAINT);
-    const tx = x + 2 * FOOT_H + 26;
-    text(p, tx, y + 17, fit(`Designed by ${input.name} in ${cityOf(a.location)}. Assembled in the browser.`, FINE, x + colW - tx, measure), FINE, FAINT);
+    let tx = x;
+    if (fine.bin) {
+      p.ops.push({ kind: 'mark', x: tx, y, s: FOOT_H, glyph: 'bin' });
+      tx += FOOT_H + 10;
+    }
+    if (fine.ring) {
+      const letters = fine.ringText.trim().toUpperCase() || initialsOf(input.name);
+      p.ops.push({ kind: 'mark', x: tx, y, s: FOOT_H, glyph: 'ring' });
+      const mf = f(600, letters.length > 2 ? 6.5 : 8);
+      text(p, tx + (FOOT_H - measure(letters, mf)) / 2, y + FOOT_H / 2 + 3, letters, mf, FAINT);
+      tx += FOOT_H + 10;
+    }
+    if (tx > x) tx += 6;
+    const line = finePrintText(fine.text, { name: input.name, role: input.role, location: a.location });
+    if (line) text(p, tx, y + 17, fit(line, FINE, x + colW - tx, measure), FINE, FAINT);
   };
+  const footH = fine.show && (fine.bin || fine.ring || fine.text.trim()) ? FOOT_H : 0;
 
   const inner = w - pad * 2;
   let y = header(card, pad, pad, inner) + GAP;
@@ -325,8 +352,8 @@ export function layoutAbout(
     for (const s of sections) y = section(card, pad, y, inner, s);
     flowBottom = y;
   }
-  footer(card, pad, Math.max(flowBottom + GAP, h - pad - FOOT_H), inner);
-  return { ...card, bottom: flowBottom + GAP + FOOT_H, hidden };
+  if (footH) footer(card, pad, Math.max(flowBottom + GAP, h - pad - FOOT_H), inner);
+  return { ...card, bottom: footH ? flowBottom + GAP + FOOT_H : flowBottom, hidden };
 }
 
 /** The scales the card is drawn at, and the step they are searched in. */

@@ -4,8 +4,8 @@ import { processPhoto } from '../photos';
 import { moveItem, type Store } from '../state';
 
 /**
- * A project's photos: add (drop files or click), drag to reorder (first = top of the stack),
- * replace, remove. Uploads are resized in the browser and written to public/shots right away;
+ * A project's photos: add (drop files or click), reorder (drag, or the arrows; first = top of the
+ * stack, the order the site deals them in), replace, remove. Uploads are resized in the browser and written to public/shots right away;
  * the project only refers to them once saved. Removing never deletes the file.
  */
 export function photoStrip(store: Store, index: number): HTMLElement {
@@ -77,55 +77,100 @@ export function photoStrip(store: Store, index: number): HTMLElement {
     void upload(Array.from(e.dataTransfer?.files ?? []).filter((f) => f.type.startsWith('image/')));
   });
 
-  function draw() {
-    strip.replaceChildren(
-      ...project.images.map((src, i) => {
-        const card = h(
-          'div',
-          { class: 'photo', draggable: true },
-          h('img', { src, alt: `Photo ${i + 1}`, loading: 'lazy' }),
-          i === 0 ? h('span', { class: 'badge' }, 'Top') : null,
-          h(
-            'div',
-            { class: 'photo-bar' },
-            h('button', { class: 'icon', type: 'button', title: 'Replace', 'aria-label': `Replace photo ${i + 1}`, onclick: () => pick(false, i) }, '⟳'),
-            h(
-              'button',
-              {
-                class: 'icon',
-                type: 'button',
-                title: 'Remove from this project (the file stays until you remove unused photos)',
-                'aria-label': `Remove photo ${i + 1}`,
-                onclick: () => {
-                  store.change(() => project.images.splice(i, 1));
-                  draw();
-                },
-              },
-              '✕',
-            ),
-          ),
-        );
-        card.addEventListener('dragstart', (e) => {
-          dragFrom = i;
-          e.dataTransfer!.effectAllowed = 'move';
-        });
-        card.addEventListener('dragover', (e) => {
-          if (dragFrom < 0) return;
-          e.preventDefault();
-          card.classList.add('drop-target');
-        });
-        card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
-        card.addEventListener('drop', (e) => {
-          e.preventDefault();
-          if (dragFrom >= 0 && dragFrom !== i) store.change(() => moveItem(project.images, dragFrom, i));
-          dragFrom = -1;
+  /** A card's place in the strip, read when it is used: cards are kept across redraws and move around. */
+  const indexOf = (card: HTMLElement) => Array.prototype.indexOf.call(strip.children, card) as number;
+
+  /** Reorders the stack (first = top, the order it deals in). */
+  function move(from: number, to: number) {
+    if (from === to || to < 0 || to >= project.images.length) return;
+    store.change(() => moveItem(project.images, from, to));
+    draw();
+  }
+
+  function makeCard(src: string) {
+    const btn = (label: string, text: string, onclick: () => void, cls = 'icon') =>
+      h('button', { class: cls, type: 'button', title: label, 'aria-label': label, onclick }, text);
+    const at = () => indexOf(card);
+    const first = btn('Make it the first photo', '⤒', () => move(at(), 0));
+    const left = btn('Move earlier', '←', () => move(at(), at() - 1));
+    const right = btn('Move later', '→', () => move(at(), at() + 1));
+    const badge = h('span', { class: 'badge' });
+    const card: HTMLElement = h(
+      'div',
+      { class: 'photo', draggable: true },
+      h('img', { src, alt: '', draggable: false }),
+      badge,
+      h(
+        'div',
+        { class: 'photo-bar' },
+        first,
+        left,
+        right,
+        h('span', { class: 'spacer' }),
+        btn('Replace', '⟳', () => pick(false, at())),
+        btn('Remove from this project (the file stays until you remove unused photos)', '✕', () => {
+          store.change(() => project.images.splice(at(), 1));
           draw();
-        });
-        card.addEventListener('dragend', () => (dragFrom = -1));
-        return card;
-      }),
-      dropzone,
+        }),
+      ),
     );
+    /** Number, badge and the buttons that apply, for where the card now sits. */
+    const label = (i: number, n: number) => {
+      badge.textContent = i === 0 ? 'Top' : String(i + 1);
+      badge.classList.toggle('top', i === 0);
+      (card.querySelector('img') as HTMLImageElement).alt = `Photo ${i + 1}`;
+      first.disabled = left.disabled = i === 0;
+      right.disabled = i === n - 1;
+    };
+    card.addEventListener('dragstart', (e) => {
+      dragFrom = at();
+      e.dataTransfer!.effectAllowed = 'move';
+    });
+    card.addEventListener('dragover', (e) => {
+      if (dragFrom < 0) return;
+      e.preventDefault();
+      card.classList.add('drop-target');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+    card.addEventListener('drop', (e) => {
+      e.preventDefault();
+      card.classList.remove('drop-target');
+      const to = at();
+      if (dragFrom >= 0) move(dragFrom, to);
+      dragFrom = -1;
+    });
+    card.addEventListener('dragend', () => (dragFrom = -1));
+    return { card, label };
+  }
+
+  /** Cards by photo, kept across redraws so a change never rebuilds (and reloads) the whole strip. */
+  let cards: { src: string; card: HTMLElement; label: (i: number, n: number) => void }[] = [];
+
+  /**
+   * Brings the strip in line with the project's photos, moving only what changed. The strip never
+   * empties on the way, and the editor's scroll and the focused button are kept, so adding, moving or
+   * removing a photo leaves the page where it was.
+   */
+  function draw() {
+    const scroller = strip.closest<HTMLElement>('.editor');
+    const top = scroller?.scrollTop ?? 0;
+    const pageTop = document.scrollingElement?.scrollTop ?? 0;
+    const active = document.activeElement as HTMLElement | null;
+    const pool = cards;
+    cards = project.images.map((src) => {
+      const k = pool.findIndex((c) => c.src === src);
+      return k >= 0 ? pool.splice(k, 1)[0] : { src, ...makeCard(src) };
+    });
+    for (const c of pool) c.card.remove();
+    cards.forEach((c, i) => {
+      if (strip.children[i] !== c.card) strip.insertBefore(c.card, strip.children[i] ?? null);
+      c.label(i, cards.length);
+    });
+    if (dropzone.parentNode !== strip || strip.lastElementChild !== dropzone) strip.append(dropzone);
+    if (active && active !== document.activeElement && strip.contains(active) && !(active as HTMLButtonElement).disabled)
+      active.focus({ preventScroll: true });
+    if (scroller) scroller.scrollTop = top;
+    if (document.scrollingElement) document.scrollingElement.scrollTop = pageTop;
   }
 
   draw();

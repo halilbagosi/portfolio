@@ -48,6 +48,7 @@ describe('unusedPhotos', () => {
   it('counts the About portrait as used', () => {
     const c = validContent();
     c.settings.about.photo = '/shots/about-1.jpg';
-    expect(unusedPhotos(c, ['alpha-1.jpg', 'beta-1.jpg', 'beta-2.jpg', 'about-1.jpg'])).toEqual([]);
+    c.settings.icon.image = '/shots/icon-1.jpg';
+    expect(unusedPhotos(c, ['alpha-1.jpg', 'beta-1.jpg', 'beta-2.jpg', 'about-1.jpg', 'icon-1.jpg'])).toEqual([]);
   });
 });

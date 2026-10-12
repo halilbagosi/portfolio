@@ -72,3 +72,20 @@ describe(`layout ${W}x${D}`, () => {
   }
 });
 }
+
+describe('section sizes from the dashboard', () => {
+  const W = 6;
+  const D = 3.9;
+  const gap = 0.14;
+  it('gives the lead column the share asked for', () => {
+    const s = restSizes(4, W, D, gap, 0.6);
+    expect(s.cols[0] / (W - gap)).toBeCloseTo(0.6);
+  });
+  it('gives an open section the share of width and depth asked for', () => {
+    const s = focusSizes(4, 2, W, D, gap, undefined, undefined, undefined, { w: 0.7, d: 0.6 });
+    expect(s.cols[1] / (W - gap)).toBeCloseTo(0.7);
+    expect(s.rows[1][1] / (D - 2 * gap)).toBeCloseTo(0.6);
+    const r = rectsFrom(4, s, W, D, gap);
+    expect(r[2].w).toBeCloseTo(s.cols[1]);
+  });
+});

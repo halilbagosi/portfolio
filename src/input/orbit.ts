@@ -160,10 +160,14 @@ export class Orbit {
     this.settleTo(this.lidOn ? faceToward(project(this.quaternion, this.omega, TAU), this.view) : 'top');
   }
 
-  /** Turn to a face: onto its back over the far edge, or back toward the viewer. */
-  flip(face: Face) {
+  /**
+   * Turn to a face. `way` is the roll: 'away' rolls the top away over the far edge (as a swipe up or
+   * scroll down moves it), 'toward' rolls it back over the near edge. By default it goes onto its back
+   * away and comes back toward; going on 'away' from the back carries on round to the top (a loop).
+   */
+  flip(face: Face, way: 'away' | 'toward' = face === 'bottom' ? 'away' : 'toward') {
     if (this.locked || this.mode === 'drag' || face === this.face || (face === 'bottom' && !this.lidOn)) return;
-    this.omega.set(face === 'bottom' ? -6 : 6, 0, 0);
+    this.omega.set(way === 'away' ? -6 : 6, 0, 0);
     this.settleTo(face);
   }
 

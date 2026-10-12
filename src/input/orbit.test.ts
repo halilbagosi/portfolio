@@ -120,6 +120,27 @@ describe('Orbit', () => {
     expect(angleTo(o, 'top')).toBeLessThan(1e-3);
   });
 
+  it('rolls on round from its back to the top when flipped away (a loop), or back the way it came', () => {
+    const up = new THREE.Vector3();
+    const upZ = (o: Orbit) => up.set(0, 1, 0).applyQuaternion(o.quaternion).z;
+    for (const way of ['away', 'toward'] as const) {
+      const o = make();
+      o.flip('bottom');
+      settle(o);
+      let most = -Infinity;
+      let least = Infinity;
+      o.flip('top', way);
+      settle(o, (s) => {
+        most = Math.max(most, upZ(s));
+        least = Math.min(least, upZ(s));
+      });
+      expect(o.face).toBe('top');
+      expect(angleTo(o, 'top')).toBeLessThan(1e-3);
+      if (way === 'away') expect(most).toBeGreaterThan(0.9); // carried on: the top came up over the near edge
+      else expect(least).toBeLessThan(-0.9); // back over the far edge
+    }
+  });
+
   it('does not flip to the underside with the lid off', () => {
     const o = make();
     o.setLimits(false, false);

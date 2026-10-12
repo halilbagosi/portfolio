@@ -30,14 +30,25 @@ let store: Store;
 /** Problems the server reported on the last save (e.g. a missing photo file). */
 let serverErrors: string[] = [];
 
+/** The tab the editor last drew, so a redraw of the same one keeps its scroll position. */
+let drawnTab = '';
+
 function render() {
   renderList(side, store, render);
   const t = store.tab;
+  const tabKey = JSON.stringify(t);
+  // Structural edits (a link, a list row, a portrait) redraw the form: stay where you were. A new tab starts at the top.
+  const keep = tabKey === drawnTab ? { editor: editor.scrollTop, page: document.scrollingElement?.scrollTop ?? 0 } : null;
+  drawnTab = tabKey;
   if (t.kind === 'project' && store.content.projects[t.index])
     renderProjectForm(form, store, t.index, { rerender: render, refreshList: () => renderList(side, store, render) }, (i) => photoStrip(store, i));
   else if (t.kind === 'about') renderAbout(form, store, render);
   else renderSettings(form, store);
   refresh();
+  if (keep) {
+    editor.scrollTop = keep.editor;
+    if (document.scrollingElement) document.scrollingElement.scrollTop = keep.page;
+  } else editor.scrollTop = 0;
   preview.show(previewHash());
 }
 

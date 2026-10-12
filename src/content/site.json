@@ -4,12 +4,14 @@
       "name": "Halil Bagosi",
       "role": "Software Engineer",
       "title": "Halil Bagosi — Software Engineer",
-      "description": "Halil Bagosi, software engineer. Selected projects."
+      "description": "Halil Bagosi, software engineer. Portfolio."
     },
     "icon": {
       "text": "HB",
       "background": "#0b0b0d",
-      "color": "#ffffff"
+      "color": "#ffffff",
+      "radius": 22,
+      "image": ""
     },
     "hints": {
       "open": {
@@ -38,10 +40,32 @@
     },
     "motion": {
       "photoDwell": 1.5,
-      "gyroDegrees": 31,
-      "parallax": 1.5,
+      "gyroDegrees": 20,
+      "parallax": 1,
       "lidKnock": true,
       "topDownOnOpen": true
+    },
+    "layout": {
+      "leadWidth": 50,
+      "openWidth": 75,
+      "openDepth": 75
+    },
+    "card": {
+      "headings": {
+        "about": "About",
+        "experience": "Experience",
+        "achievements": "Achievements",
+        "skills": "Skills",
+        "contact": "Contact"
+      },
+      "yearsLabel": "years experience",
+      "finePrint": {
+        "show": true,
+        "text": "Designed by {name} in {city}. Assembled in the browser.",
+        "bin": true,
+        "ring": true,
+        "ringText": ""
+      }
     },
     "socials": [
       {
