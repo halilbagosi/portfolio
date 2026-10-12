@@ -64,7 +64,7 @@
       "photo": "/shots/about-1.jpg",
       "bio": "Mobile and Web Developer specializing in intuitive design and UX. Developing multiple native Apple platform applications as well as websites and cross-platform apps using native components. Detail-oriented, perfectionist and eager to improve and polish existing software.",
       "years": 2,
-      "location": "Kavajë, Albania",
+      "location": "Albania",
       "workPreference": "Remote · open to relocation",
       "available": true,
       "availability": "Open to new roles",
@@ -173,11 +173,24 @@
         "#ff5fae"
       ],
       "images": [
-        "/shots/palettes-1.jpg",
-        "/shots/palettes-2.jpg",
-        "/shots/palettes-3.jpg",
-        "/shots/palettes-4.jpg"
-      ]
+        "/shots/palettes-5.jpg",
+        "/shots/palettes-6.jpg",
+        "/shots/palettes-7.jpg",
+        "/shots/palettes-8.jpg",
+        "/shots/palettes-9.jpg",
+        "/shots/palettes-10.jpg",
+        "/shots/palettes-11.jpg",
+        "/shots/palettes-12.jpg",
+        "/shots/palettes-13.jpg",
+        "/shots/palettes-14.jpg",
+        "/shots/palettes-15.jpg",
+        "/shots/palettes-16.jpg",
+        "/shots/palettes-17.jpg",
+        "/shots/palettes-18.jpg",
+        "/shots/palettes-19.jpg",
+        "/shots/palettes-20.jpg"
+      ],
+      "featured": true
     },
     {
       "id": "memorylane",
@@ -211,8 +224,7 @@
         "/shots/memorylane-2.jpg",
         "/shots/memorylane-3.jpg",
         "/shots/memorylane-4.jpg"
-      ],
-      "featured": true
+      ]
     },
     {
       "id": "artpage",
