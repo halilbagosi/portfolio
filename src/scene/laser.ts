@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { settings } from '../config/projects';
 import { LID_TOP, type Lid } from './lid';
 
 /**
@@ -49,7 +50,7 @@ export class Laser {
    * In the scene, not the lid's group: three only counts lights of visible objects, and the lid is
    * hidden once it is gone, which would change the light count and recompile every lit material.
    */
-  private light = new THREE.PointLight('#d4c8ff', 0, 0.9, 2);
+  private light = new THREE.PointLight(new THREE.Color(settings.look.laser).lerp(new THREE.Color('#ffffff'), 0.6), 0, 0.9, 2);
   private at = new THREE.Vector3();
   private sparks: THREE.Points;
   private pos = new Float32Array(SPARKS * 3);
@@ -68,7 +69,7 @@ export class Laser {
     const glow = (this.glow = glowTexture());
     this.core = new THREE.Sprite(glowMat(glow, '#ffffff'));
     this.core.scale.setScalar(0.05);
-    this.halo = new THREE.Sprite(glowMat(glow, '#8f7dff'));
+    this.halo = new THREE.Sprite(glowMat(glow, settings.look.laser));
     this.halo.scale.setScalar(0.26);
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));

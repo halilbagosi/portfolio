@@ -14,8 +14,9 @@ export function validContent(): SiteContent {
         flip: { desktop: 'Scroll down to turn it over', touch: 'Swipe up to turn it over' },
         back: { desktop: 'Scroll up to turn it back', touch: 'Swipe down to turn it back' },
       },
-      motion: { photoDwell: 2, gyroDegrees: 18, parallax: 1, lidKnock: true, topDownOnOpen: true },
-      layout: { leadWidth: 46, openWidth: 90, openDepth: 75 },
+      motion: { photoDwell: 2, flipSpeed: 1, gyroDegrees: 18, parallax: 1, lidKnock: true, topDownOnOpen: true },
+      look: { lid: '#7d7e80', engraving: '#d9dbde', lidEdge: '#a9abae', walls: '#3a3a3a', plate: '#070707', background: '#000000', laser: '#8f7dff', glowStrength: 1 },
+      layout: { leadWidth: 46, openWidth: 90, openDepth: 75, featuredWidth: 90, featuredDepth: 100 },
       card: {
         headings: { about: 'About', experience: 'Experience', achievements: 'Achievements', skills: 'Skills', contact: 'Contact' },
         yearsLabel: 'years experience',

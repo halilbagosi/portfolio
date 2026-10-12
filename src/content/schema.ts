@@ -133,9 +133,19 @@ export interface LayoutSettings {
   openWidth: number;
   /** A section open: its share of the depth when it shares a column (every section, in a tall box). */
   openDepth: number;
+  /** The featured section open, wide box: its share of the width. */
+  featuredWidth: number;
+  /** The featured section open, wide box: its share of the depth (centred; 100 = all of it). */
+  featuredDepth: number;
 }
 /** Allowed range per layout value (percent). */
-export const LAYOUT_RANGES: Record<keyof LayoutSettings, [number, number]> = { leadWidth: [30, 70], openWidth: [50, 95], openDepth: [50, 95] };
+export const LAYOUT_RANGES: Record<keyof LayoutSettings, [number, number]> = {
+  leadWidth: [30, 70],
+  openWidth: [50, 95],
+  openDepth: [50, 95],
+  featuredWidth: [50, 95],
+  featuredDepth: [40, 100],
+};
 
 /** The line along the bottom of the About card: two printed marks and a sentence. */
 export interface FinePrint {
@@ -163,11 +173,34 @@ export interface CardSettings {
   finePrint: FinePrint;
 }
 
+/** The box's colours (#rrggbb) and how brightly the sections glow. */
+export interface LookSettings {
+  /** The lid's anodised finish. */
+  lid: string;
+  /** The engraving, where the laser cut through to bare metal. */
+  engraving: string;
+  /** The lid's chamfered edge. */
+  lidEdge: string;
+  /** The box's walls. */
+  walls: string;
+  /** The top plate between the sections. */
+  plate: string;
+  /** The page behind the box. */
+  background: string;
+  /** The laser's glow while it engraves the lid. */
+  laser: string;
+  /** How brightly the sections glow (each project's own two colours), × the usual. */
+  glowStrength: number;
+}
+export const LOOK_COLOURS = ['lid', 'engraving', 'lidEdge', 'walls', 'plate', 'background', 'laser'] as const;
+export const MAX_GLOW = 2;
+
 export interface Settings {
   identity: { name: string; role: string; title: string; description: string };
   icon: SiteIcon;
   hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair; flip: HintPair; back: HintPair };
-  motion: { photoDwell: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
+  motion: { photoDwell: number; flipSpeed: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
+  look: LookSettings;
   layout: LayoutSettings;
   card: CardSettings;
   socials: Social[];
@@ -213,7 +246,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
     issues.push({ path: 'settings', message: 'Settings are missing.' });
     return;
   }
-  const { identity, hints, motion, socials, about, icon, layout, card } = s;
+  const { identity, hints, motion, socials, about, icon, layout, card, look } = s;
   if (!isObj(identity)) issues.push({ path: 'settings.identity', message: 'Identity is missing.' });
   else
     for (const k of ['name', 'role', 'title', 'description'])
@@ -238,6 +271,7 @@ function validateSettings(s: unknown, issues: Issue[]) {
         issues.push({ path: `settings.motion.${k}`, message: `Must be between ${lo} and ${hi}.` });
     };
     range('photoDwell', 0.5, 10);
+    range('flipSpeed', 0.25, 3);
     range('gyroDegrees', 5, 45);
     range('parallax', 0, 2);
     for (const k of ['lidKnock', 'topDownOnOpen'])
@@ -254,6 +288,15 @@ function validateSettings(s: unknown, issues: Issue[]) {
       issues.push({ path: 'settings.icon.radius', message: `Must be between 0 and ${MAX_ICON_RADIUS}.` });
     if (icon.image !== '' && (typeof icon.image !== 'string' || !SHOT_PATH.test(icon.image)))
       issues.push({ path: 'settings.icon.image', message: 'The icon image must be a /shots/<file> path, or empty.' });
+  }
+
+  if (!isObj(look)) issues.push({ path: 'settings.look', message: 'Colours are missing.' });
+  else {
+    for (const k of LOOK_COLOURS)
+      if (typeof look[k] !== 'string' || !HEX.test(look[k] as string)) issues.push({ path: `settings.look.${k}`, message: 'Needs a #rrggbb colour.' });
+    const g = look.glowStrength;
+    if (typeof g !== 'number' || !Number.isFinite(g) || g < 0 || g > MAX_GLOW)
+      issues.push({ path: 'settings.look.glowStrength', message: `Must be between 0 and ${MAX_GLOW}.` });
   }
 
   if (!isObj(layout)) issues.push({ path: 'settings.layout', message: 'Layout settings are missing.' });

@@ -1,15 +1,17 @@
-import type { LayoutSettings, Settings } from '../../content/schema';
-import { iconSvg, LAYOUT_RANGES, MAX_ICON_RADIUS, MAX_ICON_TEXT } from '../../content/schema';
+import type { LayoutSettings, LookSettings, Settings } from '../../content/schema';
+import { iconSvg, LAYOUT_RANGES, MAX_GLOW, MAX_ICON_RADIUS, MAX_ICON_TEXT } from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
-import { rangeField, textField, toggleField } from '../fields';
+import { colorField, rangeField, textField, toggleField } from '../fields';
 import { processPhoto } from '../photos';
 import type { Store } from '../state';
 
-/** Identity, icon, hint copy, section sizes and motion tuning. Edits change the store in place; no re-render needed. */
+/** Identity, icon, hint copy, colours, section sizes and motion tuning. Edits change the store in place; no re-render needed. */
 export function renderSettings(root: HTMLElement, store: Store) {
   const s = store.content.settings;
   const edit = (fn: (s: Settings) => void) => store.change((c) => fn(c.settings));
+  const look = (label: string, key: Exclude<keyof LookSettings, 'glowStrength'>, hint: string) =>
+    colorField(label, `settings.look.${key}`, s.look[key], (v) => edit((x) => (x.look[key] = v)), hint);
   const hint = (label: string, key: 'open' | 'section' | 'close' | 'flip' | 'back') =>
     h(
       'div',
@@ -47,12 +49,49 @@ export function renderSettings(root: HTMLElement, store: Store) {
     hint('Turn it over (About)', 'flip'),
     hint('Turn it back', 'back'),
 
+    h('div', { class: 'section-title' }, 'Colours'),
+    h(
+      'div',
+      { class: 'grid2' },
+      look('Lid', 'lid', 'The anodised metal of the lid.'),
+      look('Engraving', 'engraving', 'Where the laser cut your name and links into the lid.'),
+      look('Lid edge', 'lidEdge', 'The bevel around the lid.'),
+      look('Walls', 'walls', 'The sides of the box, where the light is full on.'),
+      look('Plate', 'plate', 'The top of the box, between the sections.'),
+      look('Page', 'background', 'Behind the box.'),
+      look('Laser glow', 'laser', 'The beam’s glow while it engraves the lid.'),
+    ),
+    rangeField(
+      'Glow strength',
+      'settings.look.glowStrength',
+      s.look.glowStrength,
+      { min: 0, max: MAX_GLOW, step: 0.05, unit: '×' },
+      (v) => edit((x) => (x.look.glowStrength = v)),
+      'How brightly the sections glow. Each project’s two glow colours are set on the project.',
+    ),
+
     h('div', { class: 'section-title' }, 'Section sizes'),
     layoutField('Featured section width (overview)', 'leadWidth', s, edit, 'Share of the box the big tile takes before anything is opened. Wide screens.'),
-    layoutField('Open section width', 'openWidth', s, edit, 'Share of the box an open section takes across; the others shrink to strips. Wide screens.'),
-    layoutField('Open section length', 'openDepth', s, edit, 'Share of the box an open section takes front to back, when it shares its column (every section on a phone).'),
+    layoutField('Featured section open width', 'featuredWidth', s, edit, 'Share of the box the featured section takes across when open. Wide screens.'),
+    layoutField('Featured section open length', 'featuredDepth', s, edit, 'Share of the box it takes front to back when open, centred. 100 is the full length. Wide screens.'),
+    layoutField('Other sections open width', 'openWidth', s, edit, 'Share of the box any other open section takes across; the rest shrink to strips. Wide screens.'),
+    layoutField(
+      'Other sections open length',
+      'openDepth',
+      s,
+      edit,
+      'Share of the box they take front to back when open. On a phone the box is one column with no featured tile, so this applies to every section there.',
+    ),
 
     h('div', { class: 'section-title' }, 'Motion'),
+    rangeField(
+      'Flip speed',
+      'settings.motion.flipSpeed',
+      s.motion.flipSpeed,
+      { min: 0.25, max: 3, step: 0.05, unit: '×' },
+      (v) => edit((x) => (x.motion.flipSpeed = v)),
+      'How fast a screenshot flips to the next one. Above 1 is quicker.',
+    ),
     rangeField('Time on each photo', 'settings.motion.photoDwell', s.motion.photoDwell, { min: 0.5, max: 10, step: 0.5, unit: 's' }, (v) =>
       edit((x) => (x.motion.photoDwell = v)),
     ),

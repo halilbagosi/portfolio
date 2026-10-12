@@ -88,4 +88,22 @@ describe('section sizes from the dashboard', () => {
     const r = rectsFrom(4, s, W, D, gap);
     expect(r[2].w).toBeCloseTo(s.cols[1]);
   });
+  it('sizes the featured section on its own, centred front to back', () => {
+    const share = { w: 0.7, d: 0.6, featured: { w: 0.8, d: 0.5 } };
+    const r = rectsFrom(4, focusSizes(4, 0, W, D, gap, undefined, undefined, undefined, share), W, D, gap);
+    expect(r[0].w / (W - gap)).toBeCloseTo(0.8);
+    expect(r[0].d / D).toBeCloseTo(0.5);
+    expect(r[0].z).toBeCloseTo(0);
+    // Another section still opens by the general shares.
+    const o = rectsFrom(4, focusSizes(4, 2, W, D, gap, undefined, undefined, undefined, share), W, D, gap);
+    expect(o[2].w / (W - gap)).toBeCloseTo(0.7);
+    expect(o[0].d).toBeCloseTo(D);
+  });
+
+  it('has no featured section in a tall box', () => {
+    const share = { w: 0.7, d: 0.6, featured: { w: 0.8, d: 0.5 } };
+    const s = focusSizes(4, 0, 3.9, 7, gap, undefined, undefined, undefined, share);
+    expect(s.rows[0][0] / (7 - 3 * gap)).toBeCloseTo(0.6);
+  });
 });
+

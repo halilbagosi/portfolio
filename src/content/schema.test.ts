@@ -215,6 +215,12 @@ describe('socials and about', () => {
     expectIssue((c) => ((c.settings.about as unknown as Record<string, unknown>).achievements = undefined), 'settings.about.achievements', 'must be a list');
   });
 
+  it('checks the colours, glow strength and flip speed', () => {
+    expectIssue((c) => (c.settings.look.walls = 'grey'), 'settings.look.walls', '#rrggbb');
+    expectIssue((c) => (c.settings.look.glowStrength = 3), 'settings.look.glowStrength', 'between 0 and 2');
+    expectIssue((c) => (c.settings.motion.flipSpeed = 0), 'settings.motion.flipSpeed', 'between 0.25 and 3');
+  });
+
   it('keeps section sizes in range', () => {
     expectIssue((c) => (c.settings.layout.leadWidth = 80), 'settings.layout.leadWidth', 'between 30 and 70');
     expectIssue((c) => (c.settings.layout.openDepth = 20), 'settings.layout.openDepth', 'between 50 and 95');

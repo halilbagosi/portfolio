@@ -82,6 +82,9 @@ export class Lightbox {
     this.root.id = 'lightbox';
     this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true');
+    this.root.setAttribute('aria-label', 'Screenshots');
+    // Focus lands on the dialog itself, not a button: arrows and Escape work at once, and nothing looks selected.
+    this.root.tabIndex = -1;
     this.root.hidden = true;
     this.root.innerHTML = `
       <div class="lb-backdrop"></div>
@@ -171,7 +174,7 @@ export class Lightbox {
     };
     // decode() waits for the picture just assigned (a bare `complete` can still describe the previous one).
     void this.img.decode().catch(() => {}).then(start);
-    (this.root.querySelector(o.urls.length < 2 ? '.lb-close' : '.lb-next') as HTMLButtonElement).focus({ preventScroll: true });
+    this.root.focus({ preventScroll: true });
   }
 
   close() {

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
-import type { Project } from '../config/projects';
+import { settings, type Project } from '../config/projects';
 import { CARD_DEPTH, TOP_Y, WELL_RADIUS } from './box';
 import type { Rect } from './layout';
 import { sdRoundGLSL } from './shaders';
@@ -299,7 +299,7 @@ export class Well {
   }
 
   get glowIntensity() {
-    return this.glow.value * (1 - 0.75 * this.dim.value);
+    return this.glow.value * (1 - 0.75 * this.dim.value) * settings.look.glowStrength;
   }
 
   private place(l: Label, k: number, x: number, z: number, opacity: number) {
@@ -367,7 +367,7 @@ export class Well {
     const u = this.mat.uniforms;
     u.uTime.value = time;
     u.uDim.value = dim;
-    u.uGlow.value = glow;
+    u.uGlow.value = glow * settings.look.glowStrength;
     u.uReveal.value = reveal;
     u.uSize.value.set(w, d);
     u.uCenter.value.set(x, z);

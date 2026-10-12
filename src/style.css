@@ -27,6 +27,7 @@ body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helv
    are liquid glass like the chips in the scene: a frosted capsule with a lit top edge. */
 #lightbox { position: fixed; inset: 0; z-index: 10; --ease-swipe: cubic-bezier(0.22, 1, 0.36, 1); }
 #lightbox[hidden] { display: none; }
+#lightbox:focus { outline: none; }
 .lb-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.8); -webkit-backdrop-filter: blur(28px) saturate(130%); backdrop-filter: blur(28px) saturate(130%); opacity: 0; transition: opacity 0.45s var(--ease-drawer); }
 #lightbox.open .lb-backdrop { opacity: 1; }
 #lightbox.closing .lb-backdrop { transition-duration: 0.36s; }

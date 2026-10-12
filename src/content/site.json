@@ -40,15 +40,28 @@
     },
     "motion": {
       "photoDwell": 1.5,
+      "flipSpeed": 1,
       "gyroDegrees": 20,
       "parallax": 1,
       "lidKnock": true,
       "topDownOnOpen": true
     },
+    "look": {
+      "lid": "#929292",
+      "engraving": "#d9dbde",
+      "lidEdge": "#a9abae",
+      "walls": "#3a3a3a",
+      "plate": "#070707",
+      "background": "#000000",
+      "laser": "#0433ff",
+      "glowStrength": 1.25
+    },
     "layout": {
-      "leadWidth": 50,
+      "leadWidth": 40,
       "openWidth": 75,
-      "openDepth": 75
+      "openDepth": 85,
+      "featuredWidth": 90,
+      "featuredDepth": 100
     },
     "card": {
       "headings": {
@@ -61,7 +74,7 @@
       "yearsLabel": "years experience",
       "finePrint": {
         "show": true,
-        "text": "Designed by {name} in {city}. Assembled in the browser.",
+        "text": "Designed by {name}. Assembled in the browser.",
         "bin": true,
         "ring": true,
         "ringText": ""
@@ -89,7 +102,7 @@
       "bio": "Mobile and Web Developer specializing in intuitive design and UX. Developing multiple native Apple platform applications as well as websites and cross-platform apps using native components. Detail-oriented, perfectionist and eager to improve and polish existing software.",
       "years": 2,
       "location": "Albania",
-      "workPreference": "Remote · open to relocation",
+      "workPreference": "Remote · Open To Relocation",
       "available": true,
       "availability": "Open to new roles",
       "skills": [

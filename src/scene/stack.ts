@@ -85,11 +85,13 @@ const DWELL = settings.motion.photoDwell;
  * the top card eases aside for OUT s, dissolving as it goes, then fades in at the back already in
  * place. The cards behind move up one slot along one eased curve, a beat after it starts leaving.
  */
-const OUT = 0.56;
+/** Set in the dashboard: above 1 every part of a flip is quicker. */
+const SPEED = settings.motion.flipSpeed;
+const OUT = 0.56 / SPEED;
 const DISSOLVE_FROM = 0.3; // share of OUT before the leaving card starts to dissolve
-const RETURN_FADE = 0.4;
-const MOVE = 0.6;
-const MOVE_DELAY = 0.07;
+const RETURN_FADE = 0.4 / SPEED;
+const MOVE = 0.6 / SPEED;
+const MOVE_DELAY = 0.07 / SPEED;
 
 /** CSS-style cubic-bezier easing (x1, y1, x2, y2), solved for y at x. */
 function bezier(x1: number, y1: number, x2: number, y2: number) {

@@ -84,6 +84,18 @@ export function toggleField(label: string, path: string, value: boolean, set: (v
   );
 }
 
+/** One colour, with its hex code beside the swatch. */
+export function colorField(label: string, path: string, value: string, set: (v: string) => void, hint?: string) {
+  const id = nextId();
+  const input = h('input', { id, type: 'color', value });
+  const code = h('span', { class: 'field-hint color-code' }, value);
+  input.addEventListener('input', () => {
+    code.textContent = input.value;
+    set(input.value);
+  });
+  return field(label, path, h('div', { class: 'colors' }, input, code), hint, id);
+}
+
 export function colorsField(label: string, path: string, value: [string, string], set: (v: [string, string]) => void) {
   const inputs = value.map((c, i) => h('input', { type: 'color', value: c, 'aria-label': `${label} ${i + 1}` }));
   for (const input of inputs) input.addEventListener('input', () => set([inputs[0].value, inputs[1].value]));

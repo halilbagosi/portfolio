@@ -56,6 +56,9 @@ try {
 }
 
 const { scene, camera } = stage;
+// The page's colour (set in the dashboard): behind the box, and around the canvas while it loads.
+scene.background = new THREE.Color(settings.look.background);
+document.documentElement.style.background = document.body.style.background = settings.look.background;
 const pointer = new Pointer(host, camera);
 const motion = new Motion();
 // The box in the hand: drags turn it, a flick up rolls it onto its back (the About card).
@@ -124,7 +127,8 @@ scene.add(lid.group);
 const n = Math.min(projects.length, MAX_WELLS);
 // Section sizes from the dashboard (percent of the box).
 const leadShare = settings.layout.leadWidth / 100;
-const openShare = { w: settings.layout.openWidth / 100, d: settings.layout.openDepth / 100 };
+const L = settings.layout;
+const openShare = { w: L.openWidth / 100, d: L.openDepth / 100, featured: { w: L.featuredWidth / 100, d: L.featuredDepth / 100 } };
 const closed = packLayout(n, INTERIOR_W, INTERIOR_D, GAP, leadShare);
 const tiles = projects.slice(0, n).map((p, i) => {
   const t = new Well(p, i, reduced);

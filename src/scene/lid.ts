@@ -14,10 +14,10 @@ const REST_Y = TOP_Y + CHAMFER;
 
 /** The lid's top surface in its own space (the extrusion's front cap: depth plus the bevel). */
 export const LID_TOP = LT - CHAMFER;
-/** Space Gray anodised aluminium, as on a MacBook. */
-const ANODISED = '#7d7e80';
+/** The anodised finish (Space Gray by default, as on a MacBook); set in the dashboard. */
+const ANODISED = settings.look.lid;
 /** Raw aluminium, where the laser has cut through the anodising: bright and a little frosted. */
-const RAW = new THREE.Color('#d9dbde');
+const RAW = new THREE.Color(settings.look.engraving);
 
 /** Etch time meaning "long finished": everything cut, cooled. */
 const DONE = 1e4;
@@ -157,7 +157,7 @@ export class Lid {
     this.cut = engrave(top, mask, revealTexture(this.etch));
     // The chamfer: raw aluminium, satin, so it only catches a soft line of light.
     const edge = new THREE.MeshPhysicalMaterial({
-      color: '#a9abae',
+      color: settings.look.lidEdge,
       metalness: 1,
       roughness: 0.4,
       transparent: true,

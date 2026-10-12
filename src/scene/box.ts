@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { settings } from '../config/projects';
 import { basicVert, CORNER_K, CORNER_N, sdRoundGLSL } from './shaders';
 
 /**
@@ -121,6 +122,8 @@ function createShell() {
   updateTube(geo, OUTER_W, OUTER_D, OUTER_R, WALL_H, 12);
   const uniforms = {
     uSheen: { value: 0 },
+    /** The walls' colour where they are lit full on (set in the dashboard). */
+    uWall: { value: new THREE.Color(settings.look.walls) },
     /** The box's orientation as seen (Stage.orbit): shading follows the box, not the world. */
     uOrbit: { value: new THREE.Matrix3() },
     uPivot: { value: PIVOT.clone() },
@@ -142,6 +145,7 @@ function createShell() {
     fragmentShader: /* glsl */ `
       ${sdRoundGLSL}
       uniform float uSheen;
+      uniform vec3 uWall;
       uniform mat3 uOrbit;
       uniform vec3 uPivot;
       varying float vV;
@@ -165,7 +169,7 @@ function createShell() {
         // Falloff into black: bright just under the edge that is up, gone well before the other.
         float h = clamp(0.5 - p.y / ${WALL_H.toFixed(3)}, 0.0, 1.0);
         float fall = pow(1.0 - smoothstep(0.0, 0.85, h), 1.8);
-        vec3 col = vec3(0.042) * fall * face;
+        vec3 col = uWall * fall * face;
         // Sheen: a soft vertical band of light drifting across the front with the parallax.
         col += vec3(0.03) * exp(-pow((p.x - uSheen) / 1.6, 2.0)) * fall * front;
         // Rims: hairlines where the wall meets the top or the bottom, like a chamfer catching
@@ -197,12 +201,13 @@ function createTopPlate() {
       uCol: { value: Array.from({ length: MAX_WELLS }, () => new THREE.Color()) },
       uI: { value: new Array(MAX_WELLS).fill(0) },
       uCount: { value: 0 },
+      uPlate: { value: new THREE.Color(settings.look.plate) },
     },
     vertexShader: basicVert,
     fragmentShader: /* glsl */ `
       ${sdRoundGLSL}
       #define MAXW ${MAX_WELLS}
-      uniform vec2 uSize; uniform float uOuterR; uniform float uR;
+      uniform vec2 uSize; uniform float uOuterR; uniform float uR; uniform vec3 uPlate;
       uniform vec4 uRects[MAXW]; uniform vec3 uCol[MAXW]; uniform float uI[MAXW]; uniform int uCount;
       varying vec2 vUv;
       void main() {
@@ -229,7 +234,7 @@ function createTopPlate() {
         float lw = max(1.0, lipPx);
         float lip = (clamp(e + 0.5, 0.0, 1.0) - clamp(e - lw + 0.5, 0.0, 1.0)) * min(1.0, lipPx);
         float rim = clamp(1.0 - (-outer / pxo - 0.5) / max(1.0, 0.02 / pxo), 0.0, 1.0);
-        vec3 col = vec3(0.0022) + vec3(0.001) * (p.y / uSize.y); // near-black, faint front-to-back falloff
+        vec3 col = uPlate * (1.0 + 0.45 * p.y / uSize.y); // the plate's colour, a faint front-to-back falloff
         col += vec3(0.025) * lip;                                 // lip of each opening
         col += vec3(0.012) * rim;                                 // outer edge catch
         col += (hash(gl_FragCoord.xy) - 0.5) / 255.0;
@@ -255,11 +260,11 @@ export function createBox() {
   const top = createTopPlate();
   group.add(top.mesh);
 
-  // Table: black like the page, with the box footprint cut out. The wells run far below it;
+  // Table: the page's colour, with the box footprint cut out. The wells run far below it;
   // this keeps them visible only through their openings.
   const table = roundedRectShape(80, 80, 0, new THREE.Shape());
   table.holes.push(roundedRectShape(OUTER_W - 0.02, OUTER_D - 0.02, OUTER_R, new THREE.Path()));
-  const tableMesh = new THREE.Mesh(new THREE.ShapeGeometry(table, 16), new THREE.MeshBasicMaterial({ color: '#000000' }));
+  const tableMesh = new THREE.Mesh(new THREE.ShapeGeometry(table, 16), new THREE.MeshBasicMaterial({ color: settings.look.background }));
   tableMesh.rotation.x = -Math.PI / 2;
   tableMesh.position.y = BOTTOM_Y; // at the foot of the walls
   tableMesh.renderOrder = -2;

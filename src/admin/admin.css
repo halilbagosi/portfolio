@@ -133,7 +133,8 @@ button, input, select, textarea { font: inherit; color: inherit; margin: 0; }
 .tag .icon { width: 24px; height: 24px; }
 .field .tags input { flex: 1; width: auto; min-width: 140px; height: var(--control-sm); min-height: 0; padding: 0 var(--s2); border: 0; background: none; outline: none; }
 
-.colors { display: flex; gap: var(--s2); }
+.colors { display: flex; gap: var(--s2); align-items: center; }
+.color-code { font-family: ui-monospace, monospace; }
 .colors input[type=color] { width: 56px; height: var(--control); padding: 3px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); cursor: pointer; }
 .colors input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
 .colors input[type=color]::-webkit-color-swatch { border: 0; border-radius: var(--radius-sm); }

@@ -57,6 +57,11 @@ export function restSizes(n: number, W: number, D: number, gap: number, leadShar
 export interface OpenShare {
   w: number;
   d: number;
+  /**
+   * The featured (lead) section's own shares, in a wide box: its column's width, and its depth, which
+   * (alone in its column) leaves room above and below it, centred. A tall box has no lead section.
+   */
+  featured?: { w: number; d: number };
 }
 
 /**
@@ -80,11 +85,13 @@ export function focusSizes(
   if (n <= 1) return restSizes(n, W, D, gap);
   const fc = s.findIndex((col) => col.includes(index));
   const usable = W - gap * (s.length - 1);
-  const colStrip = share && s.length > 1 ? (usable * (1 - share.w)) / (s.length - 1) : strip;
+  const lead = index === 0 && s.length > 1 && s[0].length === 1 ? share?.featured : undefined;
+  const colStrip = share && s.length > 1 ? (usable * (1 - (lead ?? share).w)) / (s.length - 1) : strip;
   return {
     cols: s.map((_, c) => (c === fc ? usable - colStrip * (s.length - 1) : colStrip)),
     rows: s.map((col, c) => {
       if (c !== fc) return col.map(() => split(D, gap, col.length));
+      if (lead) return [D * lead.d];
       const usableD = D - gap * (col.length - 1);
       const k = Math.max(1, col.length - 1);
       // A long single column (portrait, many projects) shares at most 45% among its strips (unless set).
@@ -96,14 +103,18 @@ export function focusSizes(
   };
 }
 
-/** Lays out rects (indexed by project) from column widths and row heights. */
+/**
+ * Lays out rects (indexed by project) from column widths and row heights. A column whose rows come to
+ * less than the depth (an open featured section asked to be shorter) sits centred in it.
+ */
 export function rectsFrom(n: number, sizes: Sizes, W: number, D: number, gap: number): Rect[] {
   const s = structure(n, D > W);
   const out: Rect[] = new Array(n);
   let x = -W / 2;
   s.forEach((col, c) => {
     const w = sizes.cols[c];
-    let z = -D / 2;
+    const used = sizes.rows[c].reduce((t, d) => t + d, 0) + gap * (col.length - 1);
+    let z = -D / 2 + Math.max(0, (D - used) / 2);
     col.forEach((p, r) => {
       const d = sizes.rows[c][r];
       out[p] = { x: x + w / 2, z: z + d / 2, w, d };
