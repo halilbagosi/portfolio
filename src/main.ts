@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Spring } from './anim/springs';
 import { projects, settings } from './config/projects';
 import { Gestures } from './input/gestures';
+import { lang, LANG_NAMES, LANGS, setLang, t } from './i18n';
 import { Motion } from './input/motion';
 import { Orbit, topElevation, type Face } from './input/orbit';
 import { Pointer } from './input/pointer';
@@ -23,6 +24,21 @@ const hintTop = document.getElementById('hint-top')!;
 const a11y = document.getElementById('a11y')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touch = matchMedia('(pointer: coarse)').matches;
+
+// Language: the site is drawn once from the content, so the switcher stores the choice and reloads.
+document.documentElement.lang = lang;
+document.title = settings.identity.title;
+document.querySelector('meta[name="description"]')?.setAttribute('content', settings.identity.description);
+const switcher = document.getElementById('lang')!;
+switcher.setAttribute('aria-label', t('switcher'));
+for (const l of LANGS) {
+  const b = Object.assign(document.createElement('button'), { type: 'button', textContent: l.toUpperCase(), lang: l });
+  b.title = LANG_NAMES[l];
+  b.setAttribute('aria-label', LANG_NAMES[l]);
+  b.setAttribute('aria-pressed', String(l === lang));
+  b.addEventListener('click', () => l !== lang && setLang(l));
+  switcher.appendChild(b);
+}
 
 function showFallback() {
   hint.hidden = true;
@@ -305,7 +321,7 @@ function cellAt(x: number, z: number) {
 
 // ---- Accessibility layer: real buttons and links mirror the 3D scene ----------------
 const openBtn = document.createElement('button');
-openBtn.textContent = `Open the box: ${settings.identity.name}, ${settings.identity.role}`;
+openBtn.textContent = t('open', { name: settings.identity.name, role: settings.identity.role });
 openBtn.addEventListener('click', openLid);
 a11y.appendChild(openBtn);
 
@@ -344,17 +360,17 @@ function turnOver() {
   }
 }
 const aboutBtn = document.createElement('button');
-aboutBtn.textContent = `Turn the box over: About ${settings.identity.name}`;
+aboutBtn.textContent = t('turnOver', { name: settings.identity.name });
 aboutBtn.addEventListener('click', turnOver);
 a11y.appendChild(aboutBtn);
 const aboutSection = document.createElement('section');
-aboutSection.setAttribute('aria-label', `About ${settings.identity.name}`);
+aboutSection.setAttribute('aria-label', t('aboutOf', { name: settings.identity.name }));
 for (const line of aboutLines(settings.about)) aboutSection.appendChild(Object.assign(document.createElement('p'), { textContent: line }));
 // The socials are already linked at the top of the nav; only what isn't (email, résumé) is added here.
 const listed = new Set(settings.socials.map((s) => s.href));
 for (const l of contactLinks(settings.about, settings.socials)) if (!listed.has(l.href)) aboutSection.appendChild(a11yLink(l.label, l.href));
 const backBtn = document.createElement('button');
-backBtn.textContent = 'Turn the box back';
+backBtn.textContent = t('turnBack');
 backBtn.addEventListener('click', () => orbit.flip('top'));
 aboutSection.appendChild(backBtn);
 a11y.appendChild(aboutSection);
@@ -376,7 +392,7 @@ function syncFaceControls(face: Face) {
 backBtn.disabled = true;
 const a11yButtons = projects.slice(0, n).map((p, i) => {
   const b = document.createElement('button');
-  b.textContent = `${p.title}, ${p.kind}: ${p.purpose} Built with ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.status}.`;
+  b.textContent = `${p.title}, ${p.kindLabel}: ${p.purpose} ${t('builtWith')} ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.statusLabel}.`;
   b.setAttribute('aria-expanded', 'false');
   b.addEventListener('focus', () => {
     openLid();
@@ -388,7 +404,7 @@ const a11yButtons = projects.slice(0, n).map((p, i) => {
     a.href = l.href;
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = `${p.title} on ${l.label}`;
+    a.textContent = t('projectOn', { title: p.title, label: l.label });
     a.addEventListener('focus', () => setFocus(i));
     a11y.appendChild(a);
   }
@@ -657,7 +673,7 @@ function frame(stamp?: number) {
   if (orbit.face !== a11yFace) {
     a11yFace = orbit.face;
     syncFaceControls(a11yFace);
-    faceStatus.textContent = a11yFace === 'bottom' ? 'Showing About' : 'Showing the top of the box';
+    faceStatus.textContent = a11yFace === 'bottom' ? t('showingAbout') : t('showingTop');
   }
   // Lying on its back, the camera frames the About card straight on; upright, the usual overview.
   if (orbit.face !== shownFace && focused < 0) {

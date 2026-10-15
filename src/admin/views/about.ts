@@ -16,7 +16,8 @@ import { api } from '../api';
 import { h } from '../dom';
 import { rangeField, tagsField, textField, toggleField } from '../fields';
 import { processPhoto } from '../photos';
-import { moveItem, type Store } from '../state';
+import { DEFAULT_SQ } from '../../i18n';
+import { moveItem, setSq, type Store } from '../state';
 
 /** Up, down and remove buttons for one row of a list editor. */
 function rowActions(i: number, n: number, move: (from: number, to: number) => void, remove: () => void) {
@@ -39,8 +40,8 @@ const listField = (path: string, ...rows: HTMLElement[]) =>
   h('div', { class: 'field list-field', 'data-path': path }, h('small', { class: 'field-error' }), ...rows);
 
 /** One row of a list editor: three fields side by side, then the row's buttons. */
-const listRow = (fields: HTMLElement[], ...actions: Parameters<typeof rowActions>) =>
-  h('div', { class: 'list-row' }, h('div', { class: 'grid3' }, ...fields), rowActions(...actions));
+const listRow = (fields: HTMLElement[], sq: HTMLElement[], ...actions: Parameters<typeof rowActions>) =>
+  h('div', { class: 'list-row' }, h('div', {}, h('div', { class: 'grid3' }, ...fields), h('div', { class: 'grid3 sq-row' }, ...sq)), rowActions(...actions));
 
 /** The "add a row" button under a list: disabled, and saying why, once the list is full. */
 const addButton = (full: boolean, fullLabel: string, label: string, add: () => void) =>
@@ -109,6 +110,7 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
         textField('Engraved text', `${at}.text`, so.text, set('text'), { hint: 'On the lid, e.g. github.com/you.' }),
         textField('Link', `${at}.href`, so.href, set('href'), { hint: 'https://… or mailto:…' }),
       ],
+      [],
       i,
       s.socials.length,
       (from, to) => restructure((x) => moveItem(x.socials, from, to)),
@@ -125,6 +127,11 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
         textField('Company or school', `${at}.org`, t.org, set('org')),
         textField('Period', `${at}.period`, t.period, set('period'), { hint: 'e.g. 2022–now' }),
       ],
+      (['role', 'org', 'period'] as const).map((k) =>
+        textField(`${k === 'org' ? 'Company or school' : k[0].toUpperCase() + k.slice(1)} — Albanian`, `${at}.sq.${k}`, t.sq?.[k] ?? '', (v) => ed((x) => setSq(x.timeline[i], k, v)), {
+          placeholder: t[k],
+        }),
+      ),
       i,
       a.timeline.length,
       (from, to) => restructure((x) => moveItem(x.about.timeline, from, to)),
@@ -141,6 +148,11 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
         textField('Detail', `${at}.detail`, t.detail, set('detail'), { hint: 'One short line (optional).' }),
         textField('Year', `${at}.year`, t.year, set('year'), { hint: 'e.g. 2025 (optional).' }),
       ],
+      (['title', 'detail'] as const).map((k) =>
+        textField(`${k[0].toUpperCase()}${k.slice(1)} — Albanian`, `${at}.sq.${k}`, t.sq?.[k] ?? '', (v) => ed((x) => setSq(x.achievements[i], k, v)), {
+          placeholder: t[k],
+        }),
+      ),
       i,
       a.achievements.length,
       (from, to) => restructure((x) => moveItem(x.about.achievements, from, to)),
@@ -158,6 +170,22 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
       textField(`“${k[0].toUpperCase()}${k.slice(1)}” heading`, `settings.card.headings.${k}`, card.headings[k], (v) => edit((x) => (x.card.headings[k] = v))),
     ),
     textField('Years label', 'settings.card.yearsLabel', card.yearsLabel, (v) => edit((x) => (x.card.yearsLabel = v)), { hint: `Shown as “${a.years}+ …”.` }),
+  );
+
+  // Albanian wording of the About card's own text (the timeline and achievements have theirs on each row).
+  const sq = s.sq ?? {};
+  const sqText = (k: keyof NonNullable<Settings['sq']> & string, label: string, placeholder: string, o: { multiline?: boolean } = {}) =>
+    textField(`${label} — Albanian`, `settings.sq.${k}`, (sq[k] as string | undefined) ?? '', (v) => edit((x) => setSq(x, k, v)), { ...o, placeholder });
+  const sqHeadings = CARD_HEADINGS.map((k) =>
+    textField(`“${k[0].toUpperCase()}${k.slice(1)}” heading — Albanian`, `settings.sq.headings.${k}`, sq.headings?.[k] ?? '', (v) =>
+      edit((x) => {
+        const sub = (x.sq ??= {});
+        const hd = (sub.headings ??= {});
+        if (v.trim()) hd[k] = v;
+        else delete hd[k];
+        if (!Object.keys(hd).length) delete sub.headings;
+        if (!Object.keys(sub).length) delete x.sq;
+      }), { placeholder: DEFAULT_SQ.headings[k] }),
   );
 
   const socialsFull = s.socials.length >= MAX_SOCIALS;
@@ -216,6 +244,20 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     addButton(achievementsFull, `Up to ${MAX_ACHIEVEMENTS} achievements`, 'Add an achievement', () =>
       restructure((x) => x.about.achievements.push({ title: '', detail: '', year: '' })),
     ),
+
+    h('div', { class: 'section-title' }, 'Albanian (Shqip) — About'),
+    h('small', { class: 'field-hint' }, 'Shown when a visitor picks SQ. Leave a field empty to show the English (headings and fine print have Albanian defaults). Experience and achievements have their Albanian fields on each row above.'),
+    sqText('bio', 'Bio', a.bio, { multiline: true }),
+    h(
+      'div',
+      { class: 'grid2' },
+      sqText('location', 'Location', a.location),
+      sqText('workPreference', 'Work preference', a.workPreference),
+      sqText('availability', 'Availability', a.availability),
+      sqText('yearsLabel', 'Years label', DEFAULT_SQ.yearsLabel),
+    ),
+    h('div', { class: 'grid3' }, ...sqHeadings),
+    sqText('finePrint', 'Fine print', DEFAULT_SQ.finePrint),
 
     h('div', { class: 'section-title' }, 'Card headings'),
     headings,

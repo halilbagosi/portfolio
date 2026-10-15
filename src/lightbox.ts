@@ -1,5 +1,6 @@
 import { cubicBezier, homography, lerpQuad, matrix3d, rectQuad, type Quad } from './anim/quad';
 import { WheelSum } from './input/gestures';
+import { t } from './i18n';
 
 interface OpenOptions {
   title: string;
@@ -82,7 +83,7 @@ export class Lightbox {
     this.root.id = 'lightbox';
     this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true');
-    this.root.setAttribute('aria-label', 'Screenshots');
+    this.root.setAttribute('aria-label', t('screenshots'));
     // Focus lands on the dialog itself, not a button: arrows and Escape work at once, and nothing looks selected.
     this.root.tabIndex = -1;
     this.root.hidden = true;
@@ -90,11 +91,11 @@ export class Lightbox {
       <div class="lb-backdrop"></div>
       <figure class="lb-figure"><img class="lb-img" alt="" draggable="false" /><img class="lb-img lb-spare" alt="" draggable="false" aria-hidden="true" /></figure>
       <div class="lb-bar lb-glass">
-        <button class="lb-btn lb-prev" aria-label="Previous screenshot">${icon('M14.5 6 8.5 12l6 6')}</button>
+        <button class="lb-btn lb-prev" aria-label="${t('prev')}">${icon('M14.5 6 8.5 12l6 6')}</button>
         <div class="lb-meta"><p class="lb-title"></p><div class="lb-dots" aria-hidden="true"></div></div>
-        <button class="lb-btn lb-next" aria-label="Next screenshot">${icon('M9.5 6l6 6-6 6')}</button>
+        <button class="lb-btn lb-next" aria-label="${t('next')}">${icon('M9.5 6l6 6-6 6')}</button>
       </div>
-      <button class="lb-btn lb-close lb-glass" aria-label="Close">${icon('M7 7l10 10M17 7 7 17')}</button>`;
+      <button class="lb-btn lb-close lb-glass" aria-label="${t('close')}">${icon('M7 7l10 10M17 7 7 17')}</button>`;
     document.body.appendChild(this.root);
     this.fig = this.root.querySelector('.lb-figure')!;
     this.backdrop = this.root.querySelector('.lb-backdrop')!;

@@ -68,3 +68,12 @@ body { font-family: ui-sans-serif, -apple-system, "SF Pro Display", Inter, "Helv
 }
 @media (prefers-reduced-motion: reduce) { .lb-img, .lb-backdrop, .lb-bar, .lb-close, #lightbox.open .lb-bar, #lightbox.open .lb-close { transition: opacity 0.2s ease; transition-delay: 0s; transform: none; } }
 @media (prefers-reduced-transparency: reduce) { .lb-backdrop { background: rgba(0, 0, 0, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; } .lb-glass { background: #2c2c2e; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+
+/* Language switcher: EN | SQ, top right, over the canvas. */
+#lang { position: fixed; z-index: 5; top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(255,255,255,.06); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+#lang button { font: inherit; font-size: 11px; letter-spacing: .16em; padding: 6px 11px; border: 0; border-radius: 999px; background: none; color: rgba(217,220,225,.55); cursor: pointer; transition: background-color .25s var(--ease-out), color .25s var(--ease-out); }
+#lang button[aria-pressed="true"] { background: rgba(255,255,255,.14); color: #fff; cursor: default; }
+@media (hover: hover) { #lang button[aria-pressed="false"]:hover { color: #fff; } }
+#lang button:active { transform: scale(.96); }
+#lang button:focus-visible { outline: 2px solid rgba(255,255,255,.7); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { #lang button { transition: none; } }

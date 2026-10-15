@@ -25,11 +25,12 @@ export function textField(
   path: string,
   value: string,
   set: (v: string) => void,
-  o: { hint?: string; multiline?: boolean; suggestions?: readonly string[]; type?: string; maxLength?: number } = {},
+  o: { hint?: string; multiline?: boolean; suggestions?: readonly string[]; type?: string; maxLength?: number; placeholder?: string } = {},
 ) {
   const id = nextId();
   const input = o.multiline ? h('textarea', { id, rows: 3 }) : h('input', { id, type: o.type ?? 'text' });
   if (o.maxLength) input.maxLength = o.maxLength;
+  if (o.placeholder) input.placeholder = o.placeholder;
   input.value = value;
   input.addEventListener('input', () => set(input.value));
   const el = field(label, path, input, o.hint, id);

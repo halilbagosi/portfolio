@@ -4,7 +4,9 @@ import { api } from '../api';
 import { h } from '../dom';
 import { colorField, rangeField, textField, toggleField } from '../fields';
 import { processPhoto } from '../photos';
-import type { Store } from '../state';
+import { DEFAULT_SQ } from '../../i18n';
+import { HINT_KEYS } from '../../content/schema';
+import { setSq, type Store } from '../state';
 
 /** Identity, icon, hint copy, colours, section sizes and motion tuning. Edits change the store in place; no re-render needed. */
 export function renderSettings(root: HTMLElement, store: Store) {
@@ -19,6 +21,27 @@ export function renderSettings(root: HTMLElement, store: Store) {
       textField(`${label} — desktop`, `settings.hints.${key}.desktop`, s.hints[key].desktop, (v) => edit((x) => (x.hints[key].desktop = v))),
       textField(`${label} — touch`, `settings.hints.${key}.touch`, s.hints[key].touch, (v) => edit((x) => (x.hints[key].touch = v))),
     );
+
+  const sq = s.sq ?? {};
+  const sqText = (k: 'role' | 'title' | 'description', label: string, multiline = false) =>
+    textField(`${label} — Albanian`, `settings.sq.${k}`, sq[k] ?? '', (v) => edit((x) => setSq(x, k, v)), { multiline, placeholder: s.identity[k] });
+  const sqIdentity = h('div', {}, h('div', { class: 'grid2' }, sqText('role', 'Role'), sqText('title', 'Page title')), sqText('description', 'Description', true));
+  const sqHint = (k: 'begin' | (typeof HINT_KEYS)[number], d: 'desktop' | 'touch') => {
+    const mine = (sq.hints?.[k] as Record<string, string> | undefined)?.[d] ?? '';
+    const fallback = (DEFAULT_SQ.hints[k] as Record<string, string>)[d];
+    const label = k === 'begin' ? 'Wake the lid' : { open: 'Open the box', section: 'Open a section', close: 'Put the lid back', flip: 'Turn it over', back: 'Turn it back' }[k];
+    return textField(`${label} — ${d} — Albanian`, `settings.sq.hints.${k}.${d}`, mine, (v) =>
+      edit((x) => {
+        const top = (x.sq ??= {});
+        const hints = (top.hints ??= {});
+        const pair = ((hints as Record<string, Record<string, string>>)[k] ??= {});
+        if (v.trim()) pair[d] = v;
+        else delete pair[d];
+        if (!Object.keys(pair).length) delete (hints as Record<string, unknown>)[k];
+        if (!Object.keys(hints).length) delete top.hints;
+        if (!Object.keys(top).length) delete x.sq;
+      }), { placeholder: fallback });
+  };
 
   root.replaceChildren(
     h('div', { class: 'editor-head' }, h('h2', {}, 'Settings')),
@@ -48,6 +71,12 @@ export function renderSettings(root: HTMLElement, store: Store) {
     hint('Put the lid back', 'close'),
     hint('Turn it over (About)', 'flip'),
     hint('Turn it back', 'back'),
+
+    h('div', { class: 'section-title' }, 'Albanian (Shqip) — identity and hints'),
+    h('small', { class: 'field-hint' }, 'Shown when a visitor picks SQ. Leave a field empty for the built-in Albanian (hints) or the English (identity). Your name and the site icon are the same in both.'),
+    sqIdentity,
+    h('div', { class: 'grid2' }, ...HINT_KEYS.flatMap((k) => (['desktop', 'touch'] as const).map((d) => sqHint(k, d)))),
+    sqHint('begin', 'touch'),
 
     h('div', { class: 'section-title' }, 'Colours'),
     h(

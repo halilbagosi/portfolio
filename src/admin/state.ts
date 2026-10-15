@@ -78,6 +78,17 @@ export function newProject(existingIds: string[]): Project {
   };
 }
 
+/**
+ * Sets one Albanian text on `owner.sq`. An empty text is removed (and the `sq` object with it when
+ * nothing is left), so site.json only holds what was actually translated.
+ */
+export function setSq<T extends { sq?: Record<string, unknown> }>(owner: T, key: string, value: string) {
+  const sq = (owner.sq ??= {});
+  if (value.trim()) sq[key] = value;
+  else delete sq[key];
+  if (!Object.keys(sq).length) delete owner.sq;
+}
+
 export function moveItem<T>(list: T[], from: number, to: number) {
   const [item] = list.splice(from, 1);
   list.splice(to, 0, item);

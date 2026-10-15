@@ -1,4 +1,5 @@
 import type { About, CardSettings, Social } from '../content/schema';
+import { t as tr } from '../i18n';
 import { CORNER_K, CORNER_N } from './shaders';
 import { drawTracked, FONT } from './textures';
 
@@ -94,7 +95,7 @@ export function contactLinks(about: About, socials: Social[]): { label: string; 
   const mail = `mailto:${about.email}`;
   return [
     { label: about.email, href: mail },
-    ...(about.resume ? [{ label: 'Résumé', href: about.resume }] : []),
+    ...(about.resume ? [{ label: tr('resume'), href: about.resume }] : []),
     ...socials.filter((s) => s.href !== mail).map((s) => ({ label: s.label, href: s.href })),
   ];
 }
@@ -103,12 +104,12 @@ export function contactLinks(about: About, socials: Social[]): { label: string; 
 export function aboutLines(a: About): string[] {
   return [
     a.bio,
-    `${a.years}+ years of experience.`,
-    `Based in ${a.location}${a.workPreference ? ` · ${a.workPreference}` : ''}.`,
+    tr('years', { n: a.years }),
+    `${tr('basedIn', { where: a.location })}${a.workPreference ? ` · ${a.workPreference}` : ''}.`,
     a.availability,
-    `Skills: ${a.skills.join(', ')}.`,
+    `${tr('skills')}: ${a.skills.join(', ')}.`,
     ...a.timeline.map((t) => `${t.role}, ${t.org}, ${t.period}.`),
-    ...a.achievements.map((t) => `Achievement: ${[t.title, t.detail, t.year].filter(Boolean).join(', ')}.`),
+    ...a.achievements.map((t) => `${tr('achievement')}: ${[t.title, t.detail, t.year].filter(Boolean).join(', ')}.`),
   ];
 }
 

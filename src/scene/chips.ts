@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
-import type { Project } from '../config/projects';
+import type { ShownProject as Project } from '../config/projects';
+import { t } from '../i18n';
 import { TOP_Y } from './box';
 import { SIDE_SPLIT, TALL_SPLIT } from './well';
 import { basicVert, sdRoundGLSL } from './shaders';
@@ -178,15 +179,15 @@ export class ChipSet {
     const sheet = mk(
       specSheetTexture(
         {
-          eyebrow: p.kind,
+          eyebrow: p.kindLabel,
           eyebrowColor: kindTint(p.kind),
           title: p.title,
           body: p.purpose,
           rows: [
-            { label: 'Stack', value: p.stack.join(', ') },
-            { label: 'Architecture', value: p.architecture },
-            { label: 'Timeline', value: p.duration, half: true },
-            { label: 'Status', value: p.status, dot: statusTint(p.status), half: true },
+            { label: t('stack'), value: p.stack.join(', ') },
+            { label: t('architecture'), value: p.architecture },
+            { label: t('timeline'), value: p.duration, half: true },
+            { label: t('status'), value: p.statusLabel, dot: statusTint(p.status), half: true },
           ],
         },
         maxW,
@@ -198,7 +199,7 @@ export class ChipSet {
       0.16,
     );
     const groups: Chip[][] = [[sheet]];
-    if (p.links.length) groups.push(p.links.map((l) => mk(labelTexture([`View on ${l.label}  \u2197`], pill(Math.round(23 * ts), 500, 'rgba(245,245,247,0.92)')), '#8E8E93', 0.04, 1, l.href)));
+    if (p.links.length) groups.push(p.links.map((l) => mk(labelTexture([`${t('viewOn', { label: l.label })}  \u2197`], pill(Math.round(23 * ts), 500, 'rgba(245,245,247,0.92)')), '#8E8E93', 0.04, 1, l.href)));
 
     // Wrap each group into rows no wider than maxW; groups get more air than rows within them.
     const gap = 0.08;

@@ -13,6 +13,7 @@ export class Preview {
   private frame = h('iframe', { title: 'Site preview' });
   private stage = h('div', { class: 'preview-stage' }, this.frame);
   private mode: Mode = 'desktop';
+  private lang = 'en';
   private hash = '#open';
   private loaded = false;
   private n = 0;
@@ -33,6 +34,21 @@ export class Preview {
         m,
       ),
     );
+    const langs = ['en', 'sq'].map((l) =>
+      h(
+        'button',
+        {
+          type: 'button',
+          class: l === this.lang ? 'on' : '',
+          onclick: () => {
+            this.lang = l;
+            for (const b of langs) b.classList.toggle('on', b.textContent === l);
+            this.reload();
+          },
+        },
+        l,
+      ),
+    );
     this.el = h(
       'section',
       { class: 'preview' },
@@ -41,6 +57,7 @@ export class Preview {
         { class: 'preview-bar' },
         h('span', {}, 'Preview'),
         h('span', { class: 'spacer' }),
+        h('div', { class: 'seg' }, ...langs),
         h('div', { class: 'seg' }, ...buttons),
         h('button', { class: 'btn small', type: 'button', onclick: () => this.reload() }, 'Reload'),
       ),
@@ -59,7 +76,7 @@ export class Preview {
   reload() {
     // A changing query makes it a real navigation (a hash-only change wouldn't reload).
     this.loaded = true;
-    this.frame.src = `/?preview=${++this.n}${this.hash}`;
+    this.frame.src = `/?preview=${++this.n}&lang=${this.lang}${this.hash}`;
   }
 
   private fit() {

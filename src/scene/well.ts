@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Spring } from '../anim/springs';
-import { settings, type Project } from '../config/projects';
+import { settings, type ShownProject as Project } from '../config/projects';
 import { CARD_DEPTH, TOP_Y, WELL_RADIUS } from './box';
 import type { Rect } from './layout';
 import { sdRoundGLSL } from './shaders';
@@ -192,7 +192,7 @@ export class Well {
     this.stack.group.position.y = TOP_Y - CARD_DEPTH;
     this.group.add(this.stack.group);
 
-    this.kind = this.text(project.kind.toUpperCase(), `600 24px ${FONT}`, kindTint(project.kind), 0.004);
+    this.kind = this.text(project.kindLabel.toUpperCase(), `600 24px ${FONT}`, kindTint(project.kind), 0.004);
     this.title = this.text(project.title, `600 64px ${FONT}`, '#f5f5f7', 0.004);
     this.vTitle = {
       mesh: new THREE.Mesh(unitPlane, sharpenText((this.title.mesh.material as THREE.MeshBasicMaterial).clone())),

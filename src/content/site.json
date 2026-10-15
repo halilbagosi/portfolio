@@ -125,26 +125,48 @@
         {
           "role": "AI Trainer",
           "org": "micro1",
-          "period": "2026–now"
+          "period": "2026 – now",
+          "sq": {
+            "period": "2026 – Aktualisht"
+          }
         },
         {
           "role": "Web Developer",
           "org": "Prime Solutions SH.P.K",
-          "period": "2025–2026"
+          "period": "2025 – 2026",
+          "sq": {
+            "period": "2025 – 2026"
+          }
         }
       ],
       "achievements": [
         {
           "title": "Apple Swift Student Challenge Finalist",
           "detail": "Designed iOS App Playground for Palettes",
-          "year": "2025"
+          "year": "2025",
+          "sq": {
+            "title": "Finalist në Apple Swift Student Challenge ",
+            "detail": "Dizenjova dhe zhvillova App Playground Palettes"
+          }
         },
         {
           "title": "Hackathon Winner",
           "detail": "Designed a system for water flow issues in Tirana",
-          "year": "2025"
+          "year": "2025",
+          "sq": {
+            "title": "Fitues i Hackathon",
+            "detail": "Dizenjova një sistem për problemet e ujit në qytetin e Tiranës"
+          }
         }
       ]
+    },
+    "sq": {
+      "bio": "Developer Mobile dhe Web i specializuar në dizajn dhe UX intuitiv. Duke zhvilluar disa aplikacione për platformat Apple si dhe faqe Web e aplikacione ndër-platforme duke përdorur komponentë të specializuar. I dhënë pas detajeve, perfeksionist dhe i gatshëm të përmirësoj software ekzistues.",
+      "workPreference": "Remote · I gatshëm per shpërngulje",
+      "yearsLabel": "vite përvojë",
+      "location": "Shqipëri",
+      "finePrint": "Designed by {name}. Assembled in the browser.",
+      "availability": "I gatshëm për role të reja"
     }
   },
   "projects": [
@@ -163,7 +185,7 @@
         "Metal"
       ],
       "architecture": "SwiftData + multi-engine previews",
-      "duration": "4 months",
+      "duration": "9 months",
       "status": "In progress",
       "links": [
         {
@@ -180,7 +202,13 @@
         "/shots/snippets-2.jpg",
         "/shots/snippets-3.jpg",
         "/shots/snippets-4.jpg"
-      ]
+      ],
+      "sq": {
+        "purpose": "Aplikacion macOS për të organizuar, kërkuar dhe shikuar live copëza kodi.",
+        "duration": "9 muaj",
+        "caption": "Copëza kodi për macOS",
+        "status": "në zhvillim"
+      }
     },
     {
       "id": "palettes",
@@ -227,7 +255,13 @@
         "/shots/palettes-19.jpg",
         "/shots/palettes-20.jpg"
       ],
-      "featured": true
+      "featured": true,
+      "sq": {
+        "caption": "Paleta ngjyrash për iOS dhe iPadOS",
+        "duration": "6 muaj",
+        "status": "në zhvillim",
+        "purpose": "Gjeneron paleta ngjyrash sipas teorisë së ngjyrave dhe Apple Intelligence lokale, në pajisje."
+      }
     },
     {
       "id": "memorylane",
@@ -244,7 +278,7 @@
         "PostgreSQL"
       ],
       "architecture": "Expo app + NestJS REST API",
-      "duration": "6 weeks",
+      "duration": "14 weeks",
       "status": "Prototype",
       "links": [
         {
@@ -261,7 +295,13 @@
         "/shots/memorylane-2.jpg",
         "/shots/memorylane-3.jpg",
         "/shots/memorylane-4.jpg"
-      ]
+      ],
+      "sq": {
+        "duration": "14 javë",
+        "caption": "Kujdes për memorien për iOS dhe Android",
+        "purpose": "Ndihmon personat me demencë të kujtojnë njerëzit e dashur nëpërmjet quiz të krijuar nga kujdestarët.",
+        "status": "Prototip"
+      }
     },
     {
       "id": "artpage",
@@ -295,7 +335,12 @@
         "/shots/artpage-2.jpg",
         "/shots/artpage-3.jpg",
         "/shots/artpage-4.jpg"
-      ]
+      ],
+      "sq": {
+        "purpose": "Një portofol triptik ku arti, fotografia dhe filmi shfaqen në botën e tyre.",
+        "status": "në zhvillim",
+        "duration": "1 javë"
+      }
     },
     {
       "id": "portfolio",

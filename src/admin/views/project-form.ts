@@ -1,7 +1,7 @@
-import { KINDS, STATUSES, type Project } from '../../content/schema';
+import { KINDS, PROJECT_SQ_KEYS, STATUSES, type Project } from '../../content/schema';
 import { h } from '../dom';
 import { colorsField, selectField, tagsField, textField, toggleField } from '../fields';
-import type { Store } from '../state';
+import { setSq, type Store } from '../state';
 
 /**
  * Editor for one project. Text edits change the store without re-rendering (keeps focus);
@@ -20,6 +20,12 @@ export function renderProjectForm(
     <K extends keyof Project>(k: K) =>
     (v: Project[K]) =>
       store.change((c) => (c.projects[index][k] = v));
+
+  const sqField = (k: (typeof PROJECT_SQ_KEYS)[number], multiline = false) =>
+    textField(`${k[0].toUpperCase()}${k.slice(1)} — Albanian`, path(`sq.${k}`), p.sq?.[k] ?? '', (v) => store.change((c) => setSq(c.projects[index], k, v)), {
+      multiline,
+      placeholder: p[k],
+    });
 
   const heading = h('h2', {}, p.title || 'Untitled');
   const remove = () => {
@@ -125,6 +131,15 @@ export function renderProjectForm(
       set('glow')(v);
       cb.refreshList();
     }),
+
+    h('div', { class: 'section-title' }, 'Albanian (Shqip)'),
+    h('small', { class: 'field-hint' }, 'Shown when a visitor picks SQ. Leave a field empty to show the English.'),
+    h(
+      'div',
+      { class: 'grid2' },
+      ...PROJECT_SQ_KEYS.filter((k) => k !== 'purpose').map((k) => sqField(k)),
+    ),
+    sqField('purpose', true),
 
     h('div', { class: 'section-title' }, 'Links'),
     links,

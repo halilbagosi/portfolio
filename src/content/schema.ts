@@ -29,6 +29,10 @@ export interface ProjectLink {
   href: string;
 }
 
+/** The Albanian wording of a project's text. Anything left empty falls back to the English. */
+export type ProjectSq = Partial<Record<(typeof PROJECT_SQ_KEYS)[number], string>>;
+export const PROJECT_SQ_KEYS = ['title', 'caption', 'purpose', 'architecture', 'duration', 'status'] as const;
+
 export interface Project {
   /** Stable slug: names the project's photo files and identifies it in the dashboard. */
   id: string;
@@ -50,6 +54,8 @@ export interface Project {
   glow: [string, string];
   /** Interface screenshots, shown as a stack inside the section (served from /public). */
   images: string[];
+  /** Albanian wording (optional). */
+  sq?: ProjectSq;
 }
 
 export interface HintPair {
@@ -69,6 +75,8 @@ export interface TimelineEntry {
   role: string;
   org: string;
   period: string;
+  /** Albanian wording (optional). */
+  sq?: Partial<Record<'role' | 'org' | 'period', string>>;
 }
 
 /** Something to be proud of: a title, and optionally a line of detail and when. */
@@ -78,6 +86,8 @@ export interface Achievement {
   detail: string;
   /** e.g. "2025" ('' to leave out). */
   year: string;
+  /** Albanian wording (optional). */
+  sq?: Partial<Record<'title' | 'detail', string>>;
 }
 
 /** The About card on the box's underside: what a recruiter wants to know. */
@@ -195,6 +205,18 @@ export interface LookSettings {
 export const LOOK_COLOURS = ['lid', 'engraving', 'lidEdge', 'walls', 'plate', 'background', 'laser'] as const;
 export const MAX_GLOW = 2;
 
+export const HINT_KEYS = ['open', 'section', 'close', 'flip', 'back'] as const;
+export type HintKey = (typeof HINT_KEYS)[number];
+export const SETTINGS_SQ_TEXT = [
+  'role', 'title', 'description', 'bio', 'location', 'workPreference', 'availability', 'yearsLabel', 'finePrint',
+] as const;
+
+/** The Albanian wording of the site's own text. Anything left empty falls back to a built-in Albanian default, then to the English. */
+export type SettingsSq = Partial<Record<(typeof SETTINGS_SQ_TEXT)[number], string>> & {
+  headings?: Partial<Record<CardHeading, string>>;
+  hints?: { [K in HintKey]?: Partial<HintPair> } & { begin?: { touch?: string } };
+};
+
 export interface Settings {
   identity: { name: string; role: string; title: string; description: string };
   icon: SiteIcon;
@@ -205,6 +227,8 @@ export interface Settings {
   card: CardSettings;
   socials: Social[];
   about: About;
+  /** Albanian wording (optional). */
+  sq?: SettingsSq;
 }
 
 export interface SiteContent {
@@ -220,7 +244,7 @@ export interface Issue {
 }
 
 /** The projects the site shows, in its order: visible ones, the featured one first (the big tile). */
-export function siteOrder(projects: Project[]): Project[] {
+export function siteOrder<T extends Project>(projects: T[]): T[] {
   const shown = projects.filter((p) => p.visible);
   const lead = shown.findIndex((p) => p.featured);
   if (lead > 0) shown.unshift(...shown.splice(lead, 1));
@@ -310,6 +334,29 @@ function validateSettings(s: unknown, issues: Issue[]) {
 
   validateSocials(socials, issues);
   validateAbout(about, issues);
+  validateSettingsSq(s.sq, issues);
+}
+
+/** Optional Albanian text: an object whose listed keys, where present, are strings. */
+function checkSq(v: unknown, keys: readonly string[], path: string, issues: Issue[], project?: string) {
+  if (v === undefined) return;
+  if (!isObj(v)) {
+    issues.push({ path, message: 'The Albanian text is malformed.', project });
+    return;
+  }
+  for (const k of keys)
+    if (v[k] !== undefined && typeof v[k] !== 'string') issues.push({ path: `${path}.${k}`, message: 'Albanian text must be text.', project });
+}
+
+function validateSettingsSq(sq: unknown, issues: Issue[]) {
+  const at = 'settings.sq';
+  checkSq(sq, SETTINGS_SQ_TEXT, at, issues);
+  if (!isObj(sq)) return;
+  checkSq(sq.headings, CARD_HEADINGS, `${at}.headings`, issues);
+  if (sq.hints === undefined) return;
+  if (!isObj(sq.hints)) return void issues.push({ path: `${at}.hints`, message: 'The Albanian text is malformed.' });
+  for (const k of HINT_KEYS) checkSq(sq.hints[k], ['desktop', 'touch'], `${at}.hints.${k}`, issues);
+  checkSq(sq.hints.begin, ['touch'], `${at}.hints.begin`, issues);
 }
 
 function validateCard(card: unknown, issues: Issue[]) {
@@ -373,6 +420,7 @@ function validateAbout(a: unknown, issues: Issue[]) {
     a.timeline.forEach((t: unknown, i) => {
       for (const k of ['role', 'org', 'period'])
         if (!isObj(t) || !filled(t[k])) issues.push({ path: at(`timeline.${i}.${k}`), message: `Timeline ${i + 1}: ${k} is required.` });
+      if (isObj(t)) checkSq(t.sq, ['role', 'org', 'period'], at(`timeline.${i}.sq`), issues);
     });
   }
   if (!Array.isArray(a.achievements)) issues.push({ path: at('achievements'), message: 'Achievements must be a list.' });
@@ -384,6 +432,7 @@ function validateAbout(a: unknown, issues: Issue[]) {
       for (const k of ['detail', 'year'])
         if (isObj(t) && typeof t[k] !== 'string')
           issues.push({ path: at(`achievements.${i}.${k}`), message: `Achievement ${i + 1}: ${k} must be text (it may be empty).` });
+      if (isObj(t)) checkSq(t.sq, ['title', 'detail'], at(`achievements.${i}.sq`), issues);
     });
   }
 }
@@ -428,6 +477,7 @@ function validateProjects(list: unknown, issues: Issue[]) {
     if (!Array.isArray(p.images) || !p.images.every((s) => typeof s === 'string' && SHOT_PATH.test(s)))
       add('images', 'Photos must be /shots/<file> paths.');
     else if (p.visible === true && p.images.length === 0) add('images', 'A visible project needs at least one photo.');
+    checkSq(p.sq, PROJECT_SQ_KEYS, at('sq'), issues, project);
     if (p.visible === true) visible++;
   });
   if (visible < 1) issues.push({ path: 'projects', message: 'At least one project must be visible.' });
