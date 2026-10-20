@@ -1,4 +1,4 @@
-import type { About, CardSettings, Social } from '../content/schema';
+import { isHidden, type About, type CardSettings, type Social } from '../content/schema';
 import { t as tr } from '../i18n';
 import { CORNER_K, CORNER_N } from './shaders';
 import { drawTracked, FONT } from './textures';
@@ -94,7 +94,7 @@ export function initialsOf(name: string) {
 export function contactLinks(about: About, socials: Social[]): { label: string; href: string }[] {
   const mail = `mailto:${about.email}`;
   return [
-    { label: about.email, href: mail },
+    ...(about.email ? [{ label: about.email, href: mail }] : []),
     ...(about.resume ? [{ label: tr('resume'), href: about.resume }] : []),
     ...socials.filter((s) => s.href !== mail).map((s) => ({ label: s.label, href: s.href })),
   ];
@@ -102,15 +102,16 @@ export function contactLinks(about: About, socials: Social[]): { label: string; 
 
 /** The About as plain sentences, for screen readers and the no-WebGL page. */
 export function aboutLines(a: About): string[] {
+  // Hidden fields arrive empty (see withoutHidden): their lines are left out.
   return [
     a.bio,
-    tr('years', { n: a.years }),
-    `${tr('basedIn', { where: a.location })}${a.workPreference ? ` · ${a.workPreference}` : ''}.`,
+    isHidden(a, 'years') ? '' : tr('years', { n: a.years }),
+    a.location ? `${tr('basedIn', { where: a.location })}${a.workPreference ? ` · ${a.workPreference}` : ''}.` : a.workPreference && `${a.workPreference}.`,
     a.availability,
-    `${tr('skills')}: ${a.skills.join(', ')}.`,
-    ...a.timeline.map((t) => `${t.role}, ${t.org}, ${t.period}.`),
+    a.skills.length ? `${tr('skills')}: ${a.skills.join(', ')}.` : '',
+    ...a.timeline.map((t) => `${[t.role, t.org, t.period].filter(Boolean).join(', ')}.`),
     ...a.achievements.map((t) => `${tr('achievement')}: ${[t.title, t.detail, t.year].filter(Boolean).join(', ')}.`),
-  ];
+  ].filter(Boolean);
 }
 
 /** Text cut to fit a width, with an ellipsis. Cuts by code point, so an emoji is never split. */
@@ -238,15 +239,16 @@ export function layoutAbout(
     p.ops.push({ kind: 'photo', cx: x + s / 2, cy: y + s / 2, r: s / 2 });
     const tx = x + s + 24;
     const tw = colW - s - 24;
-    text(p, tx, y + 44, fit(input.name, f(600, 40), tw, measure), f(600, 40), WHITE);
-    text(p, tx, y + 76, fit(input.role, f(400, 21), tw, measure), f(400, 21), GREY);
+    // Without a role (hidden), the name sits centred beside the portrait.
+    text(p, tx, y + (input.role ? 44 : 58), fit(input.name, f(600, 40), tw, measure), f(600, 40), WHITE);
+    if (input.role) text(p, tx, y + 76, fit(input.role, f(400, 21), tw, measure), f(400, 21), GREY);
     const fact = f(400, 17);
     const facts: Run[] = [
       { t: a.availability, font: f(500, 17), color: a.available ? GREEN : GREY },
-      { t: `${a.years}+ ${words.yearsLabel}`, font: fact, color: GREY },
+      { t: isHidden(a, 'years') ? '' : `${a.years}+ ${words.yearsLabel}`, font: fact, color: GREY },
       { t: a.location, font: fact, color: GREY },
-      ...(a.workPreference ? [{ t: a.workPreference, font: fact, color: GREY }] : []),
-    ];
+      { t: a.workPreference, font: fact, color: GREY },
+    ].filter((r) => r.t);
     return flow(p, x, y + s + 24, colW, facts, 17, 26, '  ·  ');
   };
 
@@ -286,19 +288,23 @@ export function layoutAbout(
   const contacts = contactLinks(a, input.socials);
   const hd = words.headings;
   const sections: [string, Body][] = [
-    [hd.about, (p, x, y, cw) => paragraph(p, x, y, cw, a.bio, 8)],
+    ...(a.bio ? [[hd.about, (p, x, y, cw) => paragraph(p, x, y, cw, a.bio, 8)] as [string, Body]] : []),
     ...(a.timeline.length
       ? [[hd.experience, (p, x, y, cw) => list(p, x, y, cw, a.timeline.map((t) => ({ title: t.role, sub: t.org, meta: t.period })))] as [string, Body]]
       : []),
     ...(a.achievements.length
       ? [[hd.achievements, (p, x, y, cw) => list(p, x, y, cw, a.achievements.map((t) => ({ title: t.title, sub: t.detail, meta: t.year })))] as [string, Body]]
       : []),
-    [hd.skills, (p, x, y, cw) => paragraph(p, x, y, cw, a.skills.join(', '), 5)],
-    [
-      hd.contact,
-      (p, x, y, cw) =>
-        flow(p, x, y, cw, contacts.map((l) => ({ t: `${l.label} ›`, font: f(500, 18), color: LINK, href: l.href })), 18, TAP_H, '', 32),
-    ],
+    ...(a.skills.length ? [[hd.skills, (p, x, y, cw) => paragraph(p, x, y, cw, a.skills.join(', '), 5)] as [string, Body]] : []),
+    ...(contacts.length
+      ? [
+          [
+            hd.contact,
+            (p, x, y, cw) =>
+              flow(p, x, y, cw, contacts.map((l) => ({ t: `${l.label} ›`, font: f(500, 18), color: LINK, href: l.href })), 18, TAP_H, '', 32),
+          ] as [string, Body],
+        ]
+      : []),
   ];
 
   /** A section: a hairline, its heading on the left and its body on the right. Returns the y below. */

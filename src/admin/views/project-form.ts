@@ -1,7 +1,7 @@
-import { KINDS, PROJECT_SQ_KEYS, STATUSES, type Project } from '../../content/schema';
+import { isHidden, KINDS, PROJECT_SQ_KEYS, STATUSES, type Hideable, type Project } from '../../content/schema';
 import { h } from '../dom';
-import { colorsField, selectField, tagsField, textField, toggleField } from '../fields';
-import { setSq, type Store } from '../state';
+import { colorsField, hideable, selectField, tagsField, textField, toggleField } from '../fields';
+import { setHidden, setSq, type Store } from '../state';
 
 /**
  * Editor for one project. Text edits change the store without re-rendering (keeps focus);
@@ -26,6 +26,9 @@ export function renderProjectForm(
       multiline,
       placeholder: p[k],
     });
+
+  /** The eye that hides a field of this project from the site. */
+  const hide = (el: HTMLElement, k: Hideable<'project'>) => hideable(el, isHidden(p, k), (on) => store.change((c) => setHidden(c.projects[index], k, on)));
 
   const heading = h('h2', {}, p.title || 'Untitled');
   const remove = () => {
@@ -104,6 +107,7 @@ export function renderProjectForm(
     ),
 
     h('div', { class: 'section-title' }, 'Basics'),
+    h('small', { class: 'field-hint' }, 'The eye beside a field hides it from the site; its text is kept, to bring back.'),
     h(
       'div',
       { class: 'grid2' },
@@ -113,19 +117,19 @@ export function renderProjectForm(
         cb.refreshList();
       }),
       textField('ID', path('id'), p.id, set('id'), { hint: 'Names its photo files: a–z, 0–9 and dashes.' }),
-      selectField('Kind', path('kind'), p.kind, KINDS, (v) => set('kind')(v as Project['kind'])),
-      textField('Status', path('status'), p.status, set('status'), { suggestions: STATUSES, hint: 'Shipped, In progress and Prototype get a colour.' }),
+      hide(selectField('Kind', path('kind'), p.kind, KINDS, (v) => set('kind')(v as Project['kind'])), 'kind'),
+      hide(textField('Status', path('status'), p.status, set('status'), { suggestions: STATUSES, hint: 'Shipped, In progress and Prototype get a colour.' }), 'status'),
     ),
-    textField('Caption', path('caption'), p.caption, set('caption'), { hint: 'The short line on the closed section.' }),
-    textField('Purpose', path('purpose'), p.purpose, set('purpose'), { multiline: true, hint: 'One or two sentences, shown when the section is open.' }),
+    hide(textField('Caption', path('caption'), p.caption, set('caption'), { hint: 'The short line on the closed section.' }), 'caption'),
+    hide(textField('Purpose', path('purpose'), p.purpose, set('purpose'), { multiline: true, hint: 'One or two sentences, shown when the section is open.' }), 'purpose'),
 
     h('div', { class: 'section-title' }, 'Details'),
-    tagsField('Stack', path('stack'), p.stack, set('stack')),
+    hide(tagsField('Stack', path('stack'), p.stack, set('stack')), 'stack'),
     h(
       'div',
       { class: 'grid2' },
-      textField('Architecture', path('architecture'), p.architecture, set('architecture')),
-      textField('Built in', path('duration'), p.duration, set('duration'), { hint: 'e.g. 4 months' }),
+      hide(textField('Architecture', path('architecture'), p.architecture, set('architecture')), 'architecture'),
+      hide(textField('Built in', path('duration'), p.duration, set('duration'), { hint: 'e.g. 4 months' }), 'duration'),
     ),
     colorsField('Glow', path('glow'), p.glow, (v) => {
       set('glow')(v);
@@ -142,7 +146,7 @@ export function renderProjectForm(
     sqField('purpose', true),
 
     h('div', { class: 'section-title' }, 'Links'),
-    links,
+    hide(h('div', { class: 'field', 'data-path': path('links') }, h('span', { class: 'field-label' }, 'Buttons under the facts'), links), 'links'),
 
     h('div', { class: 'section-title' }, 'Photos'),
     photos(index),

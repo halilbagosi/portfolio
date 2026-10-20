@@ -242,7 +242,8 @@ export class Well {
 
   private label(line: string, font: string, color: string) {
     const size = parseInt(font.split(' ')[1]);
-    return labelTexture([line], { font, color, padX: 0, padY: 4, lineHeight: size * 1.25 });
+    // A hidden kind or caption arrives empty: a space keeps the texture a real size.
+    return labelTexture([line || ' '], { font, color, padX: 0, padY: 4, lineHeight: size * 1.25 });
   }
 
   private text(line: string, font: string, color: string, lift: number): Label {
