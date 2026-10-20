@@ -24,6 +24,21 @@ const HREF = /^https?:\/\/\S+$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAILTO = /^mailto:[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Fields that can be hidden from the site, per owner. A hidden field keeps its text (so it can be
+ * brought back) but the site shows it as empty; a required field may then be left empty too.
+ */
+export const HIDEABLE = {
+  identity: ['role'],
+  about: ['photo', 'bio', 'years', 'location', 'workPreference', 'availability', 'skills', 'email', 'resume'],
+  timeline: ['org', 'period'],
+  achievement: ['detail', 'year'],
+  project: ['kind', 'caption', 'purpose', 'stack', 'architecture', 'duration', 'status', 'links'],
+} as const;
+export type Hideable<K extends keyof typeof HIDEABLE> = (typeof HIDEABLE)[K][number];
+/** Whether an owner's field is hidden from the site. */
+export const isHidden = (o: { hidden?: unknown }, k: string) => Array.isArray(o.hidden) && o.hidden.includes(k);
+
 export interface ProjectLink {
   label: string;
   href: string;
@@ -56,6 +71,8 @@ export interface Project {
   images: string[];
   /** Albanian wording (optional). */
   sq?: ProjectSq;
+  /** Fields hidden from the site (optional). */
+  hidden?: Hideable<'project'>[];
 }
 
 export interface HintPair {
@@ -77,6 +94,8 @@ export interface TimelineEntry {
   period: string;
   /** Albanian wording (optional). */
   sq?: Partial<Record<'role' | 'org' | 'period', string>>;
+  /** Fields hidden from the site (optional). */
+  hidden?: Hideable<'timeline'>[];
 }
 
 /** Something to be proud of: a title, and optionally a line of detail and when. */
@@ -88,6 +107,8 @@ export interface Achievement {
   year: string;
   /** Albanian wording (optional). */
   sq?: Partial<Record<'title' | 'detail', string>>;
+  /** Fields hidden from the site (optional). */
+  hidden?: Hideable<'achievement'>[];
 }
 
 /** The About card on the box's underside: what a recruiter wants to know. */
@@ -109,6 +130,8 @@ export interface About {
   resume: string;
   timeline: TimelineEntry[];
   achievements: Achievement[];
+  /** Fields hidden from the site (optional). */
+  hidden?: Hideable<'about'>[];
 }
 
 /** The browser-tab icon: a few letters on a rounded square, or an uploaded image instead. */
@@ -218,7 +241,7 @@ export type SettingsSq = Partial<Record<(typeof SETTINGS_SQ_TEXT)[number], strin
 };
 
 export interface Settings {
-  identity: { name: string; role: string; title: string; description: string };
+  identity: { name: string; role: string; title: string; description: string; hidden?: Hideable<'identity'>[] };
   icon: SiteIcon;
   hints: { open: HintPair; begin: { touch: string }; section: HintPair; close: HintPair; flip: HintPair; back: HintPair };
   motion: { photoDwell: number; flipSpeed: number; gyroDegrees: number; parallax: number; lidKnock: boolean; topDownOnOpen: boolean };
@@ -272,9 +295,11 @@ function validateSettings(s: unknown, issues: Issue[]) {
   }
   const { identity, hints, motion, socials, about, icon, layout, card, look } = s;
   if (!isObj(identity)) issues.push({ path: 'settings.identity', message: 'Identity is missing.' });
-  else
+  else {
     for (const k of ['name', 'role', 'title', 'description'])
-      if (!filled(identity[k])) issues.push({ path: `settings.identity.${k}`, message: `${k} is required.` });
+      if (!filled(identity[k]) && !isHidden(identity, k)) issues.push({ path: `settings.identity.${k}`, message: `${k} is required.` });
+    checkHidden(identity, HIDEABLE.identity, 'settings.identity', issues);
+  }
 
   if (!isObj(hints)) issues.push({ path: 'settings.hints', message: 'Hints are missing.' });
   else {
@@ -335,6 +360,14 @@ function validateSettings(s: unknown, issues: Issue[]) {
   validateSocials(socials, issues);
   validateAbout(about, issues);
   validateSettingsSq(s.sq, issues);
+}
+
+/** Optional list of hidden fields: each one a field that may be hidden. */
+function checkHidden(owner: Record<string, unknown>, keys: readonly string[], path: string, issues: Issue[], project?: string) {
+  const v = owner.hidden;
+  if (v === undefined) return;
+  if (!Array.isArray(v) || !v.every((k) => keys.includes(k)))
+    issues.push({ path: `${path}.hidden`, message: `Only these fields can be hidden: ${keys.join(', ')}.`, project });
 }
 
 /** Optional Albanian text: an object whose listed keys, where present, are strings. */
@@ -401,26 +434,29 @@ function validateAbout(a: unknown, issues: Issue[]) {
     issues.push({ path: 'settings.about', message: 'About is missing.' });
     return;
   }
-  for (const k of ['bio', 'location', 'availability']) if (!filled(a[k])) issues.push({ path: at(k), message: `${k} is required.` });
+  checkHidden(a, HIDEABLE.about, 'settings.about', issues);
+  const hid = (k: string) => isHidden(a, k);
+  for (const k of ['bio', 'location', 'availability']) if (!filled(a[k]) && !hid(k)) issues.push({ path: at(k), message: `${k} is required.` });
   if (typeof a.bio === 'string' && a.bio.length > MAX_BIO) issues.push({ path: at('bio'), message: `Keep the bio under ${MAX_BIO} characters.` });
   if (typeof a.workPreference !== 'string') issues.push({ path: at('workPreference'), message: 'Work preference must be text (it may be empty).' });
   if (typeof a.years !== 'number' || !Number.isInteger(a.years) || a.years < 0 || a.years > MAX_YEARS)
     issues.push({ path: at('years'), message: `Must be a whole number between 0 and ${MAX_YEARS}.` });
   if (typeof a.available !== 'boolean') issues.push({ path: at('available'), message: 'Must be on or off.' });
-  if (typeof a.email !== 'string' || !EMAIL.test(a.email)) issues.push({ path: at('email'), message: 'Needs a valid email address.' });
+  if (typeof a.email !== 'string' || !(EMAIL.test(a.email) || (hid('email') && a.email === ''))) issues.push({ path: at('email'), message: 'Needs a valid email address.' });
   if (a.resume !== '' && (typeof a.resume !== 'string' || !HREF.test(a.resume)))
     issues.push({ path: at('resume'), message: 'Needs an http(s):// address, or leave it empty.' });
   if (a.photo !== '' && (typeof a.photo !== 'string' || !SHOT_PATH.test(a.photo)))
     issues.push({ path: at('photo'), message: 'The portrait must be a /shots/<file> path, or empty.' });
-  if (!Array.isArray(a.skills) || a.skills.length < 1 || a.skills.length > MAX_SKILLS || !a.skills.every(filled))
+  if (!Array.isArray(a.skills) || (a.skills.length < 1 && !hid('skills')) || a.skills.length > MAX_SKILLS || !a.skills.every(filled))
     issues.push({ path: at('skills'), message: `List 1 to ${MAX_SKILLS} skills, none empty.` });
   if (!Array.isArray(a.timeline)) issues.push({ path: at('timeline'), message: 'Timeline must be a list.' });
   else {
     if (a.timeline.length > MAX_TIMELINE) issues.push({ path: at('timeline'), message: `At most ${MAX_TIMELINE} timeline entries.` });
     a.timeline.forEach((t: unknown, i) => {
       for (const k of ['role', 'org', 'period'])
-        if (!isObj(t) || !filled(t[k])) issues.push({ path: at(`timeline.${i}.${k}`), message: `Timeline ${i + 1}: ${k} is required.` });
+        if (!isObj(t) || (!filled(t[k]) && !isHidden(t, k))) issues.push({ path: at(`timeline.${i}.${k}`), message: `Timeline ${i + 1}: ${k} is required.` });
       if (isObj(t)) checkSq(t.sq, ['role', 'org', 'period'], at(`timeline.${i}.sq`), issues);
+      if (isObj(t)) checkHidden(t, HIDEABLE.timeline, at(`timeline.${i}`), issues);
     });
   }
   if (!Array.isArray(a.achievements)) issues.push({ path: at('achievements'), message: 'Achievements must be a list.' });
@@ -433,6 +469,7 @@ function validateAbout(a: unknown, issues: Issue[]) {
         if (isObj(t) && typeof t[k] !== 'string')
           issues.push({ path: at(`achievements.${i}.${k}`), message: `Achievement ${i + 1}: ${k} must be text (it may be empty).` });
       if (isObj(t)) checkSq(t.sq, ['title', 'detail'], at(`achievements.${i}.sq`), issues);
+      if (isObj(t)) checkHidden(t, HIDEABLE.achievement, at(`achievements.${i}`), issues);
     });
   }
 }
@@ -463,7 +500,8 @@ function validateProjects(list: unknown, issues: Issue[]) {
       if (featured) add('featured', 'Only one project can be featured.');
       featured = true;
     }
-    for (const k of ['title', 'caption', 'purpose', 'architecture', 'duration', 'status']) if (!filled(p[k])) add(k, `${k} is required.`);
+    for (const k of ['title', 'caption', 'purpose', 'architecture', 'duration', 'status']) if (!filled(p[k]) && !isHidden(p, k)) add(k, `${k} is required.`);
+    checkHidden(p, HIDEABLE.project, `projects.${i}`, issues, project);
     if (!(KINDS as readonly unknown[]).includes(p.kind)) add('kind', `kind must be one of ${KINDS.join(', ')}.`);
     if (!Array.isArray(p.stack) || !p.stack.every(filled)) add('stack', 'Stack entries cannot be empty.');
     if (!Array.isArray(p.glow) || p.glow.length !== 2 || !p.glow.every((g) => typeof g === 'string' && HEX.test(g)))

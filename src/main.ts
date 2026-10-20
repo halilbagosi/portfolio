@@ -50,7 +50,7 @@ function showFallback() {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = p.links[0]?.href ?? '#';
-    a.textContent = `${p.title}: ${p.purpose}`;
+    a.textContent = p.purpose ? `${p.title}: ${p.purpose}` : p.title;
     li.appendChild(a);
     list.appendChild(li);
   }
@@ -434,7 +434,7 @@ const a11yButtons = projects.slice(0, n).map((p, i) => {
 /** The accessible layer's words, in the language shown (again after a switch). */
 function labelA11y() {
   const { identity, about, socials } = settings;
-  openBtn.textContent = t('open', { name: identity.name, role: identity.role });
+  openBtn.textContent = t('open', { who: [identity.name, identity.role].filter(Boolean).join(', ') });
   aboutBtn.textContent = t('turnOver', { name: identity.name });
   aboutSection.setAttribute('aria-label', t('aboutOf', { name: identity.name }));
   aboutText.replaceChildren(...aboutLines(about).map((line) => Object.assign(document.createElement('p'), { textContent: line })));
@@ -443,7 +443,9 @@ function labelA11y() {
   for (const l of contactLinks(about, socials)) if (!listed.has(l.href)) aboutText.appendChild(a11yLink(l.label, l.href));
   backBtn.textContent = t('turnBack');
   projects.slice(0, n).forEach((p, i) => {
-    a11yButtons[i].textContent = `${p.title}, ${p.kindLabel}: ${p.purpose} ${t('builtWith')} ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.statusLabel}.`;
+    // Hidden fields arrive empty: they are left out of the sentence.
+    const facts = [p.purpose, p.stack.length ? `${t('builtWith')} ${p.stack.join(', ')}.` : '', ...[p.architecture, p.duration, p.statusLabel].map((f) => f && `${f}.`)];
+    a11yButtons[i].textContent = `${[p.title, p.kindLabel].filter(Boolean).join(', ')}: ${facts.filter(Boolean).join(' ')}`;
     p.links.forEach((l, j) => (a11yLinks[i][j].textContent = t('projectOn', { title: p.title, label: l.label })));
   });
 }

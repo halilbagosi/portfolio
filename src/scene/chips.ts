@@ -187,12 +187,13 @@ export class ChipSet {
           eyebrowColor: kindTint(p.kind),
           title: p.title,
           body: p.purpose,
+          // Hidden fields arrive empty: their rows are left out.
           rows: [
             { label: t('stack'), value: p.stack.join(', ') },
             { label: t('architecture'), value: p.architecture },
             { label: t('timeline'), value: p.duration, half: true },
             { label: t('status'), value: p.statusLabel, dot: statusTint(p.status), half: true },
-          ],
+          ].filter((r) => r.value),
         },
         maxW,
         ts,

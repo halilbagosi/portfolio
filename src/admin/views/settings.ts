@@ -2,11 +2,11 @@ import type { LayoutSettings, LookSettings, Settings } from '../../content/schem
 import { iconSvg, LAYOUT_RANGES, MAX_GLOW, MAX_ICON_RADIUS, MAX_ICON_TEXT } from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
-import { colorField, rangeField, textField, toggleField } from '../fields';
+import { colorField, hideable, rangeField, textField, toggleField } from '../fields';
 import { processPhoto } from '../photos';
 import { DEFAULT_SQ } from '../../i18n';
-import { HINT_KEYS } from '../../content/schema';
-import { setSq, type Store } from '../state';
+import { HINT_KEYS, isHidden } from '../../content/schema';
+import { setHidden, setSq, type Store } from '../state';
 
 /** Identity, icon, hint copy, colours, section sizes and motion tuning. Edits change the store in place; no re-render needed. */
 export function renderSettings(root: HTMLElement, store: Store) {
@@ -51,7 +51,9 @@ export function renderSettings(root: HTMLElement, store: Store) {
     h(
       'div',
       { class: 'grid2' },
-      textField('Role', 'settings.identity.role', s.identity.role, (v) => edit((x) => (x.identity.role = v)), { hint: 'Engraved under your name.' }),
+      hideable(textField('Role', 'settings.identity.role', s.identity.role, (v) => edit((x) => (x.identity.role = v)), { hint: 'Engraved under your name.' }), isHidden(s.identity, 'role'), (on) =>
+        edit((x) => setHidden(x.identity, 'role', on)),
+      ),
       sqText('role', 'Role', { hint: 'Engraved instead when a visitor picks SQ. Empty: the English role.' }),
     ),
     textField('Page title', 'settings.identity.title', s.identity.title, (v) => edit((x) => (x.identity.title = v)), { hint: 'Browser tab and search results.' }),

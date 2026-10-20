@@ -39,7 +39,7 @@ export function setLang(next: Lang) {
 /** The site's fixed words (labels the content doesn't carry). */
 const UI = {
   en: {
-    open: 'Open the box: {name}, {role}',
+    open: 'Open the box: {who}',
     turnOver: 'Turn the box over: About {name}',
     aboutOf: 'About {name}',
     turnBack: 'Turn the box back',
@@ -65,7 +65,7 @@ const UI = {
     switcher: 'Language',
   },
   sq: {
-    open: 'Hap kutinë: {name}, {role}',
+    open: 'Hap kutinë: {who}',
     turnOver: 'Ktheje kutinë përmbys: Rreth {name}',
     aboutOf: 'Rreth {name}',
     turnBack: 'Ktheje kutinë mbrapsht',
