@@ -25,7 +25,8 @@ const a11y = document.getElementById('a11y')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touch = matchMedia('(pointer: coarse)').matches;
 
-// Language: the site is drawn once from the content, so the switcher stores the choice and reloads.
+// Language: the site is drawn once from the content, so the switcher stores the choice and reloads
+// (back where the visitor was: see keepView).
 document.documentElement.lang = lang;
 document.title = settings.identity.title;
 document.querySelector('meta[name="description"]')?.setAttribute('content', settings.identity.description);
@@ -36,7 +37,11 @@ for (const l of LANGS) {
   b.title = LANG_NAMES[l];
   b.setAttribute('aria-label', LANG_NAMES[l]);
   b.setAttribute('aria-pressed', String(l === lang));
-  b.addEventListener('click', () => l !== lang && setLang(l));
+  b.addEventListener('click', () => {
+    if (l === lang) return;
+    keepView();
+    setLang(l);
+  });
   switcher.appendChild(b);
 }
 
@@ -208,34 +213,41 @@ function prewarm() {
   chipSets.forEach((c, k) => (c.group.visible = vis[k]));
 }
 // The box's shape is fixed per load (wide on landscape screens, tall on portrait ones). When the
-// viewport flips (a phone rotates), reload into the other shape, keeping the lid off if it was.
-const REOPEN = 'box-open';
+// viewport flips (a phone rotates), reload into the other shape, back where the visitor was.
 let flipTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(flipTimer);
   flipTimer = window.setTimeout(() => {
     if (isPortraitViewport() === PORTRAIT) return;
-    try {
-      if (lid.state !== 'closed') sessionStorage.setItem(REOPEN, '1');
-    } catch {
-      /* storage blocked: it just starts closed */
-    }
+    keepView();
     location.reload();
   }, 250);
 });
-let reopen = false;
+/** Where the visitor was, carried over a reload (a rotation or a new language): lid off or on, the open section, the face up. */
+type KeptView = { open: boolean; focus: number; face: Face };
+const KEPT = 'box-view';
+function keepView() {
+  const open = lid.state === 'leaving' || lid.state === 'gone';
+  const view: KeptView = { open, focus: open ? focused : -1, face: orbit.face };
+  try {
+    sessionStorage.setItem(KEPT, JSON.stringify(view));
+  } catch {
+    /* storage blocked: it just starts afresh */
+  }
+}
+let kept: KeptView | null = null;
 try {
-  reopen = sessionStorage.getItem(REOPEN) === '1';
-  sessionStorage.removeItem(REOPEN);
+  kept = JSON.parse(sessionStorage.getItem(KEPT) ?? 'null') as KeptView | null;
+  sessionStorage.removeItem(KEPT);
 } catch {
   /* ignore */
 }
-if (reopen) {
+if (kept?.open) {
   lid.skip();
   reveal.snap(1);
 }
-// First load: a laser engraves the lid. Not on a reopen, under reduced motion, or for dev hashes.
-const laser = reduced || reopen || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
+// First load: a laser engraves the lid. Not after a reload that keeps the view, under reduced motion, or for dev hashes.
+const laser = reduced || kept || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
 
 const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
 // After the lead screenshots have loaded: a phone shot's aspect picks how its section opens (see Well.focusSide).
@@ -555,15 +567,10 @@ const LIGHT_H = 4.2;
 const LIGHT_REACH = 1.15;
 const lightAim = new THREE.Vector3();
 const lightPos = new THREE.Vector3();
-// Dev convenience: /#open starts with the lid already off.
-if (import.meta.env.DEV && location.hash.startsWith('#open')) {
-  lid.skip();
-  reveal.snap(1);
-  const k = Number(location.hash.slice(6));
-  // Once the lead shots are in, so the section opens in the layout their aspect picks.
-  if (location.hash.length > 5 && k >= 0 && k < n) void leadsLoaded.then(() => {
-    setFocus(k); // e.g. #open-1 focuses project 1
-    // Fast-forward every spring to rest so captures show the settled state.
+/** Opens section k at once: every spring fast-forwarded to rest (once the lead shots are in, so it opens in the layout their aspect picks). */
+function settleOpen(k: number) {
+  void leadsLoaded.then(() => {
+    setFocus(k);
     for (let i = 0; i < 3; i++) {
       stepLayout(3);
       stage.update(3);
@@ -573,13 +580,26 @@ if (import.meta.env.DEV && location.hash.startsWith('#open')) {
     }
   });
 }
-
-// Dev convenience: /#about starts with the box on its back, showing the About card.
-if (import.meta.env.DEV && location.hash === '#about') {
+/** Straight onto its back, the About card framed. */
+function settleOnBack() {
   orbit.snap('bottom');
   shownFace = 'bottom';
   stage.setView('underside', true);
 }
+// Back where the visitor was before a rotation or a language switch.
+if (kept?.open && kept.focus >= 0 && kept.focus < n) settleOpen(kept.focus);
+else if (kept?.face === 'bottom') settleOnBack();
+
+// Dev convenience: /#open starts with the lid already off.
+if (import.meta.env.DEV && location.hash.startsWith('#open')) {
+  lid.skip();
+  reveal.snap(1);
+  const k = Number(location.hash.slice(6));
+  if (location.hash.length > 5 && k >= 0 && k < n) settleOpen(k); // e.g. #open-1 focuses project 1
+}
+
+// Dev convenience: /#about starts with the box on its back, showing the About card.
+if (import.meta.env.DEV && location.hash === '#about') settleOnBack();
 
 // Dev: /?stats shows the live render resolution and frame rate (to check sharpness on a phone).
 const stats = import.meta.env.DEV && new URLSearchParams(location.search).has('stats') ? document.createElement('div') : null;

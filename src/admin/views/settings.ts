@@ -23,9 +23,9 @@ export function renderSettings(root: HTMLElement, store: Store) {
     );
 
   const sq = s.sq ?? {};
-  const sqText = (k: 'role' | 'title' | 'description', label: string, multiline = false) =>
-    textField(`${label} — Albanian`, `settings.sq.${k}`, sq[k] ?? '', (v) => edit((x) => setSq(x, k, v)), { multiline, placeholder: s.identity[k] });
-  const sqIdentity = h('div', {}, h('div', { class: 'grid2' }, sqText('role', 'Role'), sqText('title', 'Page title')), sqText('description', 'Description', true));
+  const sqText = (k: 'role' | 'title' | 'description', label: string, o: { multiline?: boolean; hint?: string } = {}) =>
+    textField(`${label} — Albanian`, `settings.sq.${k}`, sq[k] ?? '', (v) => edit((x) => setSq(x, k, v)), { ...o, placeholder: s.identity[k] });
+  const sqIdentity = h('div', {}, sqText('title', 'Page title'), sqText('description', 'Description', { multiline: true }));
   const sqHint = (k: 'begin' | (typeof HINT_KEYS)[number], d: 'desktop' | 'touch') => {
     const mine = (sq.hints?.[k] as Record<string, string> | undefined)?.[d] ?? '';
     const fallback = (DEFAULT_SQ.hints[k] as Record<string, string>)[d];
@@ -47,11 +47,12 @@ export function renderSettings(root: HTMLElement, store: Store) {
     h('div', { class: 'editor-head' }, h('h2', {}, 'Settings')),
 
     h('div', { class: 'section-title' }, 'Identity'),
+    textField('Name', 'settings.identity.name', s.identity.name, (v) => edit((x) => (x.identity.name = v)), { hint: 'Engraved on the lid.' }),
     h(
       'div',
       { class: 'grid2' },
-      textField('Name', 'settings.identity.name', s.identity.name, (v) => edit((x) => (x.identity.name = v)), { hint: 'Engraved on the lid.' }),
       textField('Role', 'settings.identity.role', s.identity.role, (v) => edit((x) => (x.identity.role = v)), { hint: 'Engraved under your name.' }),
+      sqText('role', 'Role', { hint: 'Engraved instead when a visitor picks SQ. Empty: the English role.' }),
     ),
     textField('Page title', 'settings.identity.title', s.identity.title, (v) => edit((x) => (x.identity.title = v)), { hint: 'Browser tab and search results.' }),
     textField('Description', 'settings.identity.description', s.identity.description, (v) => edit((x) => (x.identity.description = v)), {
