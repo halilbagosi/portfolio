@@ -8,16 +8,18 @@ import {
   MAX_SOCIALS,
   MAX_TIMELINE,
   MAX_YEARS,
+  isHidden,
   type About,
+  type Hideable,
   type FinePrint,
   type Settings,
 } from '../../content/schema';
 import { api } from '../api';
 import { h } from '../dom';
-import { rangeField, tagsField, textField, toggleField } from '../fields';
+import { hideable, rangeField, tagsField, textField, toggleField } from '../fields';
 import { processPhoto } from '../photos';
 import { DEFAULT_SQ } from '../../i18n';
-import { moveItem, setSq, type Store } from '../state';
+import { moveItem, setHidden, setSq, type Store } from '../state';
 
 /** Up, down and remove buttons for one row of a list editor. */
 function rowActions(i: number, n: number, move: (from: number, to: number) => void, remove: () => void) {
@@ -57,6 +59,8 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
   const a = s.about;
   const edit = (fn: (s: Settings) => void) => store.change((c) => fn(c.settings));
   const ed = (fn: (a: About) => void) => edit((x) => fn(x.about));
+  /** The eye that hides an About field from the site. */
+  const hide = (el: HTMLElement, k: Hideable<'about'>) => hideable(el, isHidden(a, k), (on) => ed((x) => setHidden(x, k, on)));
   /** A structural change: the rows themselves change, so draw the view again. */
   const restructure = (fn: (s: Settings) => void) => {
     edit(fn);
@@ -120,12 +124,14 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
 
   const timeline = a.timeline.map((t, i) => {
     const at = `settings.about.timeline.${i}`;
-    const set = (k: keyof typeof t) => (v: string) => ed((x) => (x.timeline[i][k] = v));
+    const set = (k: 'role' | 'org' | 'period') => (v: string) => ed((x) => (x.timeline[i][k] = v));
     return listRow(
       [
         textField('Role', `${at}.role`, t.role, set('role')),
-        textField('Company or school', `${at}.org`, t.org, set('org')),
-        textField('Period', `${at}.period`, t.period, set('period'), { hint: 'e.g. 2022–now' }),
+        hideable(textField('Company or school', `${at}.org`, t.org, set('org')), isHidden(t, 'org'), (on) => ed((x) => setHidden(x.timeline[i], 'org', on))),
+        hideable(textField('Period', `${at}.period`, t.period, set('period'), { hint: 'e.g. 2022–now' }), isHidden(t, 'period'), (on) =>
+          ed((x) => setHidden(x.timeline[i], 'period', on)),
+        ),
       ],
       (['role', 'org', 'period'] as const).map((k) =>
         textField(`${k === 'org' ? 'Company or school' : k[0].toUpperCase() + k.slice(1)} — Albanian`, `${at}.sq.${k}`, t.sq?.[k] ?? '', (v) => ed((x) => setSq(x.timeline[i], k, v)), {
@@ -141,12 +147,16 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
 
   const achievements = a.achievements.map((t, i) => {
     const at = `settings.about.achievements.${i}`;
-    const set = (k: keyof typeof t) => (v: string) => ed((x) => (x.achievements[i][k] = v));
+    const set = (k: 'title' | 'detail' | 'year') => (v: string) => ed((x) => (x.achievements[i][k] = v));
     return listRow(
       [
         textField('Title', `${at}.title`, t.title, set('title'), { hint: 'e.g. Apple Design Award finalist.' }),
-        textField('Detail', `${at}.detail`, t.detail, set('detail'), { hint: 'One short line (optional).' }),
-        textField('Year', `${at}.year`, t.year, set('year'), { hint: 'e.g. 2025 (optional).' }),
+        hideable(textField('Detail', `${at}.detail`, t.detail, set('detail'), { hint: 'One short line (optional).' }), isHidden(t, 'detail'), (on) =>
+          ed((x) => setHidden(x.achievements[i], 'detail', on)),
+        ),
+        hideable(textField('Year', `${at}.year`, t.year, set('year'), { hint: 'e.g. 2025 (optional).' }), isHidden(t, 'year'), (on) =>
+          ed((x) => setHidden(x.achievements[i], 'year', on)),
+        ),
       ],
       (['title', 'detail'] as const).map((k) =>
         textField(`${k[0].toUpperCase()}${k.slice(1)} — Albanian`, `${at}.sq.${k}`, t.sq?.[k] ?? '', (v) => ed((x) => setSq(x.achievements[i], k, v)), {
@@ -202,35 +212,48 @@ export function renderAbout(root: HTMLElement, store: Store, rerender: () => voi
     ),
 
     h('div', { class: 'section-title' }, 'About — on the underside'),
-    portrait,
-    textField('Bio', 'settings.about.bio', a.bio, (v) => ed((x) => (x.bio = v)), {
-      multiline: true,
-      maxLength: MAX_BIO,
-      hint: `Two or three sentences, up to ${MAX_BIO} characters.`,
-    }),
-    rangeField('Years of experience', 'settings.about.years', a.years, { min: 0, max: MAX_YEARS, step: 1, unit: 'years' }, (v) => ed((x) => (x.years = v)), 'Shown as “N+”.'),
+    h('small', { class: 'field-hint' }, 'The eye beside a field hides it from the site; its text is kept, to bring back.'),
+    hide(portrait, 'photo'),
+    hide(
+      textField('Bio', 'settings.about.bio', a.bio, (v) => ed((x) => (x.bio = v)), {
+        multiline: true,
+        maxLength: MAX_BIO,
+        hint: `Two or three sentences, up to ${MAX_BIO} characters.`,
+      }),
+      'bio',
+    ),
+    hide(
+      rangeField('Years of experience', 'settings.about.years', a.years, { min: 0, max: MAX_YEARS, step: 1, unit: 'years' }, (v) => ed((x) => (x.years = v)), 'Shown as “N+”.'),
+      'years',
+    ),
     h(
       'div',
       { class: 'grid2' },
-      textField('Location', 'settings.about.location', a.location, (v) => ed((x) => (x.location = v))),
-      textField('Work preference', 'settings.about.workPreference', a.workPreference, (v) => ed((x) => (x.workPreference = v)), {
-        hint: 'e.g. Remote · open to relocation (optional).',
-      }),
+      hide(textField('Location', 'settings.about.location', a.location, (v) => ed((x) => (x.location = v))), 'location'),
+      hide(
+        textField('Work preference', 'settings.about.workPreference', a.workPreference, (v) => ed((x) => (x.workPreference = v)), {
+          hint: 'e.g. Remote · open to relocation (optional).',
+        }),
+        'workPreference',
+      ),
     ),
     h(
       'div',
       { class: 'grid2' },
       toggleField('Available', 'settings.about.available', a.available, (v) => ed((x) => (x.available = v)), 'Shown in green when on, grey when off.'),
-      textField('Availability', 'settings.about.availability', a.availability, (v) => ed((x) => (x.availability = v)), {
-        hint: 'e.g. Open to new roles.',
-      }),
+      hide(
+        textField('Availability', 'settings.about.availability', a.availability, (v) => ed((x) => (x.availability = v)), {
+          hint: 'e.g. Open to new roles.',
+        }),
+        'availability',
+      ),
     ),
-    tagsField('Skills', 'settings.about.skills', a.skills, (v) => ed((x) => (x.skills = v)), `Up to ${MAX_SKILLS}, listed in order.`, MAX_SKILLS),
+    hide(tagsField('Skills', 'settings.about.skills', a.skills, (v) => ed((x) => (x.skills = v)), `Up to ${MAX_SKILLS}, listed in order.`, MAX_SKILLS), 'skills'),
     h(
       'div',
       { class: 'grid2' },
-      textField('Email', 'settings.about.email', a.email, (v) => ed((x) => (x.email = v))),
-      textField('Résumé link', 'settings.about.resume', a.resume, (v) => ed((x) => (x.resume = v)), { hint: 'https://… (optional).' }),
+      hide(textField('Email', 'settings.about.email', a.email, (v) => ed((x) => (x.email = v))), 'email'),
+      hide(textField('Résumé link', 'settings.about.resume', a.resume, (v) => ed((x) => (x.resume = v)), { hint: 'https://… (optional).' }), 'resume'),
     ),
 
     h('div', { class: 'section-title' }, 'Experience — newest first'),

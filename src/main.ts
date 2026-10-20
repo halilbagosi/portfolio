@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { Spring } from './anim/springs';
-import { projects, settings } from './config/projects';
+import { projects, settings, useLang } from './config/projects';
 import { Gestures } from './input/gestures';
-import { lang, LANG_NAMES, LANGS, setLang, t } from './i18n';
+import { lang, LANG_NAMES, LANGS, setLang, t, type Lang } from './i18n';
 import { Motion } from './input/motion';
 import { Orbit, topElevation, type Face } from './input/orbit';
 import { Pointer } from './input/pointer';
@@ -25,25 +25,23 @@ const a11y = document.getElementById('a11y')!;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const touch = matchMedia('(pointer: coarse)').matches;
 
-// Language: the site is drawn once from the content, so the switcher stores the choice and reloads
-// (back where the visitor was: see keepView).
-document.documentElement.lang = lang;
-document.title = settings.identity.title;
-document.querySelector('meta[name="description"]')?.setAttribute('content', settings.identity.description);
+// Language: the switcher changes the words in place (see switchLang); nothing reloads.
 const switcher = document.getElementById('lang')!;
-switcher.setAttribute('aria-label', t('switcher'));
+function labelPage() {
+  document.documentElement.lang = lang;
+  document.title = settings.identity.title;
+  document.querySelector('meta[name="description"]')?.setAttribute('content', settings.identity.description);
+  switcher.setAttribute('aria-label', t('switcher'));
+  for (const b of switcher.children) b.setAttribute('aria-pressed', String((b as HTMLElement).lang === lang));
+}
 for (const l of LANGS) {
   const b = Object.assign(document.createElement('button'), { type: 'button', textContent: l.toUpperCase(), lang: l });
   b.title = LANG_NAMES[l];
   b.setAttribute('aria-label', LANG_NAMES[l]);
-  b.setAttribute('aria-pressed', String(l === lang));
-  b.addEventListener('click', () => {
-    if (l === lang) return;
-    keepView();
-    setLang(l);
-  });
+  b.addEventListener('click', () => l !== lang && switchLang(l));
   switcher.appendChild(b);
 }
+labelPage();
 
 function showFallback() {
   hint.hidden = true;
@@ -52,7 +50,7 @@ function showFallback() {
     const li = document.createElement('li');
     const a = document.createElement('a');
     a.href = p.links[0]?.href ?? '#';
-    a.textContent = `${p.title}: ${p.purpose}`;
+    a.textContent = p.purpose ? `${p.title}: ${p.purpose}` : p.title;
     li.appendChild(a);
     list.appendChild(li);
   }
@@ -96,13 +94,25 @@ let pendingFlip = false;
 /** The face the camera is framed for: the overview (top) or the About card straight on (bottom). */
 let shownFace: Face = 'top';
 // iOS asks for motion access on the first tap, which then only wakes the lid (see the click handler).
-const copy = settings.hints;
-let openHint = touch ? (motion.needsPermission ? copy.begin.touch : copy.open.touch) : copy.open.desktop;
-const closeHint = touch ? copy.close.touch : copy.close.desktop;
-const sectionHint = touch ? copy.section.touch : copy.section.desktop;
+let copy = settings.hints;
+let asked = false;
+let openHint = '';
+let closeHint = '';
+let sectionHint = '';
+let flipHint = '';
+let backHint = '';
+/** The hints in the language shown (again after a switch). */
+function readHints() {
+  copy = settings.hints;
+  const pick = (p: { desktop: string; touch: string }) => (touch ? p.touch : p.desktop);
+  openHint = touch && motion.needsPermission && !asked ? copy.begin.touch : pick(copy.open);
+  closeHint = pick(copy.close);
+  sectionHint = pick(copy.section);
+  flipHint = pick(copy.flip);
+  backHint = pick(copy.back);
+}
+readHints();
 hintTop.textContent = openHint;
-const flipHint = touch ? copy.flip.touch : copy.flip.desktop;
-const backHint = touch ? copy.back.touch : copy.back.desktop;
 
 let swapTimer = 0;
 function showHint(text: string) {
@@ -125,6 +135,7 @@ function showRestHints() {
 function permissionAsked() {
   if (hintTop.textContent === openHint) hintTop.textContent = copy.open.touch;
   openHint = copy.open.touch;
+  asked = true;
 }
 /** Cross-fades the hint to new text: out, swap, in. */
 function swapHint(text: string) {
@@ -136,12 +147,15 @@ const box = createBox();
 scene.add(box.group);
 const underside = new Underside();
 box.group.add(underside.mesh);
-try {
-  const { identity, about, socials, card } = settings;
-  underside.showAbout({ name: identity.name, role: identity.role, about, socials, card }, about.photo);
-} catch (err) {
-  console.warn('About card failed to draw; the back of the box stays blank.', err); // never take the scene down
+function drawAboutCard() {
+  try {
+    const { identity, about, socials, card } = settings;
+    underside.showAbout({ name: identity.name, role: identity.role, about, socials, card }, about.photo);
+  } catch (err) {
+    console.warn('About card failed to draw; the back of the box stays blank.', err); // never take the scene down
+  }
 }
+drawAboutCard();
 const lid = new Lid(reduced);
 scene.add(lid.group);
 
@@ -247,7 +261,7 @@ if (kept?.open) {
   reveal.snap(1);
 }
 // First load: a laser engraves the lid. Not after a reload that keeps the view, under reduced motion, or for dev hashes.
-const laser = reduced || kept || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
+let laser = reduced || kept || (import.meta.env.DEV && location.hash !== '') ? null : new Laser(lid, scene);
 
 const idle = (window as unknown as { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
 // After the lead screenshots have loaded: a phone shot's aspect picks how its section opens (see Well.focusSide).
@@ -333,7 +347,6 @@ function cellAt(x: number, z: number) {
 
 // ---- Accessibility layer: real buttons and links mirror the 3D scene ----------------
 const openBtn = document.createElement('button');
-openBtn.textContent = t('open', { name: settings.identity.name, role: settings.identity.role });
 openBtn.addEventListener('click', openLid);
 a11y.appendChild(openBtn);
 
@@ -372,17 +385,12 @@ function turnOver() {
   }
 }
 const aboutBtn = document.createElement('button');
-aboutBtn.textContent = t('turnOver', { name: settings.identity.name });
 aboutBtn.addEventListener('click', turnOver);
 a11y.appendChild(aboutBtn);
 const aboutSection = document.createElement('section');
-aboutSection.setAttribute('aria-label', t('aboutOf', { name: settings.identity.name }));
-for (const line of aboutLines(settings.about)) aboutSection.appendChild(Object.assign(document.createElement('p'), { textContent: line }));
-// The socials are already linked at the top of the nav; only what isn't (email, résumé) is added here.
-const listed = new Set(settings.socials.map((s) => s.href));
-for (const l of contactLinks(settings.about, settings.socials)) if (!listed.has(l.href)) aboutSection.appendChild(a11yLink(l.label, l.href));
+const aboutText = document.createElement('div');
+aboutSection.appendChild(aboutText);
 const backBtn = document.createElement('button');
-backBtn.textContent = t('turnBack');
 backBtn.addEventListener('click', () => orbit.flip('top'));
 aboutSection.appendChild(backBtn);
 a11y.appendChild(aboutSection);
@@ -402,26 +410,82 @@ function syncFaceControls(face: Face) {
   if (active === (back ? aboutBtn : backBtn)) (back ? backBtn : aboutBtn).focus();
 }
 backBtn.disabled = true;
+const a11yLinks: HTMLAnchorElement[][] = [];
 const a11yButtons = projects.slice(0, n).map((p, i) => {
   const b = document.createElement('button');
-  b.textContent = `${p.title}, ${p.kindLabel}: ${p.purpose} ${t('builtWith')} ${p.stack.join(', ')}. ${p.architecture}. ${p.duration}. ${p.statusLabel}.`;
   b.setAttribute('aria-expanded', 'false');
   b.addEventListener('focus', () => {
     openLid();
     setFocus(i);
   });
   a11y.appendChild(b);
-  for (const l of p.links) {
+  a11yLinks[i] = p.links.map((l) => {
     const a = document.createElement('a');
     a.href = l.href;
     a.target = '_blank';
     a.rel = 'noopener';
-    a.textContent = t('projectOn', { title: p.title, label: l.label });
     a.addEventListener('focus', () => setFocus(i));
     a11y.appendChild(a);
-  }
+    return a;
+  });
   return b;
 });
+
+/** The accessible layer's words, in the language shown (again after a switch). */
+function labelA11y() {
+  const { identity, about, socials } = settings;
+  openBtn.textContent = t('open', { who: [identity.name, identity.role].filter(Boolean).join(', ') });
+  aboutBtn.textContent = t('turnOver', { name: identity.name });
+  aboutSection.setAttribute('aria-label', t('aboutOf', { name: identity.name }));
+  aboutText.replaceChildren(...aboutLines(about).map((line) => Object.assign(document.createElement('p'), { textContent: line })));
+  // The socials are already linked at the top of the nav; only what isn't (email, résumé) is added here.
+  const listed = new Set(socials.map((s) => s.href));
+  for (const l of contactLinks(about, socials)) if (!listed.has(l.href)) aboutText.appendChild(a11yLink(l.label, l.href));
+  backBtn.textContent = t('turnBack');
+  projects.slice(0, n).forEach((p, i) => {
+    // Hidden fields arrive empty: they are left out of the sentence.
+    const facts = [p.purpose, p.stack.length ? `${t('builtWith')} ${p.stack.join(', ')}.` : '', ...[p.architecture, p.duration, p.statusLabel].map((f) => f && `${f}.`)];
+    a11yButtons[i].textContent = `${[p.title, p.kindLabel].filter(Boolean).join(', ')}: ${facts.filter(Boolean).join(' ')}`;
+    p.links.forEach((l, j) => (a11yLinks[i][j].textContent = t('projectOn', { title: p.title, label: l.label })));
+  });
+}
+labelA11y();
+
+/**
+ * Another language, in place. The page, hints and accessible layer change at once; each section's
+ * labels fade across, the open section's glass enters again, the About card is redrawn, and a lid
+ * that is on and facing up has its role line cut again by the laser.
+ */
+function switchLang(l: Lang) {
+  const shownHints = [openHint, closeHint, sectionHint, flipHint, backHint];
+  const role = settings.identity.role;
+  setLang(l);
+  useLang(l);
+  labelPage();
+  readHints();
+  // A hint on screen changes to the same hint in the new words.
+  const nowHints = [openHint, closeHint, sectionHint, flipHint, backHint];
+  for (const el of [hint, hintTop]) {
+    const k = shownHints.indexOf(el.textContent ?? '');
+    if (k >= 0) el.textContent = nowHints[k];
+  }
+  labelA11y();
+  lightbox.relabel();
+  drawAboutCard();
+  tiles.forEach((tile, k) => tile.retext(projects[k]));
+  chipSets.forEach((c, k) => c.retext(projects[k]));
+  if (focused >= 0) {
+    // The facts may take another depth in the new words: lay the open section out again.
+    const k = focused;
+    focused = -1;
+    setFocus(k);
+  }
+  if (settings.identity.role === role) return; // no Albanian role entered: the lid already says it
+  const recut = !reduced && lid.state === 'closed' && orbit.face === 'top';
+  laser?.finish();
+  lid.setRole(settings.identity.role, recut);
+  if (recut) laser = new Laser(lid, scene, laser?.light);
+}
 
 // ---- Pointer -------------------------------------------------------------------------
 function openLid() {

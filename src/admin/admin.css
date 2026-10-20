@@ -102,6 +102,14 @@ button, input, select, textarea { font: inherit; color: inherit; margin: 0; }
 .field-label { font-size: var(--fs-sm); color: var(--muted); }
 .field-hint { color: var(--muted); font-size: var(--fs-sm); }
 .field-error { color: var(--danger); font-size: var(--fs-sm); }
+/* Hide from the site: an eye beside the label; a hidden field dims (still editable) and says so. */
+.field-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); min-width: 0; }
+.hide-toggle { width: 24px; height: 20px; margin: -2px 0; }
+.field.is-hidden .hide-toggle { color: var(--warn); }
+.field.is-hidden .field-label { text-decoration: line-through; }
+.field.is-hidden > :not(.field-head):not(.hidden-note):not(.field-error) { opacity: 0.45; }
+.hidden-note { display: none; color: var(--warn); font-size: var(--fs-sm); }
+.field.is-hidden .hidden-note { display: block; }
 .field-error:empty { display: none; }
 
 /* Every boxed control: same height, padding, border and radius. */

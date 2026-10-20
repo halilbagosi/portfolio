@@ -151,6 +151,39 @@ export function tagsField(label: string, path: string, values: string[], set: (v
   return field(label, path, box, hint, id);
 }
 
+const EYE = 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z';
+const EYE_OFF = 'M3 3l18 18 M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.1 3.9 M6.6 6.6A17.6 17.6 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6 M9.9 9.9a3 3 0 0 0 4.2 4.2';
+const eye = (d: string) =>
+  `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+
+/**
+ * Gives a field an eye button that hides it from the site, or brings it back. A hidden field keeps
+ * its text (and stays editable); it dims and says so.
+ */
+export function hideable(el: HTMLElement, hidden: boolean, set: (hidden: boolean) => void) {
+  const label = el.querySelector('.field-label')!;
+  const name = label.textContent ?? '';
+  const btn = h('button', { class: 'icon hide-toggle', type: 'button' });
+  const head = h('div', { class: 'field-head' });
+  label.replaceWith(head);
+  head.append(label, btn);
+  head.after(h('small', { class: 'hidden-note' }, 'Hidden on the site. The text is kept.'));
+  const draw = (on: boolean) => {
+    el.classList.toggle('is-hidden', on);
+    btn.innerHTML = eye(on ? EYE_OFF : EYE);
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', `Hide ${name} on the site`);
+    btn.title = on ? `Hidden: show ${name} on the site` : `Shown: hide ${name} on the site`;
+  };
+  btn.addEventListener('click', () => {
+    hidden = !hidden;
+    draw(hidden);
+    set(hidden);
+  });
+  draw(hidden);
+  return el;
+}
+
 /** Marks the fields under `root` that have issues, with each one's first message. */
 export function showIssues(root: HTMLElement, issues: Issue[]) {
   // forEach / Array.from rather than for…of: tsconfig's lib has DOM but not DOM.Iterable.

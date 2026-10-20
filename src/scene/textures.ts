@@ -133,8 +133,8 @@ export function engravingMaps(
   /** Widest a line may be: it stays inside the lid's rounded corners. */
   const maxW = w * 0.86;
 
-  // Name and role are centred on the lid; the socials sit along its bottom as logos only.
-  const roleAt = u * (stack ? 4.2 : 3.4);
+  // Name and role are centred on the lid (the name alone, with the role hidden); the socials sit along its bottom as logos only.
+  const roleAt = role ? u * (stack ? 4.2 : 3.4) : 0;
   const yName = h / 2 + (type.name.size * 0.74 - roleAt) / 2;
 
   const pad = Math.ceil(u * 0.3);
@@ -339,20 +339,24 @@ export function specSheetTexture(s: SpecSheet, widthUnits: number, textScale = 1
     };
     ctx.textBaseline = 'middle';
 
+    // Each part is optional (a hidden field arrives empty) but the title.
     const eyebrow = s.eyebrow.toUpperCase();
-    ctx.font = `600 18px ${FONT}`;
-    const ew = ctx.measureText(eyebrow).width + 2.2 * Math.max(0, [...eyebrow].length - 1);
-    if (ew > inner) ctx.font = `600 ${Math.floor((18 * inner) / ew)}px ${FONT}`;
-    ctx.fillStyle = s.eyebrowColor;
-    if (draw) drawTracked(ctx, eyebrow, 0, y + 12, 2.2, pad);
-    y += 24 + 6;
+    if (eyebrow) {
+      ctx.font = `600 18px ${FONT}`;
+      const ew = ctx.measureText(eyebrow).width + 2.2 * Math.max(0, [...eyebrow].length - 1);
+      if (ew > inner) ctx.font = `600 ${Math.floor((18 * inner) / ew)}px ${FONT}`;
+      ctx.fillStyle = s.eyebrowColor;
+      if (draw) drawTracked(ctx, eyebrow, 0, y + 12, 2.2, pad);
+      y += 24 + 6;
+    }
     // A long name in a narrow sheet steps down rather than running past the edge.
     ctx.font = `600 58px ${FONT}`;
     const ts = Math.min(58, Math.floor((58 * inner) / Math.max(1, ctx.measureText(s.title).width)));
     text(s.title, `600 ${ts}px ${FONT}`, '#ffffff', pad, 66 * (ts / 58));
     y += 6;
     ctx.font = `400 24px ${FONT}`;
-    for (const l of wrapText(ctx, s.body, inner)) text(l, `400 24px ${FONT}`, 'rgba(245,245,247,0.72)', pad, 33);
+    if (s.body) for (const l of wrapText(ctx, s.body, inner)) text(l, `400 24px ${FONT}`, 'rgba(245,245,247,0.72)', pad, 33);
+    if (!s.rows.length) return y + pad;
 
     y += 24;
     if (draw) {

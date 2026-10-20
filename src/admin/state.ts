@@ -89,6 +89,14 @@ export function setSq<T extends { sq?: Record<string, unknown> }>(owner: T, key:
   if (!Object.keys(sq).length) delete owner.sq;
 }
 
+/** Hides one field from the site, or brings it back. The list is removed when empty, like `sq`. */
+export function setHidden(owner: { hidden?: string[] }, key: string, on: boolean) {
+  const list = (owner.hidden ?? []).filter((k) => k !== key);
+  if (on) list.push(key);
+  if (list.length) owner.hidden = list;
+  else delete owner.hidden;
+}
+
 export function moveItem<T>(list: T[], from: number, to: number) {
   const [item] = list.splice(from, 1);
   list.splice(to, 0, item);

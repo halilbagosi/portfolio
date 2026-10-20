@@ -61,6 +61,11 @@ export class Underside {
     this.uniforms.uSheen.value = x;
   }
 
+  /** The card last drawn, and its portrait (kept for a redraw in another language). */
+  private drawn?: THREE.CanvasTexture;
+  private portrait?: HTMLImageElement;
+  private portraitUrl = '';
+
   /** Draws the About card onto the plate, and again once the portrait has loaded. */
   showAbout(input: CardInput, photoUrl: string) {
     const w = Math.round(OUTER_W * CARD_PX);
@@ -80,13 +85,20 @@ export class Underside {
     tex.anisotropy = 8;
     const look = { initials: initialsOf(input.name), corner: OUTER_R * CARD_PX };
     const draw = (photo?: HTMLImageElement) => {
+      if (this.uniforms.uMap.value !== tex) return; // redrawn since (a new language) before the portrait came
       drawAbout(ctx, ops, lw, lh, scale, { ...look, photo });
       tex.needsUpdate = true;
     };
-    draw();
+    const old = this.drawn;
+    this.drawn = tex;
     this.setCard(tex);
+    old?.dispose();
+    // Drawn again (a new language): the portrait is already in hand.
+    if (this.portrait?.complete && this.portrait.naturalWidth && this.portraitUrl === photoUrl) return draw(this.portrait);
+    draw();
     if (!photoUrl) return;
-    const img = new Image();
+    const img = (this.portrait = new Image());
+    this.portraitUrl = photoUrl;
     img.onload = () => draw(img);
     img.onerror = () => console.warn(`The About portrait did not load (${photoUrl}); showing initials.`);
     img.src = photoUrl;

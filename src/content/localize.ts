@@ -1,5 +1,5 @@
 import { DEFAULT_SQ, kindLabel, type Lang } from '../i18n';
-import { HINT_KEYS, type Project, type Settings, type SiteContent } from './schema';
+import { HINT_KEYS, isHidden, type Project, type Settings, type SiteContent } from './schema';
 
 /** A project as the site shows it: its words in the chosen language, plus the labels for its kind and status. */
 export type ShownProject = Project & { kindLabel: string; statusLabel: string };
@@ -61,5 +61,27 @@ export function localize(content: SiteContent, lang: Lang): { settings: Settings
 
 /** Adds the display labels: the kind in the chosen language, and the status as it is shown (its colour follows the English status). */
 export function shown(original: Project, localized: Project, lang: Lang): ShownProject {
-  return { ...localized, kindLabel: kindLabel(original.kind, lang), statusLabel: localized.status, status: original.status };
+  const p = { ...localized, kindLabel: kindLabel(original.kind, lang), statusLabel: localized.status, status: original.status };
+  return { ...blank(p), kindLabel: isHidden(p, 'kind') ? '' : p.kindLabel, statusLabel: isHidden(p, 'status') ? '' : p.statusLabel };
+}
+
+/** An owner as the site shows it: each hidden text field reads as empty, each hidden list as none (the kind and status keep their values, for colour). */
+function blank<T extends { hidden?: readonly string[] }>(o: T): T {
+  if (!o.hidden?.length) return o;
+  const out: Record<string, unknown> = { ...o };
+  for (const k of o.hidden) {
+    if (k === 'kind' || k === 'status') continue;
+    const v = out[k];
+    out[k] = Array.isArray(v) ? [] : typeof v === 'string' ? '' : v;
+  }
+  return out as T;
+}
+
+/** The settings as the site shows them: hidden fields read as empty (`years` stays a number: check isHidden). */
+export function withoutHidden(s: Settings): Settings {
+  return {
+    ...s,
+    identity: blank(s.identity),
+    about: { ...blank(s.about), timeline: s.about.timeline.map(blank), achievements: s.about.achievements.map(blank) },
+  };
 }

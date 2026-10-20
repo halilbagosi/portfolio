@@ -1,6 +1,6 @@
 import raw from '../content/site.json';
 import { lang as siteLang, type Lang } from '../i18n';
-import { localize, shown, type ShownProject } from '../content/localize';
+import { localize, shown, withoutHidden, type ShownProject } from '../content/localize';
 import { formatIssue, siteOrder, validate, type Settings, type SiteContent } from '../content/schema';
 
 export type { Project, ProjectKind } from '../content/schema';
@@ -23,8 +23,15 @@ export function loadContent(input: unknown, base = import.meta.env.BASE_URL, lan
   // Same order and length as content.projects, so each shown project is paired with its original (its kind and status key the colours).
   const paired = content.projects.map((p, i) => shown(p, words.projects[i], lang));
   const projects = siteOrder(paired).map((p) => ({ ...p, images: p.images.map(at) }));
-  const about = { ...words.settings.about, photo: words.settings.about.photo && at(words.settings.about.photo) };
-  return { projects, settings: { ...words.settings, about } };
+  const settings = withoutHidden(words.settings);
+  const about = { ...settings.about, photo: settings.about.photo && at(settings.about.photo) };
+  return { projects, settings: { ...settings, about } };
 }
 
-export const { projects, settings } = loadContent(raw);
+/** What the site shows, in the language shown. Live bindings: useLang swaps them for every importer. */
+export let { projects, settings } = loadContent(raw);
+
+/** The content in another language. Only words change: order, photos, colours and motion are the same. */
+export function useLang(lang: Lang) {
+  ({ projects, settings } = loadContent(raw, undefined, lang));
+}
