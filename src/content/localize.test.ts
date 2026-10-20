@@ -28,6 +28,17 @@ describe('Albanian content', () => {
     expect(settings.about.timeline[0].role).toBe('Inxhinier softueri');
   });
 
+  it('uses an entered Albanian kind as its label, keeping the kind itself for the colour', () => {
+    const c = validContent();
+    const builtIn = loadContent(c, '/', 'sq').projects[0].kindLabel;
+    c.projects[0].sq = { kind: 'Aplikacion shumëplatformësh' };
+    const sq = loadContent(c, '/', 'sq').projects[0];
+    expect(builtIn).not.toBe('Aplikacion shumëplatformësh');
+    expect(sq.kindLabel).toBe('Aplikacion shumëplatformësh');
+    expect(sq.kind).toBe(c.projects[0].kind);
+    expect(loadContent(c, '/', 'en').projects[0].kindLabel).toBe(c.projects[0].kind);
+  });
+
   it('leaves English untouched', () => {
     const c = validContent();
     c.projects[0].sq = { caption: 'Një rresht' };

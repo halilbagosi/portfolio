@@ -46,7 +46,8 @@ export interface ProjectLink {
 
 /** The Albanian wording of a project's text. Anything left empty falls back to the English. */
 export type ProjectSq = Partial<Record<(typeof PROJECT_SQ_KEYS)[number], string>>;
-export const PROJECT_SQ_KEYS = ['title', 'caption', 'purpose', 'architecture', 'duration', 'status'] as const;
+/** `kind` is the label only (the kind itself, which picks the colour, is shared); empty uses the built-in Albanian. */
+export const PROJECT_SQ_KEYS = ['title', 'kind', 'caption', 'purpose', 'architecture', 'duration', 'status'] as const;
 
 export interface Project {
   /** Stable slug: names the project's photo files and identifies it in the dashboard. */

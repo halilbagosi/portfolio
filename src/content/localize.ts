@@ -61,7 +61,8 @@ export function localize(content: SiteContent, lang: Lang): { settings: Settings
 
 /** Adds the display labels: the kind in the chosen language, and the status as it is shown (its colour follows the English status). */
 export function shown(original: Project, localized: Project, lang: Lang): ShownProject {
-  const p = { ...localized, kindLabel: kindLabel(original.kind, lang), statusLabel: localized.status, status: original.status };
+  const kind = lang === 'sq' ? pick(original.sq?.kind, kindLabel(original.kind, lang)) : kindLabel(original.kind, lang);
+  const p = { ...localized, kindLabel: kind, statusLabel: localized.status, status: original.status };
   return { ...blank(p), kindLabel: isHidden(p, 'kind') ? '' : p.kindLabel, statusLabel: isHidden(p, 'status') ? '' : p.statusLabel };
 }
 
