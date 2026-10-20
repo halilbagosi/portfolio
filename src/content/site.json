@@ -102,9 +102,9 @@
       "bio": "Mobile and Web Developer specializing in intuitive design and UX. Developing multiple native Apple platform applications as well as websites and cross-platform apps using native components. Detail-oriented, perfectionist and eager to improve and polish existing software.",
       "years": 2,
       "location": "Albania",
-      "workPreference": "Remote · Open To Relocation",
+      "workPreference": "Remote",
       "available": true,
-      "availability": "Open to new roles",
+      "availability": "Available",
       "skills": [
         "Swift",
         "SwiftUI",
@@ -162,11 +162,13 @@
     },
     "sq": {
       "bio": "Developer Mobile dhe Web i specializuar në dizajn dhe UX intuitiv. Duke zhvilluar disa aplikacione për platformat Apple si dhe faqe Web e aplikacione ndër-platforme duke përdorur komponentë të specializuar. I dhënë pas detajeve, perfeksionist dhe i gatshëm të përmirësoj software ekzistues.",
-      "workPreference": "Remote · I gatshëm per shpërngulje",
+      "workPreference": "Remote",
       "yearsLabel": "vite përvojë",
       "location": "Shqipëri",
       "finePrint": "Designed by {name}. Assembled in the browser.",
-      "availability": "I gatshëm për role të reja"
+      "availability": "I Disponueshëm",
+      "title": "Halil Bagosi — Inxhinier Software",
+      "description": "Halil Bagosi, Inxhinier Software. Portofoli."
     }
   },
   "projects": [
