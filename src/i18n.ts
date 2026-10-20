@@ -20,18 +20,20 @@ function detect(): Lang {
   }
   return navigator.language?.toLowerCase().startsWith('sq') ? 'sq' : 'en';
 }
-export const lang: Lang = detect();
+/** The language shown. A live binding: importers see a switch at once. */
+export let lang: Lang = detect();
 
-/** The scene is drawn once from the content, so a new language is a reload. */
+/** Switch language in place: remembered, and kept in the address (no reload) so a shared link opens in it. */
 export function setLang(next: Lang) {
+  lang = next;
   try {
     localStorage.setItem(STORE, next);
   } catch {
-    // not remembered; the ?lang= below still switches this load
+    // not remembered; the address below still carries it
   }
   const url = new URL(location.href);
   url.searchParams.set('lang', next);
-  location.replace(url);
+  history.replaceState(history.state, '', url);
 }
 
 /** The site's fixed words (labels the content doesn't carry). */

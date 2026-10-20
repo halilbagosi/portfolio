@@ -49,8 +49,9 @@ export class Laser {
   /**
    * In the scene, not the lid's group: three only counts lights of visible objects, and the lid is
    * hidden once it is gone, which would change the light count and recompile every lit material.
+   * A later laser (a recut) takes over the first one's, for the same reason.
    */
-  private light = new THREE.PointLight(new THREE.Color(settings.look.laser).lerp(new THREE.Color('#ffffff'), 0.6), 0, 0.9, 2);
+  readonly light: THREE.PointLight;
   private at = new THREE.Vector3();
   private sparks: THREE.Points;
   private pos = new Float32Array(SPARKS * 3);
@@ -65,7 +66,9 @@ export class Laser {
   constructor(
     private lid: Lid,
     scene: THREE.Object3D,
+    light?: THREE.PointLight,
   ) {
+    this.light = light ?? new THREE.PointLight(new THREE.Color(settings.look.laser).lerp(new THREE.Color('#ffffff'), 0.6), 0, 0.9, 2);
     const glow = (this.glow = glowTexture());
     this.core = new THREE.Sprite(glowMat(glow, '#ffffff'));
     this.core.scale.setScalar(0.05);
@@ -103,7 +106,7 @@ export class Laser {
     this.sparks.frustumCulled = false; // they fly about; the bounds would go stale
     for (const o of [this.core, this.halo, this.sparks]) o.renderOrder = ORDER;
     lid.group.add(this.core, this.halo, this.sparks);
-    scene.add(this.light);
+    if (!light) scene.add(this.light);
     lid.setEtchTime(-1); // nothing cut yet
   }
 

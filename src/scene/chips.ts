@@ -147,7 +147,9 @@ export class ChipSet {
   /** Built tall: how far down the section the facts reach (from its top edge), for the photos below. */
   factsDepth = 0;
   private built = false;
+  private builtW = 0;
   private builtD = 0;
+  private builtSide = false;
   private tallBuilt = false;
 
   constructor(private project: Project, private shared: GlassShared) {
@@ -162,7 +164,9 @@ export class ChipSet {
   build(w: number, d: number, side = false) {
     if (this.built) return;
     this.built = true;
+    this.builtW = w;
     this.builtD = d;
+    this.builtSide = side;
     this.tallBuilt = d > w;
     const p = this.project;
     // Tall (portrait): the facts span the whole width above the screenshots, fields two to a line,
@@ -245,6 +249,23 @@ export class ChipSet {
       }
       z += rowH[ri] + spacing[ri];
     });
+  }
+
+  /** The same project in other words (a new language): the glass is rebuilt as it was, and enters again. */
+  retext(p: Project) {
+    this.project = p;
+    if (!this.built) return;
+    for (const c of this.chips) {
+      this.group.remove(c.group);
+      (c.mat.uniforms.uLabel.value as THREE.Texture).dispose();
+      c.mat.dispose();
+      c.mesh.geometry.dispose();
+    }
+    this.chips = [];
+    this.linkMeshes.length = 0;
+    this.built = false;
+    this.build(this.builtW, this.builtD, this.builtSide);
+    this.shownFor = 0;
   }
 
   /**

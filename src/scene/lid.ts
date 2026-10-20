@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Spring } from '../anim/springs';
 import { settings } from '../config/projects';
 import { OUTER_D, OUTER_R, OUTER_W, PORTRAIT, roundedRectShape, TOP_Y } from './box';
-import { EtchSchedule } from './etch';
+import { EtchSchedule, type EtchLine } from './etch';
 import { beadBlastRoughness, engravingMaps, heightToNormal, type PxBox } from './textures';
 
 const LW = OUTER_W + 0.06;
@@ -107,10 +107,11 @@ export class Lid {
   /** The engraving map's size, and each engraved social's box on it. */
   private mapW: number;
   private mapH: number;
-  private links: (PxBox & { href: string })[];
+  private links: (PxBox & { href: string })[] = [];
   /** The laser's route over the engraving. */
-  readonly etch: EtchSchedule;
-  private cut: { uEtchTime: { value: number } };
+  etch: EtchSchedule;
+  private cut: ReturnType<typeof engrave>;
+  private top: THREE.MeshPhysicalMaterial;
   private etchTime = DONE;
 
   constructor(private reduced: boolean) {
@@ -119,24 +120,11 @@ export class Lid {
     // the engraving crisp without the full desktop map's cost.
     this.mapW = PORTRAIT ? 1600 : 2048;
     this.mapH = Math.round(this.mapW * aspect);
-    // Narrow lid: larger type, and the socials one per line.
-    const eng = engravingMaps(this.mapW, this.mapH, settings.identity.name, settings.identity.role, settings.socials, {
-      scale: PORTRAIT ? 1.3 : 1,
-      stack: PORTRAIT,
-    });
-    this.links = eng.links;
-    const normal = heightToNormal(eng.height, 3.6);
+    const { normal, mask, lines } = this.engraving(settings.identity.role);
     const rough = beadBlastRoughness(1024, Math.round(1024 * aspect));
-    // Extrude caps use shape coordinates as UVs: map them onto 0..1.
-    for (const t of [normal, rough]) {
-      t.repeat.set(1 / LW, 1 / LD);
-      t.offset.set(0.5, 0.5);
-    }
-    // Sampled through the normal map's (already mapped) uv in the shader patch.
-    const mask = new THREE.CanvasTexture(eng.mask);
-    mask.colorSpace = THREE.NoColorSpace;
+    this.uvOnCap(rough);
 
-    const top = new THREE.MeshPhysicalMaterial({
+    const top = (this.top = new THREE.MeshPhysicalMaterial({
       color: ANODISED,
       metalness: 1,
       roughness: 1,
@@ -145,15 +133,10 @@ export class Lid {
       clearcoat: 0.06, // the anodised oxide layer
       clearcoatRoughness: 0.5,
       transparent: true,
-    });
+    }));
     // The laser's route: name, role, then the socials, each with its time budget.
-    const px = eng.mask.getContext('2d')!.getImageData(0, 0, this.mapW, this.mapH).data;
-    const budget = (i: number) => (i === 0 ? 1.6 : i === 1 ? 0.8 : 1.1 / Math.max(1, eng.lines.length - 2));
-    this.etch = new EtchSchedule(
-      { data: px, width: this.mapW, height: this.mapH, stride: 4 },
-      eng.lines.map((b, i) => ({ ...b, duration: budget(i) })),
-      Math.max(2, Math.round(this.mapW / 700)),
-    );
+    const budget = (i: number) => (i === 0 ? 1.6 : i === 1 ? 0.8 : 1.1 / Math.max(1, lines.length - 2));
+    this.etch = this.schedule(mask, lines.map((b, i) => ({ ...b, duration: budget(i) })));
     this.cut = engrave(top, mask, revealTexture(this.etch));
     // The chamfer: raw aluminium, satin, so it only catches a soft line of light.
     const edge = new THREE.MeshPhysicalMaterial({
@@ -176,6 +159,49 @@ export class Lid {
     this.group.add(lid);
     this.hit = lid;
     this.group.position.y = REST_Y;
+  }
+
+  /** Extrude caps use shape coordinates as UVs: map them onto 0..1. */
+  private uvOnCap(t: THREE.Texture) {
+    t.repeat.set(1 / LW, 1 / LD);
+    t.offset.set(0.5, 0.5);
+  }
+
+  /** The engraving for a role (name and socials as set): its groove relief, its cut mask and its lines. */
+  private engraving(role: string) {
+    // Narrow lid: larger type, and the socials one per line.
+    const eng = engravingMaps(this.mapW, this.mapH, settings.identity.name, role, settings.socials, {
+      scale: PORTRAIT ? 1.3 : 1,
+      stack: PORTRAIT,
+    });
+    this.links = eng.links;
+    const normal = heightToNormal(eng.height, 3.6);
+    this.uvOnCap(normal);
+    // Sampled through the normal map's (already mapped) uv in the shader patch.
+    const mask = new THREE.CanvasTexture(eng.mask);
+    mask.colorSpace = THREE.NoColorSpace;
+    return { normal, mask, lines: eng.lines };
+  }
+
+  private schedule(mask: THREE.CanvasTexture, lines: EtchLine[], outside?: number) {
+    const px = (mask.image as HTMLCanvasElement).getContext('2d')!.getImageData(0, 0, this.mapW, this.mapH).data;
+    return new EtchSchedule({ data: px, width: this.mapW, height: this.mapH, stride: 4 }, lines, Math.max(2, Math.round(this.mapW / 700)), outside);
+  }
+
+  /**
+   * Engrave another role (a new language). With `recut`, the name and socials stay cut and only the
+   * role line is left for a laser to cut (see Laser); without, it is all cut at once.
+   */
+  setRole(role: string, recut: boolean) {
+    const { normal, mask, lines } = this.engraving(role);
+    const old = [this.top.normalMap, this.cut.uMask.value, this.cut.uReveal.value];
+    this.top.normalMap = normal;
+    this.cut.uMask.value = mask;
+    // Recut: everything but the role reads as cut long ago (so it shows, and is cool, before the laser starts).
+    this.etch = recut ? this.schedule(mask, [{ ...lines[1], duration: 0.9 }], -100) : this.schedule(mask, lines.map((b) => ({ ...b, duration: 1 })));
+    this.cut.uReveal.value = revealTexture(this.etch);
+    for (const t of old) t?.dispose();
+    this.setEtchTime(recut ? -1 : DONE);
   }
 
   /** Lift off. Also reverses a lid that is on its way back down, from wherever it is. */

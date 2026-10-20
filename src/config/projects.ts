@@ -27,4 +27,10 @@ export function loadContent(input: unknown, base = import.meta.env.BASE_URL, lan
   return { projects, settings: { ...words.settings, about } };
 }
 
-export const { projects, settings } = loadContent(raw);
+/** What the site shows, in the language shown. Live bindings: useLang swaps them for every importer. */
+export let { projects, settings } = loadContent(raw);
+
+/** The content in another language. Only words change: order, photos, colours and motion are the same. */
+export function useLang(lang: Lang) {
+  ({ projects, settings } = loadContent(raw, undefined, lang));
+}

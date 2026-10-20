@@ -176,8 +176,11 @@ export class Well {
   private roomy = new Spring(0, 140, 1);
   private side = new Spring(0, 200, 1);
   private placed = false;
+  /** The labels' presence across a language switch: out, new words, back in. */
+  private words = new Spring(1, 900, 1);
+  private nextWords: Project | null = null;
 
-  constructor(readonly project: Project, index: number, reduced: boolean) {
+  constructor(public project: Project, index: number, reduced: boolean) {
     this.mat = shaftMat();
     this.mat.uniforms.uA.value.set(project.glow[0]);
     this.mat.uniforms.uB.value.set(project.glow[1]);
@@ -213,9 +216,37 @@ export class Well {
     this.sd = s(1);
   }
 
-  private text(line: string, font: string, color: string, lift: number): Label {
+  /** The same project in other words (a new language): the labels fade out, change, and fade back in. */
+  retext(p: Project) {
+    this.nextWords = p;
+    this.words.target = 0;
+  }
+
+  private applyWords(p: Project) {
+    this.project = p;
+    const swap = (l: Label, line: string, font: string, color: string, also?: Label) => {
+      const { tex, w, h } = this.label(line, font, color);
+      for (const m of [l, also]) {
+        if (!m) continue;
+        const mat = m.mesh.material as THREE.MeshBasicMaterial;
+        if (m === l) mat.map?.dispose();
+        mat.map = tex;
+        m.w = w;
+        m.h = h;
+      }
+    };
+    swap(this.kind, p.kindLabel.toUpperCase(), `600 24px ${FONT}`, kindTint(p.kind));
+    swap(this.title, p.title, `600 64px ${FONT}`, '#f5f5f7', this.vTitle);
+    swap(this.caption, p.caption, `400 32px ${FONT}`, '#9d9da6');
+  }
+
+  private label(line: string, font: string, color: string) {
     const size = parseInt(font.split(' ')[1]);
-    const { tex, w, h } = labelTexture([line], { font, color, padX: 0, padY: 4, lineHeight: size * 1.25 });
+    return labelTexture([line], { font, color, padX: 0, padY: 4, lineHeight: size * 1.25 });
+  }
+
+  private text(line: string, font: string, color: string, lift: number): Label {
+    const { tex, w, h } = this.label(line, font, color);
     const mesh = new THREE.Mesh(unitPlane, sharpenText(new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false })));
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.y = TOP_Y + lift;
@@ -360,6 +391,12 @@ export class Well {
     const d = Math.max(0.08, this.sd.step(dt));
     const dim = this.dim.step(dt);
     const glow = this.glow.step(dt);
+    const words = this.words.step(dt);
+    if (this.nextWords && words < 0.02) {
+      this.applyWords(this.nextWords);
+      this.nextWords = null;
+      this.words.target = 1;
+    }
     const f = this.focus.step(dt);
     this.group.position.set(x, 0, z);
 
@@ -443,7 +480,7 @@ export class Well {
     this.stack.update(dt, aw, ad, dim * 0.8 + (1 - reveal), presence, crop);
 
     // Place the labels (a thin strip shows only the title, below).
-    const textOn = (1 - smooth(f, 0, 0.35)) * reveal * smooth(w, 0.8, 1.3) * smooth(d, 0.36, 0.48);
+    const textOn = (1 - smooth(f, 0, 0.35)) * reveal * smooth(w, 0.8, 1.3) * smooth(d, 0.36, 0.48) * words;
     const { kk, k, th, titleZ, ck } = text;
     this.place(this.kind, kk, left, top + kh / 2, textOn * roomy * (1 - dim));
     this.place(this.title, k, left, titleZ, textOn * (1 - 0.55 * dim));
@@ -457,6 +494,6 @@ export class Well {
     const vh = this.vTitle.h * vk; // spans x
     this.vTitle.mesh.scale.set(vw, vh, 1);
     this.vTitle.mesh.position.set(0, this.vTitle.mesh.position.y, -d / 2 + 0.2 + vw / 2);
-    (this.vTitle.mesh.material as THREE.MeshBasicMaterial).opacity = vertical * reveal * (1 - 0.45 * dim);
+    (this.vTitle.mesh.material as THREE.MeshBasicMaterial).opacity = vertical * reveal * (1 - 0.45 * dim) * words;
   }
 }

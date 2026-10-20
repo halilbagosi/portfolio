@@ -52,10 +52,12 @@ export class EtchSchedule {
   readonly total: number;
   private spans: { box: Box; first: number; count: number }[] = [];
 
+  /** `outside`: the time given to pixels on no line (already cut by a recut, see Lid.setRole). */
   constructor(
     private ink: Ink,
     lines: EtchLine[],
     private pitch: number,
+    private outside = 0,
   ) {
     if (!(pitch > 0)) throw new Error(`EtchSchedule: pitch must be a positive number, got ${pitch}`); // also catches NaN
     let t = 0;
@@ -97,7 +99,7 @@ export class EtchSchedule {
     return { x, y: r.y, firing: r.ink && this.near(x, r.y) };
   }
 
-  /** The moment the spot passes over pixel (x, y); 0 outside every line (nothing is cut there). */
+  /** The moment the spot passes over pixel (x, y); `outside` off every line. */
   timeAt(x: number, y: number): number {
     for (const s of this.spans) {
       const b = s.box;
@@ -107,7 +109,7 @@ export class EtchSchedule {
       const f = Math.min(1, Math.max(0, (x - r.x0) / (r.x1 - r.x0 || 1)));
       return r.t0 + (r.dir > 0 ? f : 1 - f) * (r.t1 - r.t0);
     }
-    return 0;
+    return this.outside;
   }
 
   /** Reveal times on a grid `scale` times coarser than the map, rows top-down like the canvas. */
