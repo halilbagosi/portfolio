@@ -2,6 +2,7 @@ import { isHidden, KINDS, PROJECT_SQ_KEYS, STATUSES, type Hideable, type Project
 import { h } from '../dom';
 import { colorsField, hideable, selectField, tagsField, textField, toggleField } from '../fields';
 import { setHidden, setSq, type Store } from '../state';
+import { kindLabel } from '../../i18n';
 
 /**
  * Editor for one project. Text edits change the store without re-rendering (keeps focus);
@@ -24,7 +25,8 @@ export function renderProjectForm(
   const sqField = (k: (typeof PROJECT_SQ_KEYS)[number], multiline = false) =>
     textField(`${k[0].toUpperCase()}${k.slice(1)} — Albanian`, path(`sq.${k}`), p.sq?.[k] ?? '', (v) => store.change((c) => setSq(c.projects[index], k, v)), {
       multiline,
-      placeholder: p[k],
+      // The kind's placeholder is its built-in Albanian, what shows when this is left empty.
+      placeholder: k === 'kind' ? kindLabel(p.kind, 'sq') : p[k],
     });
 
   /** The eye that hides a field of this project from the site. */
