@@ -303,7 +303,8 @@
         "duration": "14 javë",
         "caption": "Kujdes për memorien për iOS dhe Android",
         "purpose": "Ndihmon personat me demencë të kujtojnë njerëzit e dashur nëpërmjet quiz të krijuar nga kujdestarët.",
-        "status": "Prototip"
+        "status": "Prototip",
+        "kind": "Aplikacion iOS/Android"
       }
     },
     {
